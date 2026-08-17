@@ -18,6 +18,25 @@ npm run start   # lancer le build de production
 npm run lint    # vérification ESLint
 ```
 
+## Base de données locale
+
+PostgreSQL tourne dans un conteneur Docker (voir `docker-compose.yml`), avec les
+données persistées dans le volume Docker `butterfly-postgres-data` (elles
+survivent aux redémarrages du conteneur).
+
+```bash
+docker compose up -d        # démarrer Postgres en arrière-plan
+docker compose down         # arrêter Postgres (le volume de données est conservé)
+docker compose logs -f postgres   # suivre les logs de Postgres
+
+npx prisma migrate dev      # créer/appliquer une migration en développement
+npx prisma studio           # interface graphique pour explorer les données
+```
+
+Copie `.env.example` vers `.env` si ce n'est pas déjà fait — les identifiants
+par défaut (`butterfly` / `butterfly`) sont des identifiants de développement
+local, pas des secrets.
+
 ## Statut
 
 Projet initialisé, sans fonctionnalité métier pour le moment.
