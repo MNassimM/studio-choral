@@ -31,11 +31,18 @@ docker compose logs -f postgres   # suivre les logs de Postgres
 
 npx prisma migrate dev      # créer/appliquer une migration en développement
 npx prisma studio           # interface graphique pour explorer les données
+npm run db:seed             # charger les données de développement (rejouable sans risque)
 ```
 
 Copie `.env.example` vers `.env` si ce n'est pas déjà fait — les identifiants
 par défaut (`butterfly` / `butterfly`) sont des identifiants de développement
 local, pas des secrets.
+
+La seed (`prisma/seed.ts`) est idempotente : elle utilise `upsert` sur les
+contraintes uniques existantes, donc `npm run db:seed` peut être relancé autant
+de fois que nécessaire sans créer de doublons ni écraser de données saisies à la
+main. `npx prisma migrate reset` repart d'une base vide puis relance
+automatiquement cette seed.
 
 ## Statut
 
