@@ -153,7 +153,7 @@ function Footer() {
         <Separator className="my-8" />
 
         <p className="text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Butterfly Studio Choral — Tous droits
+          © {new Date().getFullYear()} Butterfly Studio Choral - Tous droits
           réservés
         </p>
       </Container>

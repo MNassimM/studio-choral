@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ShoppingBag, UserRound } from "lucide-react";
+import { ShoppingCart, UserRound } from "lucide-react";
 
 import { Container } from "@/components/layout/container";
 import { Logo } from "@/components/layout/logo";
@@ -11,21 +11,21 @@ import { cn } from "@/lib/utils";
 function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background">
-      <Container className="flex h-16 items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
+      <Container className="grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-4">
+        <div className="flex items-center gap-4 justify-self-start">
           <MobileNav />
-          <Logo />
+          <Logo variant="large" />
         </div>
 
         <MainNav />
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center col-start-3 justify-self-end">
           <Link
             href="/panier"
             aria-label="Voir le panier"
             className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
           >
-            <ShoppingBag className="size-5" />
+            <ShoppingCart className="size-5" />
           </Link>
           <Link
             href="/compte"

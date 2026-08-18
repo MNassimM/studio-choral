@@ -23,7 +23,13 @@ M377 82L378 83H380L385 88L387 92V94L388 95V107L387 108L386 116L385 117V119L384 1
   );
 }
 
-function Logo({ className }: { className?: string }) {
+function Logo({
+  className,
+  variant = "default",
+}: {
+  className?: string;
+  variant?: "default" | "large";
+}) {
   return (
     <Link
       href="/"
@@ -32,15 +38,26 @@ function Logo({ className }: { className?: string }) {
         className,
       )}
     >
-      <ButterflyMark className="h-7 w-7 shrink-0 text-primary" />
-      <span className="flex flex-col leading-tight">
-        <span className="text-sm font-semibold tracking-[0.2em]">
-          BUTTERFLY
+      <ButterflyMark
+        className={cn(
+          "shrink-0 text-primary",
+          variant === "large" ? "h-8 w-8" : "h-7 w-7",
+        )}
+      />
+      {variant === "large" ? (
+        <span className="text-sm font-semibold whitespace-nowrap tracking-[0.15em]">
+          BUTTERFLY STUDIO CHORAL
         </span>
-        <span className="text-[0.65rem] font-medium tracking-[0.28em] text-muted-foreground">
-          STUDIO CHORAL
+      ) : (
+        <span className="flex flex-col leading-tight">
+          <span className="text-sm font-semibold tracking-[0.2em]">
+            BUTTERFLY
+          </span>
+          <span className="text-[0.65rem] font-medium tracking-[0.28em] text-muted-foreground">
+            STUDIO CHORAL
+          </span>
         </span>
-      </span>
+      )}
     </Link>
   );
 }

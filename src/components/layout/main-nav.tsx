@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 
 const mainNavItems = [
   { label: "Catalogue", href: "/catalogue" },
-  { label: "Bibliothèque", href: "/bibliotheque" },
   { label: "Comment ça marche", href: "/comment-ca-marche" },
 ];
 
