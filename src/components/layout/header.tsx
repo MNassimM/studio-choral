@@ -21,13 +21,6 @@ function Header() {
 
         <div className="flex items-center col-start-3 justify-self-end">
           <Link
-            href="/panier"
-            aria-label="Voir le panier"
-            className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
-          >
-            <ShoppingCart className="size-5" />
-          </Link>
-          <Link
             href="/compte"
             className={cn(
               buttonVariants({ variant: "outline", size: "sm" }),
@@ -46,6 +39,13 @@ function Header() {
             )}
           >
             <UserRound className="size-4" />
+          </Link>
+          <Link
+            href="/panier"
+            aria-label="Voir le panier"
+            className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
+          >
+            <ShoppingCart className="size-5" />
           </Link>
         </div>
       </Container>

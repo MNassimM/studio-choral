@@ -15,6 +15,16 @@ enum AudioType {
   PREVIEW
 }
 
+enum AccessScope {
+  MOVEMENT
+  WORK
+}
+
+enum VoiceCoverage {
+  SINGLE_VOICE
+  ALL_VOICES
+}
+
 model Work {
   id               String   @id @default(cuid())
   slug             String   @unique
@@ -29,6 +39,7 @@ model Work {
   updatedAt        DateTime @updatedAt @map("updated_at")
 
   movements Movement[]
+  products  Product[]
 
   @@map("works")
 }
@@ -44,6 +55,7 @@ model Movement {
 
   work       Work        @relation(fields: [workId], references: [id], onDelete: Cascade)
   audioFiles AudioFile[]
+  products   Product[]
 
   @@unique([workId, slug])
   @@unique([workId, position])
@@ -57,6 +69,7 @@ model Voice {
   position Int
 
   audioFiles AudioFile[]
+  products   Product[]
 
   @@map("voices")
 }
@@ -80,4 +93,33 @@ model AudioFile {
   @@unique([movementId, voiceId, type])
   @@index([movementId])
   @@map("audio_files")
+}
+
+// Une offre achetable — jamais un fichier audio. Voir src/lib/products/invariants.ts
+// pour les règles de cohérence scope/coverage <-> movementId/voiceId que Postgres
+// ne peut pas exprimer nativement.
+model Product {
+  id            String        @id @default(cuid())
+  sku           String        @unique
+  name          String
+  workId        String        @map("work_id")
+  movementId    String?       @map("movement_id")
+  voiceId       String?       @map("voice_id")
+  scope         AccessScope
+  coverage      VoiceCoverage
+  priceCents    Int           @map("price_cents")
+  currency      String        @default("EUR")
+  isActive      Boolean       @default(true) @map("is_active")
+  position      Int
+  stripePriceId String?       @unique @map("stripe_price_id")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  work     Work      @relation(fields: [workId], references: [id], onDelete: Cascade)
+  movement Movement? @relation(fields: [movementId], references: [id], onDelete: Cascade)
+  voice    Voice?    @relation(fields: [voiceId], references: [id])
+
+  @@unique([workId, movementId, voiceId, coverage])
+  @@index([workId, isActive])
+  @@map("products")
 }

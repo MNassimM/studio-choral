@@ -2,12 +2,17 @@
  * MOCK / TEMPORAIRE
  *
  * Ce module est la seule source de vérité du catalogue de démonstration :
- * œuvres, mouvements, référentiel des pupitres, et pistes audio de synthèse
- * (aucun enregistrement réel). Il est importé à la fois par la seed Prisma
- * (`prisma/seed.ts`, qui ne contient plus aucune donnée) et par le générateur
- * de fichiers WAV de démonstration (`scripts/generate-demo-audio.ts`), afin
- * que les deux ne puissent jamais diverger. Ajouter une œuvre ou un pupitre
+ * œuvres, mouvements, référentiel des pupitres, pistes audio de synthèse
+ * (aucun enregistrement réel) et produits commerciaux (offres achetables,
+ * avec leurs tarifs de démonstration — voir la section "pricing" ci-dessous).
+ * Il est importé par la seed Prisma (`prisma/seed.ts`, qui ne contient plus
+ * aucune donnée), par le générateur de fichiers WAV de démonstration
+ * (`scripts/generate-demo-audio.ts`) et par `buildDemoProducts()`, afin que
+ * ces éléments ne puissent jamais diverger. Ajouter une œuvre ou un pupitre
  * de démonstration ne demande d'éditer que ce fichier.
+ *
+ * Tout produit doit passer par `src/lib/products/invariants.ts` avant
+ * insertion en base.
  *
  * En production, les fichiers audio vivront dans un bucket privé et seront
  * servis par URL signée après vérification des droits — `storageKey` n'est
@@ -25,6 +30,23 @@ export type DemoMovement = {
   hasAccompaniment: boolean;
 };
 
+/**
+ * MOCK / TEMPORAIRE — tarifs de démonstration, à arbitrer œuvre par œuvre.
+ *
+ * Pas de grille commune : chaque œuvre déclare ses propres montants, à côté
+ * de son propre catalogue de mouvements, dans son entrée `DEMO_CATALOG`.
+ * `movementSingleVoiceCents`/`movementAllVoicesCents` valent `null` pour une
+ * œuvre à un seul mouvement — cela empêche `buildDemoProducts()` de générer
+ * des offres de scope MOVEMENT strictement identiques (et concurrentes en
+ * prix) aux offres de scope WORK de la même œuvre.
+ */
+export type DemoWorkPricing = {
+  movementSingleVoiceCents: number | null;
+  movementAllVoicesCents: number | null;
+  workSingleVoiceCents: number;
+  workAllVoicesCents: number;
+};
+
 export type DemoWork = {
   slug: string;
   title: string;
@@ -34,6 +56,15 @@ export type DemoWork = {
   description: string;
   isPublished: boolean;
   movements: DemoMovement[];
+  pricing: DemoWorkPricing;
+  /**
+   * Surcharge ponctuelle d'un prix pour un produit précis de cette œuvre,
+   * indexée par sku (ex. un Kyrie plus court vendu moins cher que les autres
+   * mouvements). Absente ou vide : tous les produits de l'œuvre utilisent
+   * les montants de `pricing`. N'affecte qu'un sku à la fois — ce n'est pas
+   * une seconde grille de prix.
+   */
+  priceOverrides?: Record<string, number>;
 };
 
 /**
@@ -74,6 +105,12 @@ export const DEMO_CATALOG: DemoWork[] = [
         hasAccompaniment: true,
       },
     ],
+    pricing: {
+      movementSingleVoiceCents: 190,
+      movementAllVoicesCents: 390,
+      workSingleVoiceCents: 890,
+      workAllVoicesCents: 1490,
+    },
   },
   {
     slug: "ce-mois-de-mai",
@@ -93,6 +130,12 @@ export const DEMO_CATALOG: DemoWork[] = [
         hasAccompaniment: false,
       },
     ],
+    pricing: {
+      movementSingleVoiceCents: null,
+      movementAllVoicesCents: null,
+      workSingleVoiceCents: 190,
+      workAllVoicesCents: 290,
+    },
   },
   {
     slug: "il-est-bel-et-bon",
@@ -112,6 +155,12 @@ export const DEMO_CATALOG: DemoWork[] = [
         hasAccompaniment: false,
       },
     ],
+    pricing: {
+      movementSingleVoiceCents: null,
+      movementAllVoicesCents: null,
+      workSingleVoiceCents: 220,
+      workAllVoicesCents: 350,
+    },
   },
   {
     slug: "mille-regretz",
@@ -131,6 +180,12 @@ export const DEMO_CATALOG: DemoWork[] = [
         hasAccompaniment: false,
       },
     ],
+    pricing: {
+      movementSingleVoiceCents: null,
+      movementAllVoicesCents: null,
+      workSingleVoiceCents: 250,
+      workAllVoicesCents: 390,
+    },
   },
 ];
 
@@ -272,4 +327,175 @@ export function buildDemoAudioTracks(): DemoAudioTrack[] {
   }
 
   return tracks;
+}
+
+const VOICE_LABEL_BY_CODE: Record<SatbVoiceCode, string> = {
+  SOPRANO: "Soprano",
+  ALTO: "Alto",
+  TENOR: "Ténor",
+  BASS: "Basse",
+};
+
+export type DemoProductScope = "MOVEMENT" | "WORK";
+export type DemoProductCoverage = "SINGLE_VOICE" | "ALL_VOICES";
+
+export type DemoProduct = {
+  sku: string;
+  name: string;
+  workSlug: string;
+  movementSlug: string | null;
+  voiceCode: SatbVoiceCode | null;
+  scope: DemoProductScope;
+  coverage: DemoProductCoverage;
+  priceCents: number;
+  currency: string;
+  isActive: boolean;
+  position: number;
+};
+
+/**
+ * Résout le prix final d'un sku : la surcharge ponctuelle de l'œuvre
+ * (`priceOverrides`) l'emporte si elle existe, sinon le montant de base issu
+ * de `pricing`. Ne calcule jamais un prix à partir d'un autre.
+ */
+function resolvePriceCents(
+  work: DemoWork,
+  sku: string,
+  basePriceCents: number | null,
+): number | null {
+  const override = work.priceOverrides?.[sku];
+  return override ?? basePriceCents;
+}
+
+function requirePriceCents(sku: string, priceCents: number | null): number {
+  if (priceCents === null) {
+    throw new Error(
+      `buildDemoProducts: prix manquant pour le produit "${sku}" — aucune valeur de repli n'est calculée.`,
+    );
+  }
+  return priceCents;
+}
+
+/**
+ * Calcule la liste complète des produits de démonstration attendus, à partir
+ * du `pricing` (et de l'éventuel `priceOverrides`) propre à chaque œuvre de
+ * `DEMO_CATALOG`. Pour chaque œuvre :
+ *   - un produit MOVEMENT + SINGLE_VOICE par (mouvement, pupitre SATB) et un
+ *     produit MOVEMENT + ALL_VOICES par mouvement, uniquement si les prix
+ *     "movement*" de l'œuvre sont renseignés (jamais pour une œuvre à un seul
+ *     mouvement, dont les prix movement* valent null) ;
+ *   - toujours un produit WORK + SINGLE_VOICE par pupitre SATB et un produit
+ *     WORK + ALL_VOICES pour l'œuvre entière.
+ */
+export function buildDemoProducts(): DemoProduct[] {
+  const products: DemoProduct[] = [];
+  const seenSkus = new Set<string>();
+
+  function addProduct(product: DemoProduct) {
+    if (seenSkus.has(product.sku)) {
+      throw new Error(`buildDemoProducts: sku en double : "${product.sku}"`);
+    }
+    seenSkus.add(product.sku);
+    products.push(product);
+  }
+
+  for (const work of DEMO_CATALOG) {
+    let position = 1;
+
+    for (const movement of work.movements) {
+      if (work.pricing.movementSingleVoiceCents !== null) {
+        for (const voiceCode of SATB_VOICE_CODES) {
+          const sku = `${work.slug}:${movement.slug}:${voiceCode.toLowerCase()}`;
+          const priceCents = requirePriceCents(
+            sku,
+            resolvePriceCents(work, sku, work.pricing.movementSingleVoiceCents),
+          );
+
+          addProduct({
+            sku,
+            name: `${VOICE_LABEL_BY_CODE[voiceCode]} — ${movement.title}`,
+            workSlug: work.slug,
+            movementSlug: movement.slug,
+            voiceCode,
+            scope: "MOVEMENT",
+            coverage: "SINGLE_VOICE",
+            priceCents,
+            currency: "EUR",
+            isActive: true,
+            position: position++,
+          });
+        }
+      }
+
+      if (work.pricing.movementAllVoicesCents !== null) {
+        const sku = `${work.slug}:${movement.slug}:all`;
+        const priceCents = requirePriceCents(
+          sku,
+          resolvePriceCents(work, sku, work.pricing.movementAllVoicesCents),
+        );
+
+        addProduct({
+          sku,
+          name: `Toutes les voix — ${movement.title}`,
+          workSlug: work.slug,
+          movementSlug: movement.slug,
+          voiceCode: null,
+          scope: "MOVEMENT",
+          coverage: "ALL_VOICES",
+          priceCents,
+          currency: "EUR",
+          isActive: true,
+          position: position++,
+        });
+      }
+    }
+
+    for (const voiceCode of SATB_VOICE_CODES) {
+      const sku = `${work.slug}:${voiceCode.toLowerCase()}`;
+      const priceCents = requirePriceCents(
+        sku,
+        resolvePriceCents(work, sku, work.pricing.workSingleVoiceCents),
+      );
+
+      addProduct({
+        sku,
+        name: `${VOICE_LABEL_BY_CODE[voiceCode]} — ${work.title}`,
+        workSlug: work.slug,
+        movementSlug: null,
+        voiceCode,
+        scope: "WORK",
+        coverage: "SINGLE_VOICE",
+        priceCents,
+        currency: "EUR",
+        isActive: true,
+        position: position++,
+      });
+    }
+
+    const workAllVoicesSku = `${work.slug}:all`;
+    const workAllVoicesPriceCents = requirePriceCents(
+      workAllVoicesSku,
+      resolvePriceCents(
+        work,
+        workAllVoicesSku,
+        work.pricing.workAllVoicesCents,
+      ),
+    );
+
+    addProduct({
+      sku: workAllVoicesSku,
+      name: `Toutes les voix — ${work.title}`,
+      workSlug: work.slug,
+      movementSlug: null,
+      voiceCode: null,
+      scope: "WORK",
+      coverage: "ALL_VOICES",
+      priceCents: workAllVoicesPriceCents,
+      currency: "EUR",
+      isActive: true,
+      position: position++,
+    });
+  }
+
+  return products;
 }
