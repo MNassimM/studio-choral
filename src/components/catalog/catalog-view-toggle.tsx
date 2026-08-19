@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 type CatalogViewToggleProps = {
   view: "grid" | "list";
-  /** searchParams courants (q, sort, year...), préservés dans les deux liens. */
+  /** searchParams courants (q, sort, period...), préservés dans les deux liens. */
   currentParams: Record<string, string | string[] | undefined>;
 };
 

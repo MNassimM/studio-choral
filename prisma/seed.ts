@@ -58,6 +58,8 @@ async function seedWorksAndMovements(): Promise<WorkAndMovementIds> {
       shortDescription: work.shortDescription,
       description: work.description,
       composedYear: work.composedYear,
+      period: work.period,
+      voicing: work.voicing,
       isPublished: work.isPublished,
     };
 

@@ -55,11 +55,10 @@ function Hero() {
           Une bibliothèque de répétition pensée pour les choristes
         </h1>
         <p className="max-w-2xl text-base text-muted-foreground sm:text-lg">
-          Butterfly Studio Choral réunit partitions et enregistrements de
-          répétition pour chaque œuvre du catalogue. Chaque pupitre, soprano,
-          alto, ténor, basse, dispose de ses propres pistes, pour que chaque
-          choriste puisse travailler sa voix avec précision avant de rejoindre
-          l&apos;ensemble.
+          Butterfly Studio Choral fournit enregistrements de répétition pour
+          chaque œuvre du catalogue. Chaque pupitre, soprano, alto, ténor,
+          basse, dispose de ses propres pistes, pour que chaque choriste puisse
+          travailler sa voix avec précision avant de rejoindre l&apos;ensemble.
         </p>
         <div className="flex flex-col gap-3 sm:flex-row">
           <Link
@@ -87,18 +86,25 @@ function SearchBar() {
   return (
     <section className="bg-background">
       <Container className="pb-16 sm:pb-20">
-        <div className="mx-auto w-full max-w-2xl relative">
-          <Search
-            className="pointer-events-none absolute top-1/2 left-5 size-5 -translate-y-1/2 text-muted-foreground"
-            aria-hidden="true"
-          />
-          {/* TODO : recherche non implémentée */}
+        <form
+          action="/catalogue"
+          method="GET"
+          className="relative mx-auto w-full max-w-2xl"
+        >
+          <button
+            type="submit"
+            aria-label="Rechercher"
+            className="absolute top-1/2 left-5 -translate-y-1/2 text-muted-foreground transition-colors hover:text-primary"
+          >
+            <Search className="size-5" aria-hidden="true" />
+          </button>
           <Input
             type="search"
+            name="q"
             placeholder="Rechercher une œuvre"
             className="h-14 rounded-full border-border pl-12 text-base"
           />
-        </div>
+        </form>
       </Container>
     </section>
   );
@@ -106,7 +112,7 @@ function SearchBar() {
 
 function HowItWorksSection() {
   return (
-    <section className="bg-background">
+    <section className="bg-background max-w-7xl mx-auto">
       <Container className="pb-20 sm:pb-28">
         <div className="rounded-2xl border border-border bg-secondary/40 p-8 sm:p-12">
           <div className="flex flex-col items-center gap-3 text-center">

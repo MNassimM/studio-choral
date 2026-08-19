@@ -19,6 +19,8 @@
  * jamais une URL.
  */
 
+import type { MusicalPeriod } from "@/generated/prisma/client";
+
 export const SATB_VOICE_CODES = ["SOPRANO", "ALTO", "TENOR", "BASS"] as const;
 
 export type SatbVoiceCode = (typeof SATB_VOICE_CODES)[number];
@@ -59,6 +61,13 @@ export type DemoWork = {
    * aucune date fiable n'est établie — ne jamais deviner une valeur.
    */
   composedYear: number | null;
+  /** Courant musical. `null` si l'œuvre est en cours de catalogage. */
+  period: MusicalPeriod | null;
+  /**
+   * Formation vocale saisie à la main (voir src/lib/works/voicing.ts) —
+   * jamais déduite des AudioFile de l'œuvre.
+   */
+  voicing: string | null;
   isPublished: boolean;
   movements: DemoMovement[];
   pricing: DemoWorkPricing;
@@ -87,6 +96,11 @@ export const DEMO_CATALOG: DemoWork[] = [
     description:
       "Composée par Franz Schubert en 1815, cette messe fait partie de ses premières œuvres liturgiques. Écrite pour chœur mixte et orchestre, elle se distingue par un style mélodique simple et chaleureux. Ses six mouvements suivent l'ordinaire de la messe, du Kyrie à l'Agnus Dei.",
     composedYear: 1815,
+    // Schubert est à la charnière classique/romantique ; CLASSICAL retenu au
+    // vu de la date de composition (1815). Choix arbitrable — signalé à
+    // l'utilisateur en fin de tâche.
+    period: "CLASSICAL",
+    voicing: "SATB",
     isPublished: true,
     movements: [
       { slug: "kyrie", title: "Kyrie", position: 1, hasAccompaniment: true },
@@ -128,6 +142,8 @@ export const DEMO_CATALOG: DemoWork[] = [
     description:
       "Composée par Clément Janequin, cette chanson polyphonique est écrite pour voix mixtes a cappella. Son texte évoque la joie et le renouveau associés au mois de mai. Elle illustre le style vif et descriptif caractéristique du chansonnier français du XVIe siècle.",
     composedYear: null,
+    period: "RENAISSANCE",
+    voicing: "SATB",
     isPublished: true,
     movements: [
       {
@@ -154,6 +170,8 @@ export const DEMO_CATALOG: DemoWork[] = [
     description:
       "Composée par Pierre Passereau au XVIe siècle, cette chanson polyphonique à quatre voix met en scène une femme vantant les qualités de son mari. Son caractère enjoué et ses onomatopées imitant le caquètement des poules en ont fait l'une des chansons les plus populaires du répertoire Renaissance. Elle reste aujourd'hui un classique du répertoire choral léger.",
     composedYear: null,
+    period: "RENAISSANCE",
+    voicing: "SATB",
     isPublished: true,
     movements: [
       {
@@ -180,6 +198,8 @@ export const DEMO_CATALOG: DemoWork[] = [
     description:
       "Chanson polyphonique à quatre voix attribuée à Josquin des Prez, compositeur majeur de la Renaissance franco-flamande. Son texte exprime la douleur d'une séparation, porté par une écriture harmonique dense et expressive. Elle reste l'une des chansons profanes les plus célèbres et les plus reprises de son époque.",
     composedYear: null,
+    period: "RENAISSANCE",
+    voicing: "SATB",
     isPublished: true,
     movements: [
       {

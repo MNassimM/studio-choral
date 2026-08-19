@@ -16,12 +16,21 @@ export const SORT_OPTIONS = [
 
 export type SortValue = (typeof SORT_OPTIONS)[number]["value"];
 
-export const YEAR_OPTIONS = [
+/**
+ * Valeurs alignées sur l'enum Prisma MusicalPeriod (voir prisma/schema.prisma)
+ * — le courant musical, saisi à la main sur chaque œuvre, remplace l'ancien
+ * filtre par tranche d'années dérivé de composedYear (qui confondait
+ * "Renaissance" et "date inconnue").
+ */
+export const PERIOD_OPTIONS = [
   { value: "all", label: "Toutes les périodes" },
-  { value: "renaissance", label: "Renaissance — date non précisée" },
-  { value: "18e", label: "XVIIIe siècle (1700–1799)" },
-  { value: "19e", label: "XIXe siècle (1800–1899)" },
-  { value: "20e", label: "XXe siècle et après (1900+)" },
+  { value: "MEDIEVAL", label: "Médiéval" },
+  { value: "RENAISSANCE", label: "Renaissance" },
+  { value: "BAROQUE", label: "Baroque" },
+  { value: "CLASSICAL", label: "Classique" },
+  { value: "ROMANTIC", label: "Romantique" },
+  { value: "MODERN", label: "Moderne" },
+  { value: "CONTEMPORARY", label: "Contemporain" },
 ] as const;
 
-export type YearValue = (typeof YEAR_OPTIONS)[number]["value"];
+export type PeriodValue = (typeof PERIOD_OPTIONS)[number]["value"];

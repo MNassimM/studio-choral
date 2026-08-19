@@ -19,7 +19,7 @@ function WorkTableRow({ work }: { work: WorkCardData }) {
       </td>
       <td className="py-3 pr-4 font-medium">{work.title}</td>
       <td className="py-3 pr-4 text-muted-foreground">{work.composer}</td>
-      <td className="py-3 pr-4 text-muted-foreground">{work.voicing}</td>
+      <td className="py-3 pr-4 text-muted-foreground">{work.voicing ?? "—"}</td>
       <td className="py-3 pr-4 text-muted-foreground">
         {work.movementsCount === 1
           ? "1 mouvement"

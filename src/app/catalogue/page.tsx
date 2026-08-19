@@ -11,20 +11,26 @@ import {
   Users2,
 } from "lucide-react";
 
+// Import de composants partagés
 import { Container } from "@/components/layout/container";
 import { WorkCard } from "@/components/catalog/work-card";
 import { WorkTableRow } from "@/components/catalog/work-table-row";
 import { CatalogSearchForm } from "@/components/catalog/catalog-search-form";
 import { CatalogComposerFilter } from "@/components/catalog/catalog-composer-filter";
-import { SortSelect, YearSelect } from "@/components/catalog/catalog-controls";
 import {
+  PeriodSelect,
+  SortSelect,
+} from "@/components/catalog/catalog-controls";
+import {
+  PERIOD_OPTIONS,
+  type PeriodValue,
   SORT_OPTIONS,
   type SortValue,
-  YEAR_OPTIONS,
-  type YearValue,
 } from "@/components/catalog/catalog-options";
 import { CatalogViewToggle } from "@/components/catalog/catalog-view-toggle";
 import { Button, buttonVariants } from "@/components/ui/button";
+
+// Import de fonctions utilitaires
 import { prisma } from "@/lib/db/prisma";
 import {
   deriveWorkCardData,
@@ -53,24 +59,13 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+// Type guards pour valider les searchParams côté serveur
 function isSortValue(value: string): value is SortValue {
   return SORT_OPTIONS.some((option) => option.value === value);
 }
 
-function isYearValue(value: string): value is YearValue {
-  return YEAR_OPTIONS.some((option) => option.value === value);
-}
-
-function matchesYearBucket(
-  composedYear: number | null,
-  bucket: YearValue,
-): boolean {
-  if (bucket === "all") return true;
-  if (bucket === "renaissance") return composedYear === null;
-  if (composedYear === null) return false;
-  if (bucket === "18e") return composedYear >= 1700 && composedYear <= 1799;
-  if (bucket === "19e") return composedYear >= 1800 && composedYear <= 1899;
-  return composedYear >= 1900;
+function isPeriodValue(value: string): value is PeriodValue {
+  return PERIOD_OPTIONS.some((option) => option.value === value);
 }
 
 function StatBox({
@@ -97,7 +92,7 @@ function StatBox({
 
 export default async function CataloguePage(props: PageProps<"/catalogue">) {
   const rawSearchParams = await props.searchParams;
-
+  // Extraction et validation des searchParams côté serveur
   const q =
     typeof rawSearchParams.q === "string" ? rawSearchParams.q.trim() : "";
   const sort: SortValue =
@@ -105,10 +100,10 @@ export default async function CataloguePage(props: PageProps<"/catalogue">) {
     isSortValue(rawSearchParams.sort)
       ? rawSearchParams.sort
       : "featured";
-  const year: YearValue =
-    typeof rawSearchParams.year === "string" &&
-    isYearValue(rawSearchParams.year)
-      ? rawSearchParams.year
+  const period: PeriodValue =
+    typeof rawSearchParams.period === "string" &&
+    isPeriodValue(rawSearchParams.period)
+      ? rawSearchParams.period
       : "all";
   const view: "grid" | "list" =
     rawSearchParams.view === "list" ? "list" : "grid";
@@ -118,6 +113,7 @@ export default async function CataloguePage(props: PageProps<"/catalogue">) {
       ? rawSearchParams.composer
       : null;
 
+  // Récupération des œuvres publiées et des compositeurs distincts côté serveur
   const [allWorks, worksCount, distinctComposerRows] = await Promise.all([
     prisma.work.findMany({
       where: { isPublished: true },
@@ -138,10 +134,10 @@ export default async function CataloguePage(props: PageProps<"/catalogue">) {
 
   let entries = allWorks.map((work) => ({
     cardData: deriveWorkCardData(work),
-    composedYear: work.composedYear,
     createdAt: work.createdAt,
   }));
 
+  // Filtrage par compositeur
   if (composer) {
     entries = entries.filter((entry) => entry.cardData.composer === composer);
   }
@@ -155,9 +151,13 @@ export default async function CataloguePage(props: PageProps<"/catalogue">) {
     );
   }
 
-  entries = entries.filter((entry) =>
-    matchesYearBucket(entry.composedYear, year),
-  );
+  // period === "all" : aucun filtrage, les œuvres sans period restent
+  // visibles. Sinon, comparaison directe à cardData.period — une œuvre dont
+  // period est null n'égale jamais une valeur d'enum et disparaît donc de
+  // tout filtre de période précis, sans cas particulier à coder.
+  if (period !== "all") {
+    entries = entries.filter((entry) => entry.cardData.period === period);
+  }
 
   entries = [...entries].sort((a, b) => {
     switch (sort) {
@@ -180,12 +180,13 @@ export default async function CataloguePage(props: PageProps<"/catalogue">) {
     }
   });
 
+  // Oeuvres filtrées et triées, prêtes à être affichées dans la vue choisie (grille ou tableau)
   const works = entries.map((entry) => entry.cardData);
 
   return (
     <>
-      <section className="bg-background">
-        <Container className="flex flex-col gap-8 py-12 sm:py-16">
+      <section className="max-w-7xl mx-auto bg-background">
+        <Container className="flex flex-col gap-8 pb-12 sm:pb-16 pt-2 sm:pt-6">
           <nav
             aria-label="Fil d'Ariane"
             className="text-sm text-muted-foreground"
@@ -214,6 +215,7 @@ export default async function CataloguePage(props: PageProps<"/catalogue">) {
             </p>
           </div>
 
+          {/* Statistiques globales du catalogue, avant filtrage */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <StatBox
               icon={BookOpen}
@@ -233,18 +235,19 @@ export default async function CataloguePage(props: PageProps<"/catalogue">) {
             />
           </div>
 
+          {/* Formulaire de recherche, filtres et bascule grille/tableau */}
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <CatalogSearchForm
                 q={q}
                 sort={sort}
-                year={year}
+                period={period}
                 view={view}
                 composer={composer}
               />
               <div className="flex flex-wrap items-center gap-2">
                 <SortSelect value={sort} />
-                <YearSelect value={year} />
+                <PeriodSelect value={period} />
                 <CatalogViewToggle
                   view={view}
                   currentParams={rawSearchParams}
@@ -264,7 +267,7 @@ export default async function CataloguePage(props: PageProps<"/catalogue">) {
               Aucune œuvre ne correspond à votre recherche.
             </p>
           ) : view === "grid" ? (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {works.map((work) => (
                 <WorkCard key={work.slug} work={work} />
               ))}

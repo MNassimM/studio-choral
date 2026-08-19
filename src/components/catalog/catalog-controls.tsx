@@ -10,10 +10,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  PERIOD_OPTIONS,
+  type PeriodValue,
   SORT_OPTIONS,
   type SortValue,
-  YEAR_OPTIONS,
-  type YearValue,
 } from "@/components/catalog/catalog-options";
 
 /**
@@ -69,7 +69,7 @@ function SortSelect({ value }: { value: SortValue }) {
   );
 }
 
-function YearSelect({ value }: { value: YearValue }) {
+function PeriodSelect({ value }: { value: PeriodValue }) {
   const updateSearchParam = useUpdateSearchParam();
 
   return (
@@ -77,7 +77,7 @@ function YearSelect({ value }: { value: YearValue }) {
       value={value}
       onValueChange={(next) => {
         if (next) {
-          updateSearchParam("year", next, "all");
+          updateSearchParam("period", next, "all");
         }
       }}
     >
@@ -86,13 +86,13 @@ function YearSelect({ value }: { value: YearValue }) {
         className="w-full sm:w-56"
       >
         <SelectValue>
-          {(current: YearValue | null) =>
-            YEAR_OPTIONS.find((option) => option.value === current)?.label
+          {(current: PeriodValue | null) =>
+            PERIOD_OPTIONS.find((option) => option.value === current)?.label
           }
         </SelectValue>
       </SelectTrigger>
       <SelectContent>
-        {YEAR_OPTIONS.map((option) => (
+        {PERIOD_OPTIONS.map((option) => (
           <SelectItem key={option.value} value={option.value}>
             {option.label}
           </SelectItem>
@@ -102,4 +102,4 @@ function YearSelect({ value }: { value: YearValue }) {
   );
 }
 
-export { SortSelect, YearSelect };
+export { PeriodSelect, SortSelect };

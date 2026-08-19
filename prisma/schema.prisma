@@ -25,25 +25,41 @@ enum VoiceCoverage {
   ALL_VOICES
 }
 
+enum MusicalPeriod {
+  MEDIEVAL
+  RENAISSANCE
+  BAROQUE
+  CLASSICAL
+  ROMANTIC
+  MODERN
+  CONTEMPORARY
+}
+
 model Work {
-  id               String   @id @default(cuid())
-  slug             String   @unique
+  id               String         @id @default(cuid())
+  slug             String         @unique
   title            String
   composer         String
-  catalogueRef     String?  @map("catalogue_ref")
-  shortDescription String?  @map("short_description")
+  catalogueRef     String?        @map("catalogue_ref")
+  shortDescription String?        @map("short_description")
   description      String?
-  coverImageKey    String?  @map("cover_image_key")
+  coverImageKey    String?        @map("cover_image_key")
   /// Année de composition, approximative pour l'ancien répertoire. NULL si
   /// aucune date fiable n'est établie — ne jamais deviner.
-  composedYear     Int?     @map("composed_year")
-  isPublished      Boolean  @default(false) @map("is_published")
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
+  composedYear     Int?           @map("composed_year")
+  /// Courant musical. NULL si l'œuvre est en cours de catalogage.
+  period           MusicalPeriod?
+  /// Formation vocale (SATB, SATB div., SSAA...), saisie à la main —
+  /// jamais déduite des AudioFile. Voir src/lib/works/voicing.ts.
+  voicing          String?
+  isPublished      Boolean        @default(false) @map("is_published")
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
 
   movements Movement[]
   products  Product[]
 
+  @@index([period])
   @@map("works")
 }
 

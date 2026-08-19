@@ -285,7 +285,7 @@ function TrustItem({ icon: Icon, title, description }: FeatureItem) {
 
 function TrustSection() {
   return (
-    <section className="border-y border-border bg-secondary/30">
+    <section className="border border-border bg-secondary/30">
       <Container className="py-10">
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {TRUST_ITEMS.map((item) => (
@@ -333,8 +333,23 @@ function CtaSection() {
 }
 
 export default function CommentCaMarchePage() {
-  return (
-    <>
+  return (<>
+      <section className="max-w-7xl mx-auto bg-background">
+        <Container className="flex flex-col gap-8 pt-2 sm:pt-6">
+          <nav
+            aria-label="Fil d'Ariane"
+            className="text-sm text-muted-foreground"
+          >
+            <Link href="/" className="hover:text-primary">
+              Accueil
+            </Link>
+            <span className="mx-2">-{'>'}</span>
+            <span aria-current="page" className="text-foreground">
+              Comment ça marche
+            </span>
+          </nav>
+          </Container>
+      </section>
       <section className="bg-background">
         <Container className="flex flex-col items-center gap-4 py-16 text-center sm:py-20">
           <h1
@@ -352,12 +367,13 @@ export default function CommentCaMarchePage() {
           </p>
         </Container>
       </section>
-
-      <ChooseWorkSection />
-      <LibrarySection />
-      <PracticeSection />
-      <TrustSection />
-      <CtaSection />
+      <div className="max-w-7xl mx-auto">
+        <ChooseWorkSection />
+        <LibrarySection />
+        <PracticeSection />
+        <TrustSection />
+        <CtaSection />
+      </div>
     </>
   );
 }

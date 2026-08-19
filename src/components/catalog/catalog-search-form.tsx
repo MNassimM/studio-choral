@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 type CatalogSearchFormProps = {
   q: string;
   sort: string;
-  year: string;
+  period: string;
   view: string;
   composer: string | null;
 };
@@ -18,7 +18,7 @@ type CatalogSearchFormProps = {
 function CatalogSearchForm({
   q,
   sort,
-  year,
+  period,
   view,
   composer,
 }: CatalogSearchFormProps) {
@@ -45,7 +45,9 @@ function CatalogSearchForm({
       {sort !== "featured" ? (
         <input type="hidden" name="sort" value={sort} />
       ) : null}
-      {year !== "all" ? <input type="hidden" name="year" value={year} /> : null}
+      {period !== "all" ? (
+        <input type="hidden" name="period" value={period} />
+      ) : null}
       {view !== "grid" ? (
         <input type="hidden" name="view" value={view} />
       ) : null}

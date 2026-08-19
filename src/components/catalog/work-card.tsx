@@ -4,6 +4,7 @@ import { ChevronRight, Headphones, Music2, ShoppingCart } from "lucide-react";
 
 import type { WorkCardData } from "@/lib/catalog/work-card-data";
 import { formatPriceCents } from "@/lib/products/format-price";
+import { PERIOD_OPTIONS } from "@/components/catalog/catalog-options";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -95,7 +96,17 @@ function WorkCard({ work, variant = "default", className }: WorkCardProps) {
           {work.catalogueRef ? (
             <Badge variant="outline">{work.catalogueRef}</Badge>
           ) : null}
-          <Badge variant="secondary">{work.voicing}</Badge>
+          {work.period ? (
+            <Badge variant="secondary">
+              {
+                PERIOD_OPTIONS.find((option) => option.value === work.period)
+                  ?.label
+              }
+            </Badge>
+          ) : null}
+          {work.voicing ? (
+            <Badge variant="secondary">{work.voicing}</Badge>
+          ) : null}
           {work.movementsCount > 1 ? (
             <Badge variant="secondary">{work.movementsCount} mouvements</Badge>
           ) : null}
