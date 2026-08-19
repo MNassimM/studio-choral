@@ -34,6 +34,9 @@ model Work {
   shortDescription String?  @map("short_description")
   description      String?
   coverImageKey    String?  @map("cover_image_key")
+  /// Année de composition, approximative pour l'ancien répertoire. NULL si
+  /// aucune date fiable n'est établie — ne jamais deviner.
+  composedYear     Int?     @map("composed_year")
   isPublished      Boolean  @default(false) @map("is_published")
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")

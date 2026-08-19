@@ -54,6 +54,11 @@ export type DemoWork = {
   catalogueRef: string | null;
   shortDescription: string;
   description: string;
+  /**
+   * Année de composition, approximative pour l'ancien répertoire. `null` si
+   * aucune date fiable n'est établie — ne jamais deviner une valeur.
+   */
+  composedYear: number | null;
   isPublished: boolean;
   movements: DemoMovement[];
   pricing: DemoWorkPricing;
@@ -81,6 +86,7 @@ export const DEMO_CATALOG: DemoWork[] = [
       "Messe brève et lyrique pour chœur et orchestre, composée par Schubert en 1815.",
     description:
       "Composée par Franz Schubert en 1815, cette messe fait partie de ses premières œuvres liturgiques. Écrite pour chœur mixte et orchestre, elle se distingue par un style mélodique simple et chaleureux. Ses six mouvements suivent l'ordinaire de la messe, du Kyrie à l'Agnus Dei.",
+    composedYear: 1815,
     isPublished: true,
     movements: [
       { slug: "kyrie", title: "Kyrie", position: 1, hasAccompaniment: true },
@@ -121,6 +127,7 @@ export const DEMO_CATALOG: DemoWork[] = [
       "Chanson polyphonique de la Renaissance française célébrant l'arrivée du printemps.",
     description:
       "Composée par Clément Janequin, cette chanson polyphonique est écrite pour voix mixtes a cappella. Son texte évoque la joie et le renouveau associés au mois de mai. Elle illustre le style vif et descriptif caractéristique du chansonnier français du XVIe siècle.",
+    composedYear: null,
     isPublished: true,
     movements: [
       {
@@ -146,6 +153,7 @@ export const DEMO_CATALOG: DemoWork[] = [
       "Chanson comique de la Renaissance française, célèbre pour ses imitations de caquètement de poule.",
     description:
       "Composée par Pierre Passereau au XVIe siècle, cette chanson polyphonique à quatre voix met en scène une femme vantant les qualités de son mari. Son caractère enjoué et ses onomatopées imitant le caquètement des poules en ont fait l'une des chansons les plus populaires du répertoire Renaissance. Elle reste aujourd'hui un classique du répertoire choral léger.",
+    composedYear: null,
     isPublished: true,
     movements: [
       {
@@ -171,6 +179,7 @@ export const DEMO_CATALOG: DemoWork[] = [
       "Chanson mélancolique de la Renaissance sur le thème de la séparation, attribuée à Josquin des Prez.",
     description:
       "Chanson polyphonique à quatre voix attribuée à Josquin des Prez, compositeur majeur de la Renaissance franco-flamande. Son texte exprime la douleur d'une séparation, porté par une écriture harmonique dense et expressive. Elle reste l'une des chansons profanes les plus célèbres et les plus reprises de son époque.",
+    composedYear: null,
     isPublished: true,
     movements: [
       {

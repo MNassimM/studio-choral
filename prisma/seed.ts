@@ -57,6 +57,7 @@ async function seedWorksAndMovements(): Promise<WorkAndMovementIds> {
       catalogueRef: work.catalogueRef,
       shortDescription: work.shortDescription,
       description: work.description,
+      composedYear: work.composedYear,
       isPublished: work.isPublished,
     };
 

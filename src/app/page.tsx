@@ -4,19 +4,16 @@ import { Playfair_Display } from "next/font/google";
 import { ChevronRight, Compass, Music2, Repeat, Search } from "lucide-react";
 
 import { Container } from "@/components/layout/container";
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { WorkCard } from "@/components/catalog/work-card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { prisma } from "@/lib/db/prisma";
+import {
+  deriveWorkCardData,
+  workCardInclude,
+} from "@/lib/catalog/work-card-data";
 
 // Police serif locale à cette page, pour les grands titres éditoriaux — le
 // reste du site (Header, Footer, composants partagés) reste en Geist.
@@ -158,15 +155,11 @@ function HowItWorksSection() {
   );
 }
 
-type FeaturedWork = {
-  slug: string;
-  title: string;
-  composer: string;
-  catalogueRef: string | null;
-  shortDescription: string | null;
-};
-
-function FeaturedWorksSection({ works }: { works: FeaturedWork[] }) {
+function FeaturedWorksSection({
+  works,
+}: {
+  works: ReturnType<typeof deriveWorkCardData>[];
+}) {
   if (works.length === 0) {
     return null;
   }
@@ -176,36 +169,7 @@ function FeaturedWorksSection({ works }: { works: FeaturedWork[] }) {
       <Container className="flex flex-col items-center gap-12 pb-20 sm:pb-28">
         <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {works.map((work) => (
-            <Card key={work.slug} className="overflow-hidden pt-0">
-              <div className="flex h-32 items-center justify-center bg-secondary text-primary">
-                <Music2 className="size-8" />
-              </div>
-              <CardHeader>
-                <CardTitle className={cn("text-lg", playfairDisplay.className)}>
-                  {work.title}
-                </CardTitle>
-                <CardDescription className="flex flex-wrap items-center gap-2">
-                  <span>{work.composer}</span>
-                  {work.catalogueRef ? (
-                    <Badge variant="outline">{work.catalogueRef}</Badge>
-                  ) : null}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-4">
-                {work.shortDescription ? (
-                  <p className="line-clamp-3 text-sm text-muted-foreground">
-                    {work.shortDescription}
-                  </p>
-                ) : null}
-                <Link
-                  href={`/catalogue/${work.slug}`}
-                  className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
-                >
-                  Découvrir
-                  <ChevronRight className="size-4" />
-                </Link>
-              </CardContent>
-            </Card>
+            <WorkCard key={work.slug} work={work} variant="compact" />
           ))}
         </div>
         <Link
@@ -220,18 +184,13 @@ function FeaturedWorksSection({ works }: { works: FeaturedWork[] }) {
 }
 
 export default async function Home() {
-  const featuredWorks = await prisma.work.findMany({
+  const works = await prisma.work.findMany({
     where: { isPublished: true },
     orderBy: { createdAt: "asc" },
     take: 3,
-    select: {
-      slug: true,
-      title: true,
-      composer: true,
-      catalogueRef: true,
-      shortDescription: true,
-    },
+    include: workCardInclude,
   });
+  const featuredWorks = works.map(deriveWorkCardData);
 
   return (
     <>
