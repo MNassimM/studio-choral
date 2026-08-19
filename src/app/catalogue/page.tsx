@@ -46,7 +46,7 @@ const playfairDisplay = Playfair_Display({
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: "Catalogue — Butterfly Studio Choral",
+    title: "Catalogue - Butterfly Studio Choral",
     description:
       "Parcourez le catalogue de partitions et de pistes de répétition par pupitre de Butterfly Studio Choral.",
     alternates: { canonical: "/catalogue" },
