@@ -60,6 +60,7 @@ async function seedWorksAndMovements(): Promise<WorkAndMovementIds> {
       composedYear: work.composedYear,
       period: work.period,
       voicing: work.voicing,
+      language: work.language,
       isPublished: work.isPublished,
     };
 

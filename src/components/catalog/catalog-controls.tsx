@@ -10,8 +10,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  PERIOD_OPTIONS,
-  type PeriodValue,
   SORT_OPTIONS,
   type SortValue,
 } from "@/components/catalog/catalog-options";
@@ -69,37 +67,4 @@ function SortSelect({ value }: { value: SortValue }) {
   );
 }
 
-function PeriodSelect({ value }: { value: PeriodValue }) {
-  const updateSearchParam = useUpdateSearchParam();
-
-  return (
-    <Select
-      value={value}
-      onValueChange={(next) => {
-        if (next) {
-          updateSearchParam("period", next, "all");
-        }
-      }}
-    >
-      <SelectTrigger
-        aria-label="Filtrer par période"
-        className="w-full sm:w-56"
-      >
-        <SelectValue>
-          {(current: PeriodValue | null) =>
-            PERIOD_OPTIONS.find((option) => option.value === current)?.label
-          }
-        </SelectValue>
-      </SelectTrigger>
-      <SelectContent>
-        {PERIOD_OPTIONS.map((option) => (
-          <SelectItem key={option.value} value={option.value}>
-            {option.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-}
-
-export { PeriodSelect, SortSelect };
+export { SortSelect };

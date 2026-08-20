@@ -68,6 +68,11 @@ export type DemoWork = {
    * jamais déduite des AudioFile de l'œuvre.
    */
   voicing: string | null;
+  /**
+   * Langue du texte chanté (code ISO 639-1, voir src/lib/works/languages.ts)
+   * — sans rapport avec la langue d'interface du site.
+   */
+  language: string | null;
   isPublished: boolean;
   movements: DemoMovement[];
   pricing: DemoWorkPricing;
@@ -101,6 +106,8 @@ export const DEMO_CATALOG: DemoWork[] = [
     // l'utilisateur en fin de tâche.
     period: "CLASSICAL",
     voicing: "SATB",
+    // Texte de l'ordinaire de la messe (Kyrie, Gloria, Credo...) : latin.
+    language: "la",
     isPublished: true,
     movements: [
       { slug: "kyrie", title: "Kyrie", position: 1, hasAccompaniment: true },
@@ -144,6 +151,7 @@ export const DEMO_CATALOG: DemoWork[] = [
     composedYear: null,
     period: "RENAISSANCE",
     voicing: "SATB",
+    language: "fr",
     isPublished: true,
     movements: [
       {
@@ -172,6 +180,7 @@ export const DEMO_CATALOG: DemoWork[] = [
     composedYear: null,
     period: "RENAISSANCE",
     voicing: "SATB",
+    language: "fr",
     isPublished: true,
     movements: [
       {
@@ -200,6 +209,7 @@ export const DEMO_CATALOG: DemoWork[] = [
     composedYear: null,
     period: "RENAISSANCE",
     voicing: "SATB",
+    language: "fr",
     isPublished: true,
     movements: [
       {

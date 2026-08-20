@@ -16,11 +16,16 @@ import { Container } from "@/components/layout/container";
 import { WorkCard } from "@/components/catalog/work-card";
 import { WorkTableRow } from "@/components/catalog/work-table-row";
 import { CatalogSearchForm } from "@/components/catalog/catalog-search-form";
-import { CatalogComposerFilter } from "@/components/catalog/catalog-composer-filter";
 import {
-  PeriodSelect,
-  SortSelect,
-} from "@/components/catalog/catalog-controls";
+  CatalogActiveFilters,
+  type ActiveFilterPill,
+} from "@/components/catalog/catalog-active-filters";
+import {
+  CatalogFiltersButton,
+  CatalogFiltersPanel,
+  type FilterCategory,
+} from "@/components/catalog/catalog-filters";
+import { SortSelect } from "@/components/catalog/catalog-controls";
 import {
   PERIOD_OPTIONS,
   type PeriodValue,
@@ -36,6 +41,7 @@ import {
   deriveWorkCardData,
   workCardInclude,
 } from "@/lib/catalog/work-card-data";
+import { getLanguageLabel } from "@/lib/works/languages";
 import { cn } from "@/lib/utils";
 
 // Page publique, peu volatile : ISR toutes les heures. Les searchParams
@@ -66,6 +72,29 @@ function isSortValue(value: string): value is SortValue {
 
 function isPeriodValue(value: string): value is PeriodValue {
   return PERIOD_OPTIONS.some((option) => option.value === value);
+}
+
+/**
+ * Parse un paramètre multi-valeur au format "A,B,C". Chaque valeur est
+ * validée indépendamment via `isValid` ; une valeur inconnue est ignorée
+ * silencieusement (jamais d'erreur) — une URL entièrement invalide retombe
+ * simplement sur "aucun filtre de cette catégorie".
+ */
+function parseMultiValueParam<T extends string>(
+  raw: unknown,
+  isValid: (value: string) => value is T,
+): T[] {
+  if (typeof raw !== "string" || raw.length === 0) return [];
+  const values: T[] = [];
+  const seen = new Set<string>();
+  for (const token of raw.split(",")) {
+    const trimmed = token.trim();
+    if (trimmed && !seen.has(trimmed) && isValid(trimmed)) {
+      seen.add(trimmed);
+      values.push(trimmed);
+    }
+  }
+  return values;
 }
 
 function StatBox({
@@ -100,21 +129,20 @@ export default async function CataloguePage(props: PageProps<"/catalogue">) {
     isSortValue(rawSearchParams.sort)
       ? rawSearchParams.sort
       : "featured";
-  const period: PeriodValue =
-    typeof rawSearchParams.period === "string" &&
-    isPeriodValue(rawSearchParams.period)
-      ? rawSearchParams.period
-      : "all";
   const view: "grid" | "list" =
     rawSearchParams.view === "list" ? "list" : "grid";
-  const composer =
-    typeof rawSearchParams.composer === "string" &&
-    rawSearchParams.composer.length > 0
-      ? rawSearchParams.composer
-      : null;
 
-  // Récupération des œuvres publiées et des compositeurs distincts côté serveur
-  const [allWorks, worksCount, distinctComposerRows] = await Promise.all([
+  // Œuvres publiées, compositeurs distincts (stat "Compositeurs") et valeurs
+  // distinctes de period/voicing/language (options du panneau de filtres) —
+  // toujours calculées depuis la base, jamais écrites en dur.
+  const [
+    allWorks,
+    worksCount,
+    distinctComposerRows,
+    distinctPeriodRows,
+    distinctVoicingRows,
+    distinctLanguageRows,
+  ] = await Promise.all([
     prisma.work.findMany({
       where: { isPublished: true },
       orderBy: { createdAt: "asc" },
@@ -126,21 +154,93 @@ export default async function CataloguePage(props: PageProps<"/catalogue">) {
       distinct: ["composer"],
       select: { composer: true },
     }),
+    prisma.work.findMany({
+      where: { isPublished: true, period: { not: null } },
+      distinct: ["period"],
+      select: { period: true },
+    }),
+    prisma.work.findMany({
+      where: { isPublished: true, voicing: { not: null } },
+      distinct: ["voicing"],
+      select: { voicing: true },
+    }),
+    prisma.work.findMany({
+      where: { isPublished: true, language: { not: null } },
+      distinct: ["language"],
+      select: { language: true },
+    }),
   ]);
 
   const composers = distinctComposerRows
     .map((row) => row.composer)
     .sort((a, b) => a.localeCompare(b, "fr"));
 
+  const availablePeriodValues = new Set(
+    distinctPeriodRows.map((row) => row.period),
+  );
+  // Ordre chronologique (celui de PERIOD_OPTIONS), pas l'ordre d'arrivée en base.
+  const availablePeriods = PERIOD_OPTIONS.filter((option) =>
+    availablePeriodValues.has(option.value),
+  );
+  const availableVoicings = distinctVoicingRows
+    .map((row) => row.voicing!)
+    .sort((a, b) => a.localeCompare(b, "fr"));
+  const availableLanguages = distinctLanguageRows
+    .map((row) => row.language!)
+    .sort((a, b) =>
+      getLanguageLabel(a).localeCompare(getLanguageLabel(b), "fr"),
+    );
+
+  // Une catégorie sans valeur disponible n'est pas affichée dans le panneau.
+  const filterCategories: FilterCategory[] = [];
+  if (availablePeriods.length > 0) {
+    filterCategories.push({
+      key: "period",
+      label: "Période",
+      options: availablePeriods.map((option) => ({
+        value: option.value,
+        label: option.label,
+      })),
+    });
+  }
+  if (availableVoicings.length > 0) {
+    filterCategories.push({
+      key: "voicing",
+      label: "Formation",
+      options: availableVoicings.map((voicing) => ({
+        value: voicing,
+        label: voicing,
+      })),
+    });
+  }
+  if (availableLanguages.length > 0) {
+    filterCategories.push({
+      key: "language",
+      label: "Langue",
+      options: availableLanguages.map((language) => ({
+        value: language,
+        label: getLanguageLabel(language),
+      })),
+    });
+  }
+
+  // period : validé contre l'enum MusicalPeriod. voicing/language : validés
+  // contre les valeurs réellement présentes en base (calculées ci-dessus) —
+  // dans les deux cas, un token inconnu est ignoré silencieusement.
+  const periods = parseMultiValueParam(rawSearchParams.period, isPeriodValue);
+  const voicings = parseMultiValueParam(
+    rawSearchParams.voicing,
+    (value): value is string => availableVoicings.includes(value),
+  );
+  const languages = parseMultiValueParam(
+    rawSearchParams.language,
+    (value): value is string => availableLanguages.includes(value),
+  );
+
   let entries = allWorks.map((work) => ({
     cardData: deriveWorkCardData(work),
     createdAt: work.createdAt,
   }));
-
-  // Filtrage par compositeur
-  if (composer) {
-    entries = entries.filter((entry) => entry.cardData.composer === composer);
-  }
 
   if (q) {
     const needle = q.toLowerCase();
@@ -151,12 +251,28 @@ export default async function CataloguePage(props: PageProps<"/catalogue">) {
     );
   }
 
-  // period === "all" : aucun filtrage, les œuvres sans period restent
-  // visibles. Sinon, comparaison directe à cardData.period — une œuvre dont
-  // period est null n'égale jamais une valeur d'enum et disparaît donc de
-  // tout filtre de période précis, sans cas particulier à coder.
-  if (period !== "all") {
-    entries = entries.filter((entry) => entry.cardData.period === period);
+  // OU à l'intérieur d'une catégorie, ET entre catégories : trois filtres
+  // indépendants appliqués en série plutôt qu'une condition combinée.
+  if (periods.length > 0) {
+    entries = entries.filter(
+      (entry) =>
+        entry.cardData.period !== null &&
+        periods.includes(entry.cardData.period),
+    );
+  }
+  if (voicings.length > 0) {
+    entries = entries.filter(
+      (entry) =>
+        entry.cardData.voicing !== null &&
+        voicings.includes(entry.cardData.voicing),
+    );
+  }
+  if (languages.length > 0) {
+    entries = entries.filter(
+      (entry) =>
+        entry.cardData.language !== null &&
+        languages.includes(entry.cardData.language),
+    );
   }
 
   entries = [...entries].sort((a, b) => {
@@ -182,6 +298,27 @@ export default async function CataloguePage(props: PageProps<"/catalogue">) {
 
   // Oeuvres filtrées et triées, prêtes à être affichées dans la vue choisie (grille ou tableau)
   const works = entries.map((entry) => entry.cardData);
+
+  const activeFilterPills: ActiveFilterPill[] = [
+    ...periods.map((value) => ({
+      categoryKey: "period" as const,
+      categoryLabel: "Période",
+      value,
+      label: PERIOD_OPTIONS.find((option) => option.value === value)!.label,
+    })),
+    ...voicings.map((value) => ({
+      categoryKey: "voicing" as const,
+      categoryLabel: "Formation",
+      value,
+      label: value,
+    })),
+    ...languages.map((value) => ({
+      categoryKey: "language" as const,
+      categoryLabel: "Langue",
+      value,
+      label: getLanguageLabel(value),
+    })),
+  ];
 
   return (
     <>
@@ -235,29 +372,39 @@ export default async function CataloguePage(props: PageProps<"/catalogue">) {
             />
           </div>
 
-          {/* Formulaire de recherche, filtres et bascule grille/tableau */}
+          {/* Recherche, filtres (panneau) et bascule grille/tableau */}
           <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <CatalogSearchForm
-                q={q}
-                sort={sort}
-                period={period}
-                view={view}
-                composer={composer}
-              />
-              <div className="flex flex-wrap items-center gap-2">
-                <SortSelect value={sort} />
-                <PeriodSelect value={period} />
-                <CatalogViewToggle
+            <CatalogFiltersPanel
+              key={[...periods, ...voicings, ...languages].join("|")}
+              categories={filterCategories}
+              activePeriods={periods}
+              activeVoicings={voicings}
+              activeLanguages={languages}
+            >
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <CatalogSearchForm
+                  q={q}
+                  sort={sort}
+                  periods={periods}
+                  voicings={voicings}
+                  languages={languages}
                   view={view}
-                  currentParams={rawSearchParams}
                 />
+                <div className="flex flex-wrap items-center gap-2">
+                  <SortSelect value={sort} />
+                  {filterCategories.length > 0 ? (
+                    <CatalogFiltersButton />
+                  ) : null}
+                  <CatalogViewToggle
+                    view={view}
+                    currentParams={rawSearchParams}
+                  />
+                </div>
               </div>
-            </div>
+            </CatalogFiltersPanel>
 
-            <CatalogComposerFilter
-              composers={composers}
-              active={composer}
+            <CatalogActiveFilters
+              pills={activeFilterPills}
               currentParams={rawSearchParams}
             />
           </div>

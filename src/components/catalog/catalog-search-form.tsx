@@ -5,22 +5,25 @@ import { Input } from "@/components/ui/input";
 type CatalogSearchFormProps = {
   q: string;
   sort: string;
-  period: string;
+  periods: string[];
+  voicings: string[];
+  languages: string[];
   view: string;
-  composer: string | null;
 };
 
 /**
  * Recherche réelle (contrairement à celle de la page d'accueil) : un simple
  * formulaire GET, sans JavaScript. Les autres filtres actifs sont reportés
- * en champs cachés pour ne pas être perdus lors d'une recherche.
+ * en champs cachés (format virgule, cohérent avec le panneau de filtres) pour
+ * ne pas être perdus lors d'une recherche.
  */
 function CatalogSearchForm({
   q,
   sort,
-  period,
+  periods,
+  voicings,
+  languages,
   view,
-  composer,
 }: CatalogSearchFormProps) {
   return (
     <form
@@ -45,14 +48,17 @@ function CatalogSearchForm({
       {sort !== "featured" ? (
         <input type="hidden" name="sort" value={sort} />
       ) : null}
-      {period !== "all" ? (
-        <input type="hidden" name="period" value={period} />
+      {periods.length > 0 ? (
+        <input type="hidden" name="period" value={periods.join(",")} />
+      ) : null}
+      {voicings.length > 0 ? (
+        <input type="hidden" name="voicing" value={voicings.join(",")} />
+      ) : null}
+      {languages.length > 0 ? (
+        <input type="hidden" name="language" value={languages.join(",")} />
       ) : null}
       {view !== "grid" ? (
         <input type="hidden" name="view" value={view} />
-      ) : null}
-      {composer ? (
-        <input type="hidden" name="composer" value={composer} />
       ) : null}
     </form>
   );

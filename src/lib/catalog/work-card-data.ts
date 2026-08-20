@@ -28,6 +28,8 @@ export type WorkCardData = {
   period: MusicalPeriod | null;
   /** Formation vocale saisie à la main, ou null si non renseignée. */
   voicing: string | null;
+  /** Langue du texte chanté (ISO 639-1), ou null si non renseignée. */
+  language: string | null;
   /** min(priceCents) des Product actifs de l'œuvre, ou null si aucun. */
   fromPriceCents: number | null;
   /** priceCents du Product WORK + ALL_VOICES actif, ou null si absent. */
@@ -55,6 +57,7 @@ export function deriveWorkCardData(work: WorkWithCardRelations): WorkCardData {
     movementsCount: work.movements.length,
     period: work.period,
     voicing: work.voicing,
+    language: work.language,
     fromPriceCents,
     fullPackPriceCents: fullPackProduct ? fullPackProduct.priceCents : null,
     currency: fullPackProduct?.currency ?? activeProducts[0]?.currency ?? "EUR",

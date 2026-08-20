@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "works" ADD COLUMN     "language" TEXT;

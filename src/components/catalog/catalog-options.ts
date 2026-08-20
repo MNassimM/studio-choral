@@ -7,7 +7,7 @@
  */
 
 export const SORT_OPTIONS = [
-  { value: "featured", label: "Sélection" },
+  { value: "featured", label: "-----------" },
   { value: "price-asc", label: "Prix croissant" },
   { value: "price-desc", label: "Prix décroissant" },
   { value: "title-asc", label: "Titre A-Z" },
@@ -17,13 +17,14 @@ export const SORT_OPTIONS = [
 export type SortValue = (typeof SORT_OPTIONS)[number]["value"];
 
 /**
- * Valeurs alignées sur l'enum Prisma MusicalPeriod (voir prisma/schema.prisma)
- * — le courant musical, saisi à la main sur chaque œuvre, remplace l'ancien
- * filtre par tranche d'années dérivé de composedYear (qui confondait
- * "Renaissance" et "date inconnue").
+ * Valeurs alignées sur l'enum Prisma MusicalPeriod (voir prisma/schema.prisma),
+ * dans l'ordre chronologique — utilisé pour trier les cases à cocher du
+ * panneau de filtres et pour les libellés français (badges, pastilles). Le
+ * panneau de filtres n'affiche que les valeurs réellement présentes en base
+ * (voir /catalogue) : cette liste n'est qu'une table de correspondance
+ * valeur → libellé, jamais la liste montrée telle quelle à l'utilisateur.
  */
 export const PERIOD_OPTIONS = [
-  { value: "all", label: "Toutes les périodes" },
   { value: "MEDIEVAL", label: "Médiéval" },
   { value: "RENAISSANCE", label: "Renaissance" },
   { value: "BAROQUE", label: "Baroque" },
