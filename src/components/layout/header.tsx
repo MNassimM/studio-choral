@@ -11,7 +11,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 async function Header() {
-  const t = await getTranslations("header");
+  const t = await getTranslations("navigation");
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background">
@@ -51,7 +51,7 @@ async function Header() {
           </Link>
           <Link
             href="/panier"
-            aria-label={t("cartAriaLabel")}
+            aria-label={t("header.cartAriaLabel")}
             className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
           >
             <ShoppingCart className="size-5" />

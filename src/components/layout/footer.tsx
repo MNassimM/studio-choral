@@ -91,8 +91,8 @@ const socialLinks = [
 ];
 
 async function Footer() {
-  const tNav = await getTranslations("nav");
-  const t = await getTranslations("footer");
+  const tCommon = await getTranslations("common");
+  const t = await getTranslations("navigation");
 
   return (
     <footer className="border-t border-border bg-background">
@@ -101,13 +101,13 @@ async function Footer() {
           <div className="flex flex-col gap-3">
             <Logo />
             <p className="max-w-xs text-sm text-muted-foreground">
-              {t("tagline")}
+              {tCommon("siteTagline")}
             </p>
           </div>
 
           <div className="flex flex-col gap-3">
             <h3 className="text-sm font-semibold text-foreground">
-              {t("navigationHeading")}
+              {t("footer.navigationHeading")}
             </h3>
             <ul className="flex flex-col gap-2.5">
               {footerNavItems.map((item) => (
@@ -116,7 +116,9 @@ async function Footer() {
                     href={item.href}
                     className="text-sm text-muted-foreground transition-colors hover:text-primary"
                   >
-                    {item.key === "library" ? t("linkLibrary") : tNav(item.key)}
+                    {item.key === "library"
+                      ? t("footer.linkLibrary")
+                      : t(`links.${item.key}`)}
                   </Link>
                 </li>
               ))}
@@ -125,7 +127,7 @@ async function Footer() {
 
           <div className="flex flex-col gap-3">
             <h3 className="text-sm font-semibold text-foreground">
-              {t("informationsHeading")}
+              {t("footer.informationsHeading")}
             </h3>
             <ul className="flex flex-col gap-2.5">
               {footerInfoItems.map((item) => (
@@ -134,7 +136,7 @@ async function Footer() {
                     href={item.href}
                     className="text-sm text-muted-foreground transition-colors hover:text-primary"
                   >
-                    {t(item.messageKey)}
+                    {t(`footer.${item.messageKey}`)}
                   </Link>
                 </li>
               ))}
@@ -143,7 +145,7 @@ async function Footer() {
 
           <div className="flex flex-col gap-3">
             <h3 className="text-sm font-semibold text-foreground">
-              {t("followUsHeading")}
+              {t("footer.followUsHeading")}
             </h3>
             <div className="flex items-center gap-2.5">
               {socialLinks.map(({ label, href, Icon }) => (
@@ -163,7 +165,7 @@ async function Footer() {
         <Separator className="my-8" />
 
         <p className="text-center text-xs text-muted-foreground">
-          {t("copyright", { year: new Date().getFullYear() })}
+          {t("footer.copyright", { year: new Date().getFullYear() })}
         </p>
       </Container>
     </footer>

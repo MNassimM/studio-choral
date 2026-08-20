@@ -33,7 +33,7 @@ const steps = [
 
 async function Hero() {
   const t = await getTranslations("home");
-  const tNav = await getTranslations("nav");
+  const tNav = await getTranslations("navigation");
 
   return (
     <section className="bg-background">
@@ -63,7 +63,7 @@ async function Hero() {
             href="/comment-ca-marche"
             className={cn(buttonVariants({ size: "lg" }), "rounded-full px-6")}
           >
-            {tNav("howItWorks")}
+            {tNav("links.howItWorks")}
           </Link>
         </div>
       </Container>
@@ -73,6 +73,7 @@ async function Hero() {
 
 async function SearchBar({ locale }: { locale: AppLocale }) {
   const t = await getTranslations("home");
+  const tCommon = await getTranslations("common");
   const action = getPathname({ href: "/catalogue", locale });
 
   return (
@@ -85,7 +86,7 @@ async function SearchBar({ locale }: { locale: AppLocale }) {
         >
           <button
             type="submit"
-            aria-label={t("searchAriaLabel")}
+            aria-label={tCommon("searchAriaLabel")}
             className="absolute top-1/2 left-5 -translate-y-1/2 text-muted-foreground transition-colors hover:text-primary"
           >
             <Search className="size-5" aria-hidden="true" />

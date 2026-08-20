@@ -1,0 +1,38 @@
+{
+  "card": {
+    "inclusionsLine": "Aperçu gratuit · Packs par voix",
+    "fromPrice": "À partir de",
+    "fullPack": "Pack complet :",
+    "viewWork": "Voir l'œuvre",
+    "viewWorkShort": "Voir",
+    "addToCart": "Ajouter au panier",
+    "discover": "Découvrir",
+    "movementsCount": "{count, plural, one {# mouvement} other {# mouvements}}"
+  },
+  "period": {
+    "MEDIEVAL": "Médiéval",
+    "RENAISSANCE": "Renaissance",
+    "BAROQUE": "Baroque",
+    "CLASSICAL": "Classique",
+    "ROMANTIC": "Romantique",
+    "MODERN": "Moderne",
+    "CONTEMPORARY": "Contemporain"
+  },
+  "language": {
+    "la": "Latin",
+    "fr": "Français",
+    "de": "Allemand",
+    "en": "Anglais",
+    "it": "Italien"
+  },
+  "voice": {
+    "SOPRANO": "Soprano",
+    "ALTO": "Alto",
+    "TENOR": "Ténor",
+    "BASS": "Basse"
+  },
+  "product": {
+    "allVoices": "Toutes les voix",
+    "nameTemplate": "{voice} — {target}"
+  }
+}

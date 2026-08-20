@@ -143,7 +143,7 @@ export default async function CataloguePage(
   const locale = ((await rootLocale()) ?? routing.defaultLocale) as AppLocale;
 
   const t = await getTranslations("catalogue");
-  const tPeriod = await getTranslations("periodOptions");
+  const tPeriod = await getTranslations("work.period");
   const tCommon = await getTranslations("common");
 
   const rawSearchParams = await props.searchParams;
@@ -211,7 +211,7 @@ export default async function CataloguePage(
   const availableVoicings = distinctVoicingRows
     .map((row) => row.voicing!)
     .sort((a, b) => a.localeCompare(b, locale));
-  const tWorkLanguage = await getTranslations("workLanguage");
+  const tWorkLanguage = await getTranslations("work.language");
   // Repli sur le code brut si non répertorié dans messages/*.json (langue pas
   // encore documentée) — jamais d'erreur de type ni d'écran cassé.
   function translateWorkLanguage(code: string): string {
@@ -362,11 +362,11 @@ export default async function CataloguePage(
       <section className="max-w-7xl mx-auto bg-background">
         <Container className="flex flex-col gap-8 pb-12 sm:pb-16 pt-2 sm:pt-6">
           <nav
-            aria-label={t("breadcrumbAriaLabel")}
+            aria-label={tCommon("breadcrumbAriaLabel")}
             className="text-sm text-muted-foreground"
           >
             <Link href="/" className="hover:text-primary">
-              {t("breadcrumbHome")}
+              {tCommon("breadcrumbHome")}
             </Link>
             <span className="mx-2">/</span>
             <span aria-current="page" className="text-foreground">

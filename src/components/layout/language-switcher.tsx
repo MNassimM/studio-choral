@@ -29,13 +29,13 @@ function LanguageSwitcher() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const activeLocale = useLocale();
-  const t = useTranslations("languageSwitcher");
+  const t = useTranslations("navigation");
   const query = Object.fromEntries(searchParams.entries());
 
   return (
     <div
       role="group"
-      aria-label={t("ariaLabel")}
+      aria-label={t("languageSwitcher.ariaLabel")}
       className="inline-flex items-center gap-1 rounded-full border border-border p-1"
     >
       {routing.locales.map((loc) => (
@@ -59,7 +59,7 @@ function LanguageSwitcher() {
               : "text-muted-foreground hover:text-foreground",
           )}
         >
-          {t(loc)}
+          {t(`languageSwitcher.${loc}`)}
         </Link>
       ))}
     </div>

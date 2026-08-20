@@ -1,0 +1,49 @@
+{
+  "metaTitle": "Catalogue - Butterfly Studio Choral",
+  "metaDescription": "Parcourez le catalogue de partitions et de pistes de répétition par pupitre de Butterfly Studio Choral.",
+  "title": "Catalogue",
+  "intro": "Parcourez nos œuvres, écoutez un aperçu gratuit et choisissez le mouvement ou le pupitre qui vous intéresse.",
+  "statWorksAvailable": "Œuvres disponibles",
+  "statComposers": "Compositeurs",
+  "statVoicingValue": "SATB",
+  "statVoicingLabel": "Formation disponible",
+  "statAudioValue": "Pistes audio",
+  "statAudioLabel": "Incluses à l'achat",
+  "searchPlaceholder": "Rechercher une œuvre ou un compositeur",
+  "sortAriaLabel": "Trier les œuvres",
+  "emptyState": "Aucune œuvre ne correspond à votre recherche.",
+  "tableVisual": "Visuel",
+  "tableTitle": "Titre",
+  "tableComposer": "Compositeur",
+  "tableVoicing": "Effectif",
+  "tableMovements": "Mouvements",
+  "tablePrice": "Prix",
+  "tableActions": "Actions",
+  "resultsCount": "{count, plural, one {# œuvre affichée} other {# œuvres affichées}}",
+  "paginationPreviousAriaLabel": "Page précédente",
+  "paginationNextAriaLabel": "Page suivante",
+  "infoBannerText": "Chaque œuvre est disponible par mouvement ou en intégralité, pour un seul pupitre ou pour l'ensemble des voix. Après votre achat, retrouvez vos pistes audio dans votre bibliothèque personnelle.",
+  "filters": {
+    "period": "Période",
+    "voicing": "Formation",
+    "language": "Langue",
+    "button": "Filtres",
+    "clear": "Effacer les filtres",
+    "viewResults": "Voir les résultats",
+    "activeLabel": "Filtres actifs :",
+    "resetAll": "Tout réinitialiser",
+    "removeAriaLabel": "Retirer le filtre {category} : {value}"
+  },
+  "viewToggle": {
+    "groupAriaLabel": "Mode d'affichage",
+    "gridAriaLabel": "Affichage en grille",
+    "listAriaLabel": "Affichage en tableau"
+  },
+  "sortOptions": {
+    "featured": "Sélection",
+    "price-asc": "Prix croissant",
+    "price-desc": "Prix décroissant",
+    "title-asc": "Titre A-Z",
+    "composer-asc": "Compositeur A-Z"
+  }
+}

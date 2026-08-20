@@ -44,8 +44,7 @@ function useUpdateSearchParam() {
 
 function SortSelect({ value }: { value: SortValue }) {
   const updateSearchParam = useUpdateSearchParam();
-  const t = useTranslations("sortOptions");
-  const tCatalogue = useTranslations("catalogue");
+  const t = useTranslations("catalogue");
 
   return (
     <Select
@@ -56,18 +55,17 @@ function SortSelect({ value }: { value: SortValue }) {
         }
       }}
     >
-      <SelectTrigger
-        aria-label={tCatalogue("sortAriaLabel")}
-        className="w-full sm:w-48"
-      >
+      <SelectTrigger aria-label={t("sortAriaLabel")} className="w-full sm:w-48">
         <SelectValue>
-          {(current: SortValue | null) => (current ? t(current) : null)}
+          {(current: SortValue | null) =>
+            current ? t(`sortOptions.${current}`) : null
+          }
         </SelectValue>
       </SelectTrigger>
       <SelectContent>
         {SORT_OPTIONS.map((option) => (
           <SelectItem key={option} value={option}>
-            {t(option)}
+            {t(`sortOptions.${option}`)}
           </SelectItem>
         ))}
       </SelectContent>

@@ -12,8 +12,7 @@ import { LanguageSwitcher } from "@/components/layout/language-switcher";
 
 function MobileNav() {
   const [open, setOpen] = useState(false);
-  const tNav = useTranslations("nav");
-  const t = useTranslations("mobileNav");
+  const t = useTranslations("navigation");
 
   return (
     <div className="md:hidden">
@@ -21,7 +20,7 @@ function MobileNav() {
         type="button"
         variant="ghost"
         size="icon"
-        aria-label={open ? t("closeMenu") : t("openMenu")}
+        aria-label={open ? t("mobileNav.closeMenu") : t("mobileNav.openMenu")}
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
       >
@@ -38,7 +37,7 @@ function MobileNav() {
                 onClick={() => setOpen(false)}
                 className="rounded-md px-3 py-2.5 text-sm font-medium text-foreground/85 transition-colors hover:bg-muted hover:text-primary"
               >
-                {tNav(item.key)}
+                {t(`links.${item.key}`)}
               </Link>
             ))}
             <Separator className="my-2" />
@@ -48,7 +47,7 @@ function MobileNav() {
               className="flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-foreground/85 transition-colors hover:bg-muted hover:text-primary"
             >
               <ShoppingBag className="size-4" />
-              {t("cart")}
+              {t("mobileNav.cart")}
             </Link>
             <Link
               href="/compte"

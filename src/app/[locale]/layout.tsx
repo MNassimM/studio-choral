@@ -25,14 +25,14 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("metadata");
+  const t = await getTranslations("common");
 
   return {
     metadataBase: process.env.NEXT_PUBLIC_SITE_URL
       ? new URL(process.env.NEXT_PUBLIC_SITE_URL)
       : undefined,
-    title: t("title"),
-    description: t("description"),
+    title: t("siteName"),
+    description: t("siteTagline"),
   };
 }
 

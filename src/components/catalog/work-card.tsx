@@ -50,8 +50,7 @@ async function WorkCard({
   variant = "default",
   className,
 }: WorkCardProps) {
-  const t = await getTranslations("workCard");
-  const tPeriod = await getTranslations("periodOptions");
+  const t = await getTranslations("work");
   const format = await getFormatter();
 
   if (variant === "compact") {
@@ -79,7 +78,7 @@ async function WorkCard({
             href={{ pathname: "/works/[slug]", params: { slug: work.slug } }}
             className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
           >
-            {t("discover")}
+            {t("card.discover")}
             <ChevronRight className="size-4" />
           </Link>
         </CardContent>
@@ -104,27 +103,27 @@ async function WorkCard({
             <Badge variant="outline">{work.catalogueRef}</Badge>
           ) : null}
           {work.period ? (
-            <Badge variant="secondary">{tPeriod(work.period)}</Badge>
+            <Badge variant="secondary">{t(`period.${work.period}`)}</Badge>
           ) : null}
           {work.voicing ? (
             <Badge variant="secondary">{work.voicing}</Badge>
           ) : null}
           {work.movementsCount > 1 ? (
             <Badge variant="secondary">
-              {t("movementsCount", { count: work.movementsCount })}
+              {t("card.movementsCount", { count: work.movementsCount })}
             </Badge>
           ) : null}
         </div>
 
         <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
           <Headphones className="size-4 shrink-0" aria-hidden="true" />
-          {t("inclusionsLine")}
+          {t("card.inclusionsLine")}
         </div>
 
         <div className="mt-auto flex flex-col gap-0.5 border-t border-border pt-3">
           {work.fromPriceCents !== null ? (
             <p className="text-sm text-muted-foreground">
-              {t("fromPrice")}{" "}
+              {t("card.fromPrice")}{" "}
               <span className="font-semibold text-foreground">
                 {format.number(work.fromPriceCents / 100, {
                   style: "currency",
@@ -135,7 +134,7 @@ async function WorkCard({
           ) : null}
           {work.fullPackPriceCents !== null ? (
             <p className="text-xs text-muted-foreground">
-              {t("fullPack")}{" "}
+              {t("card.fullPack")}{" "}
               {format.number(work.fullPackPriceCents / 100, {
                 style: "currency",
                 currency: work.currency,
@@ -152,12 +151,12 @@ async function WorkCard({
               "flex-1 rounded-full",
             )}
           >
-            {t("viewWork")}
+            {t("card.viewWork")}
           </Link>
           {/* TODO : panier non implémenté */}
           <Button disabled className="flex-1 gap-1.5 rounded-full">
             <ShoppingCart className="size-4" />
-            {t("addToCart")}
+            {t("card.addToCart")}
           </Button>
         </div>
       </CardContent>

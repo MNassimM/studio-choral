@@ -1,0 +1,49 @@
+{
+  "metaTitle": "Catalogue - Butterfly Studio Choral",
+  "metaDescription": "Browse Butterfly Studio Choral's catalogue of scores and voice-part rehearsal tracks.",
+  "title": "Catalogue",
+  "intro": "Browse our works, listen to a free preview and choose the movement or voice part you're interested in.",
+  "statWorksAvailable": "Works available",
+  "statComposers": "Composers",
+  "statVoicingValue": "SATB",
+  "statVoicingLabel": "Voicing available",
+  "statAudioValue": "Audio tracks",
+  "statAudioLabel": "Included with purchase",
+  "searchPlaceholder": "Search for a work or composer",
+  "sortAriaLabel": "Sort works",
+  "emptyState": "No work matches your search.",
+  "tableVisual": "Visual",
+  "tableTitle": "Title",
+  "tableComposer": "Composer",
+  "tableVoicing": "Voicing",
+  "tableMovements": "Movements",
+  "tablePrice": "Price",
+  "tableActions": "Actions",
+  "resultsCount": "{count, plural, one {# work shown} other {# works shown}}",
+  "paginationPreviousAriaLabel": "Previous page",
+  "paginationNextAriaLabel": "Next page",
+  "infoBannerText": "Every work is available by movement or in full, for a single voice part or for all voices. After your purchase, find your audio tracks in your personal library.",
+  "filters": {
+    "period": "Period",
+    "voicing": "Voicing",
+    "language": "Language",
+    "button": "Filters",
+    "clear": "Clear filters",
+    "viewResults": "View results",
+    "activeLabel": "Active filters:",
+    "resetAll": "Reset all",
+    "removeAriaLabel": "Remove filter {category}: {value}"
+  },
+  "viewToggle": {
+    "groupAriaLabel": "Display mode",
+    "gridAriaLabel": "Grid view",
+    "listAriaLabel": "Table view"
+  },
+  "sortOptions": {
+    "featured": "Featured",
+    "price-asc": "Price: low to high",
+    "price-desc": "Price: high to low",
+    "title-asc": "Title A-Z",
+    "composer-asc": "Composer A-Z"
+  }
+}

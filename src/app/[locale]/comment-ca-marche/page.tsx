@@ -337,18 +337,18 @@ async function CtaSection() {
 
 export default async function CommentCaMarchePage() {
   const t = await getTranslations("howItWorks");
-  const tCatalogue = await getTranslations("catalogue");
+  const tCommon = await getTranslations("common");
 
   return (
     <>
       <section className="max-w-7xl mx-auto bg-background">
         <Container className="flex flex-col gap-8 pt-2 sm:pt-6">
           <nav
-            aria-label={tCatalogue("breadcrumbAriaLabel")}
+            aria-label={tCommon("breadcrumbAriaLabel")}
             className="text-sm text-muted-foreground"
           >
             <Link href="/" className="hover:text-primary">
-              {tCatalogue("breadcrumbHome")}
+              {tCommon("breadcrumbHome")}
             </Link>
             <span className="mx-2">-{">"}</span>
             <span aria-current="page" className="text-foreground">

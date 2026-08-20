@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 // Sans ce fichier DANS le segment [locale], une 404 en anglais afficherait le
 // texte français du not-found.tsx par défaut de la racine de l'app.
 export default async function LocaleNotFound() {
-  const t = await getTranslations("notFound");
+  const t = await getTranslations("errors.notFound");
 
   return (
     <section className="bg-background">

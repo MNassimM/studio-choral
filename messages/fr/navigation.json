@@ -1,0 +1,31 @@
+{
+  "myAccount": "Mon espace",
+  "links": {
+    "catalogue": "Catalogue",
+    "howItWorks": "Comment ça marche"
+  },
+  "header": {
+    "cartAriaLabel": "Voir le panier"
+  },
+  "mobileNav": {
+    "openMenu": "Ouvrir le menu",
+    "closeMenu": "Fermer le menu",
+    "cart": "Panier"
+  },
+  "footer": {
+    "navigationHeading": "Navigation",
+    "informationsHeading": "Informations",
+    "followUsHeading": "Nous suivre",
+    "linkLibrary": "Bibliothèque",
+    "linkAboutUs": "À propos de nous",
+    "linkTerms": "Conditions générales",
+    "linkLegal": "Mentions légales",
+    "linkPrivacy": "Politique de confidentialité",
+    "copyright": "© {year} Butterfly Studio Choral - Tous droits réservés"
+  },
+  "languageSwitcher": {
+    "ariaLabel": "Choisir la langue",
+    "fr": "Français",
+    "en": "English"
+  }
+}

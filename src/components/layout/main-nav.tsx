@@ -12,7 +12,7 @@ export const mainNavItems = [
 ] as const;
 
 async function MainNav({ className }: { className?: string }) {
-  const t = await getTranslations("nav");
+  const t = await getTranslations("navigation");
 
   return (
     <nav className={cn("hidden items-center gap-8 md:flex", className)}>
@@ -22,7 +22,7 @@ async function MainNav({ className }: { className?: string }) {
           href={item.href}
           className="text-sm font-medium text-foreground/75 transition-colors hover:text-primary"
         >
-          {t(item.key)}
+          {t(`links.${item.key}`)}
         </Link>
       ))}
     </nav>

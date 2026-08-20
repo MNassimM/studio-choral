@@ -33,13 +33,14 @@ async function CatalogSearchForm({
   locale,
 }: CatalogSearchFormProps) {
   const t = await getTranslations("catalogue");
+  const tCommon = await getTranslations("common");
   const action = getPathname({ href: "/catalogue", locale });
 
   return (
     <form action={action} method="GET" className="relative flex-1 sm:max-w-sm">
       <button
         type="submit"
-        aria-label={t("searchAriaLabel")}
+        aria-label={tCommon("searchAriaLabel")}
         className="absolute top-1/2 left-4 -translate-y-1/2 text-muted-foreground transition-colors hover:text-primary"
       >
         <Search className="size-4" aria-hidden="true" />

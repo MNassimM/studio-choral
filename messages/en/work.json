@@ -1,0 +1,38 @@
+{
+  "card": {
+    "inclusionsLine": "Free preview · Packs by voice part",
+    "fromPrice": "From",
+    "fullPack": "Full pack:",
+    "viewWork": "View work",
+    "viewWorkShort": "View",
+    "addToCart": "Add to cart",
+    "discover": "Discover",
+    "movementsCount": "{count, plural, one {# movement} other {# movements}}"
+  },
+  "period": {
+    "MEDIEVAL": "Medieval",
+    "RENAISSANCE": "Renaissance",
+    "BAROQUE": "Baroque",
+    "CLASSICAL": "Classical",
+    "ROMANTIC": "Romantic",
+    "MODERN": "Modern",
+    "CONTEMPORARY": "Contemporary"
+  },
+  "language": {
+    "la": "Latin",
+    "fr": "French",
+    "de": "German",
+    "en": "English",
+    "it": "Italian"
+  },
+  "voice": {
+    "SOPRANO": "Soprano",
+    "ALTO": "Alto",
+    "TENOR": "Tenor",
+    "BASS": "Bass"
+  },
+  "product": {
+    "allVoices": "All voices",
+    "nameTemplate": "{voice} — {target}"
+  }
+}

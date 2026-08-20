@@ -7,7 +7,7 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 async function WorkTableRow({ work }: { work: WorkCardData }) {
-  const t = await getTranslations("workCard");
+  const t = await getTranslations("work.card");
   const format = await getFormatter();
 
   return (
