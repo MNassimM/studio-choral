@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import {
   Select,
@@ -19,6 +20,10 @@ import {
  * paramètres — recherche, autre filtre — sont conservés). Retirer le
  * paramètre plutôt que d'écrire sa valeur "par défaut" garde des URLs
  * propres.
+ *
+ * usePathname/useRouter viennent de next/navigation (pas de @/i18n/navigation)
+ * : on ne fait ici que réécrire un paramètre de recherche sur la page
+ * courante, jamais changer de route ni de locale.
  */
 function useUpdateSearchParam() {
   const router = useRouter();
@@ -39,6 +44,8 @@ function useUpdateSearchParam() {
 
 function SortSelect({ value }: { value: SortValue }) {
   const updateSearchParam = useUpdateSearchParam();
+  const t = useTranslations("sortOptions");
+  const tCatalogue = useTranslations("catalogue");
 
   return (
     <Select
@@ -49,17 +56,18 @@ function SortSelect({ value }: { value: SortValue }) {
         }
       }}
     >
-      <SelectTrigger aria-label="Trier les œuvres" className="w-full sm:w-48">
+      <SelectTrigger
+        aria-label={tCatalogue("sortAriaLabel")}
+        className="w-full sm:w-48"
+      >
         <SelectValue>
-          {(current: SortValue | null) =>
-            SORT_OPTIONS.find((option) => option.value === current)?.label
-          }
+          {(current: SortValue | null) => (current ? t(current) : null)}
         </SelectValue>
       </SelectTrigger>
       <SelectContent>
         {SORT_OPTIONS.map((option) => (
-          <SelectItem key={option.value} value={option.value}>
-            {option.label}
+          <SelectItem key={option} value={option}>
+            {t(option)}
           </SelectItem>
         ))}
       </SelectContent>

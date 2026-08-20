@@ -49,6 +49,19 @@ export type DemoWorkPricing = {
   workAllVoicesCents: number;
 };
 
+/**
+ * Surcharge par langue d'une œuvre (voir model WorkTranslation). `title` null
+ * signifie « conserver le titre original » (cas des incipits, qui ne se
+ * traduisent jamais) — jamais une traduction manquante à combler.
+ */
+export type DemoWorkTranslation = {
+  locale: string;
+  slug: string;
+  title: string | null;
+  shortDescription: string;
+  description: string;
+};
+
 export type DemoWork = {
   slug: string;
   title: string;
@@ -74,6 +87,7 @@ export type DemoWork = {
    */
   language: string | null;
   isPublished: boolean;
+  translations: DemoWorkTranslation[];
   movements: DemoMovement[];
   pricing: DemoWorkPricing;
   /**
@@ -109,6 +123,17 @@ export const DEMO_CATALOG: DemoWork[] = [
     // Texte de l'ordinaire de la messe (Kyrie, Gloria, Credo...) : latin.
     language: "la",
     isPublished: true,
+    translations: [
+      {
+        locale: "en",
+        slug: "mass-in-g-major",
+        title: "Mass in G major",
+        shortDescription:
+          "A brief, lyrical mass for choir and orchestra, composed by Schubert in 1815.",
+        description:
+          "Composed by Franz Schubert in 1815, this mass is among his earliest liturgical works. Written for mixed choir and orchestra, it stands out for its simple, warm melodic style. Its six movements follow the ordinary of the mass, from the Kyrie to the Agnus Dei.",
+      },
+    ],
     movements: [
       { slug: "kyrie", title: "Kyrie", position: 1, hasAccompaniment: true },
       { slug: "gloria", title: "Gloria", position: 2, hasAccompaniment: true },
@@ -153,6 +178,18 @@ export const DEMO_CATALOG: DemoWork[] = [
     voicing: "SATB",
     language: "fr",
     isPublished: true,
+    translations: [
+      {
+        locale: "en",
+        // Incipit : jamais traduit, y compris dans le slug.
+        slug: "ce-mois-de-mai",
+        title: null,
+        shortDescription:
+          "A Renaissance French polyphonic chanson celebrating the arrival of spring.",
+        description:
+          "Composed by Clément Janequin, this polyphonic chanson is written for mixed voices a cappella. Its text evokes the joy and renewal associated with the month of May. It illustrates the lively, descriptive style characteristic of the 16th-century French chansonnier.",
+      },
+    ],
     movements: [
       {
         slug: "ce-mois-de-mai",
@@ -182,6 +219,17 @@ export const DEMO_CATALOG: DemoWork[] = [
     voicing: "SATB",
     language: "fr",
     isPublished: true,
+    translations: [
+      {
+        locale: "en",
+        slug: "il-est-bel-et-bon",
+        title: null,
+        shortDescription:
+          "A comic Renaissance French chanson, famous for its imitations of clucking hens.",
+        description:
+          "Composed by Pierre Passereau in the 16th century, this four-voice polyphonic chanson depicts a woman praising her husband's qualities. Its playful character and onomatopoeic imitations of clucking hens have made it one of the most popular songs of the Renaissance repertoire. It remains a classic of the light choral repertoire today.",
+      },
+    ],
     movements: [
       {
         slug: "il-est-bel-et-bon",
@@ -211,6 +259,17 @@ export const DEMO_CATALOG: DemoWork[] = [
     voicing: "SATB",
     language: "fr",
     isPublished: true,
+    translations: [
+      {
+        locale: "en",
+        slug: "mille-regretz",
+        title: null,
+        shortDescription:
+          "A melancholic Renaissance chanson on the theme of parting, attributed to Josquin des Prez.",
+        description:
+          "A four-voice polyphonic chanson attributed to Josquin des Prez, a major composer of the Franco-Flemish Renaissance. Its text expresses the pain of separation, carried by dense, expressive harmonic writing. It remains one of the most celebrated and widely arranged secular chansons of its time.",
+      },
+    ],
     movements: [
       {
         slug: "mille-regretz",

@@ -1,12 +1,15 @@
-import Link from "next/link";
+import { getTranslations, getFormatter } from "next-intl/server";
 import { Music2, ShoppingCart } from "lucide-react";
 
 import type { WorkCardData } from "@/lib/catalog/work-card-data";
-import { formatPriceCents } from "@/lib/products/format-price";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
-function WorkTableRow({ work }: { work: WorkCardData }) {
+async function WorkTableRow({ work }: { work: WorkCardData }) {
+  const t = await getTranslations("workCard");
+  const format = await getFormatter();
+
   return (
     <tr className="border-b border-border last:border-b-0">
       <td className="py-3 pr-4 pl-4">
@@ -21,32 +24,30 @@ function WorkTableRow({ work }: { work: WorkCardData }) {
       <td className="py-3 pr-4 text-muted-foreground">{work.composer}</td>
       <td className="py-3 pr-4 text-muted-foreground">{work.voicing ?? "—"}</td>
       <td className="py-3 pr-4 text-muted-foreground">
-        {work.movementsCount === 1
-          ? "1 mouvement"
-          : `${work.movementsCount} mouvements`}
+        {t("movementsCount", { count: work.movementsCount })}
       </td>
       <td className="py-3 pr-4 font-medium">
         {work.fromPriceCents !== null
-          ? `À partir de ${formatPriceCents(work.fromPriceCents, work.currency)}`
+          ? `${t("fromPrice")} ${format.number(work.fromPriceCents / 100, { style: "currency", currency: work.currency })}`
           : "—"}
       </td>
       <td className="py-3 pr-4">
         <div className="flex items-center gap-2">
           <Link
-            href={`/works/${work.slug}`}
+            href={{ pathname: "/works/[slug]", params: { slug: work.slug } }}
             className={cn(
               buttonVariants({ variant: "outline", size: "sm" }),
               "rounded-full",
             )}
           >
-            Voir
+            {t("viewWorkShort")}
           </Link>
           {/* TODO : panier non implémenté */}
           <Button
             disabled
             size="icon"
             variant="ghost"
-            aria-label="Ajouter au panier"
+            aria-label={t("addToCart")}
             className="rounded-full"
           >
             <ShoppingCart className="size-4" />

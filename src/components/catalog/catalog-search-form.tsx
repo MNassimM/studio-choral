@@ -1,6 +1,9 @@
+import { getTranslations } from "next-intl/server";
 import { Search } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
+import { getPathname } from "@/i18n/navigation";
+import { routing } from "@/i18n/routing";
 
 type CatalogSearchFormProps = {
   q: string;
@@ -9,31 +12,34 @@ type CatalogSearchFormProps = {
   voicings: string[];
   languages: string[];
   view: string;
+  locale: (typeof routing.locales)[number];
 };
 
 /**
  * Recherche réelle (contrairement à celle de la page d'accueil) : un simple
  * formulaire GET, sans JavaScript. Les autres filtres actifs sont reportés
  * en champs cachés (format virgule, cohérent avec le panneau de filtres) pour
- * ne pas être perdus lors d'une recherche.
+ * ne pas être perdus lors d'une recherche. `action` doit pointer vers le
+ * chemin /catalogue déjà traduit de la locale active (getPathname), pas vers
+ * la clé canonique "/catalogue" telle quelle.
  */
-function CatalogSearchForm({
+async function CatalogSearchForm({
   q,
   sort,
   periods,
   voicings,
   languages,
   view,
+  locale,
 }: CatalogSearchFormProps) {
+  const t = await getTranslations("catalogue");
+  const action = getPathname({ href: "/catalogue", locale });
+
   return (
-    <form
-      action="/catalogue"
-      method="GET"
-      className="relative flex-1 sm:max-w-sm"
-    >
+    <form action={action} method="GET" className="relative flex-1 sm:max-w-sm">
       <button
         type="submit"
-        aria-label="Rechercher"
+        aria-label={t("searchAriaLabel")}
         className="absolute top-1/2 left-4 -translate-y-1/2 text-muted-foreground transition-colors hover:text-primary"
       >
         <Search className="size-4" aria-hidden="true" />
@@ -42,7 +48,7 @@ function CatalogSearchForm({
         type="search"
         name="q"
         defaultValue={q}
-        placeholder="Rechercher une œuvre ou un compositeur"
+        placeholder={t("searchPlaceholder")}
         className="h-10 rounded-full border-border pl-10"
       />
       {sort !== "featured" ? (

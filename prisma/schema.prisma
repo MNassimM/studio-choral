@@ -60,11 +60,40 @@ model Work {
   createdAt        DateTime       @default(now()) @map("created_at")
   updatedAt        DateTime       @updatedAt @map("updated_at")
 
-  movements Movement[]
-  products  Product[]
+  movements    Movement[]
+  products     Product[]
+  translations WorkTranslation[]
 
   @@index([period])
   @@map("works")
+}
+
+// Surcharges par langue d'une Work — jamais de colonnes suffixées (titleEn...) :
+// ajouter une langue est une insertion de lignes, pas une migration. Le
+// français reste la langue de référence, portée par Work elle-même.
+model WorkTranslation {
+  id               String  @id @default(cuid())
+  workId           String  @map("work_id")
+  /// Code de langue d'interface (ex. "en") — sans rapport avec Work.language
+  /// (la langue du texte CHANTÉ). Voir src/lib/works/resolve-translation.ts.
+  locale           String
+  /// Slug localisé (ex. "mass-in-g-major"). Résolution : chercher d'abord ici
+  /// pour la locale demandée, retomber sur Work.slug si absent.
+  slug             String
+  /// NULL = conserver le titre original (cas des incipits, ex. "Mille
+  /// regretz", qui ne se traduisent jamais) — pas une traduction manquante.
+  title            String?
+  shortDescription String? @map("short_description")
+  description      String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  work Work @relation(fields: [workId], references: [id], onDelete: Cascade)
+
+  @@unique([workId, locale])
+  @@unique([locale, slug])
+  @@map("work_translations")
 }
 
 model Movement {

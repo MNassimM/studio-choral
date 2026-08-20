@@ -1,20 +1,28 @@
 import type { MusicalPeriod, Prisma } from "@/generated/prisma/client";
+import type { AppLocale } from "@/i18n/routing";
+import { resolveWorkTranslation } from "@/lib/works/resolve-translation";
 
 /**
  * Forme Prisma minimale nécessaire pour dériver une `WorkCardData` : les
- * mouvements (pour leur nombre) et les produits actifs (pour les prix).
+ * mouvements (pour leur nombre), les produits actifs (pour les prix) et la
+ * traduction de la locale demandée (au plus une ligne, filtrée côté requête).
  * Réutilisée par la page d'accueil et par /catalogue pour garantir la même
  * donnée dans les deux cas.
  */
-export const workCardInclude = {
-  movements: true,
-  products: {
-    where: { isActive: true },
-  },
-} satisfies Prisma.WorkInclude;
+export function buildWorkCardInclude(locale: AppLocale) {
+  return {
+    movements: true,
+    products: {
+      where: { isActive: true },
+    },
+    translations: {
+      where: { locale },
+    },
+  } satisfies Prisma.WorkInclude;
+}
 
 export type WorkWithCardRelations = Prisma.WorkGetPayload<{
-  include: typeof workCardInclude;
+  include: ReturnType<typeof buildWorkCardInclude>;
 }>;
 
 export type WorkCardData = {
@@ -37,7 +45,12 @@ export type WorkCardData = {
   currency: string;
 };
 
-export function deriveWorkCardData(work: WorkWithCardRelations): WorkCardData {
+export function deriveWorkCardData(
+  work: WorkWithCardRelations,
+  locale: AppLocale,
+): WorkCardData {
+  const resolved = resolveWorkTranslation(work, locale);
+
   const activeProducts = work.products;
   const fromPriceCents =
     activeProducts.length > 0
@@ -49,11 +62,13 @@ export function deriveWorkCardData(work: WorkWithCardRelations): WorkCardData {
   );
 
   return {
-    slug: work.slug,
-    title: work.title,
+    slug: resolved.slug,
+    title: resolved.title,
+    // Jamais traduit : compositeur, référence catalogue, formation, langue
+    // chantée sont des données factuelles indépendantes de la locale UI.
     composer: work.composer,
     catalogueRef: work.catalogueRef,
-    shortDescription: work.shortDescription,
+    shortDescription: resolved.shortDescription,
     movementsCount: work.movements.length,
     period: work.period,
     voicing: work.voicing,

@@ -1,14 +1,18 @@
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { ShoppingCart, UserRound } from "lucide-react";
 
 import { Container } from "@/components/layout/container";
 import { Logo } from "@/components/layout/logo";
 import { MainNav } from "@/components/layout/main-nav";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
+import { Link } from "@/i18n/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-function Header() {
+async function Header() {
+  const t = await getTranslations("header");
+
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background">
       <Container className="grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-4">
@@ -19,7 +23,12 @@ function Header() {
 
         <MainNav />
 
-        <div className="flex items-center col-start-3 justify-self-end">
+        <div className="flex items-center gap-2 col-start-3 justify-self-end">
+          {/* En dessous de md, MobileNav affiche son propre LanguageSwitcher
+              dans le menu ouvert — l'afficher aussi ici le dupliquerait. */}
+          <div className="hidden md:block">
+            <LanguageSwitcher />
+          </div>
           <Link
             href="/compte"
             className={cn(
@@ -28,11 +37,11 @@ function Header() {
             )}
           >
             <UserRound className="size-4" />
-            Mon espace
+            {t("myAccount")}
           </Link>
           <Link
             href="/compte"
-            aria-label="Mon espace"
+            aria-label={t("myAccount")}
             className={cn(
               buttonVariants({ variant: "outline", size: "icon" }),
               "rounded-full sm:hidden",
@@ -42,7 +51,7 @@ function Header() {
           </Link>
           <Link
             href="/panier"
-            aria-label="Voir le panier"
+            aria-label={t("cartAriaLabel")}
             className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
           >
             <ShoppingCart className="size-5" />

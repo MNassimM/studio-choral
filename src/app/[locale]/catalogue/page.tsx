@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import { locale as rootLocale } from "next/root-params";
 import { Playfair_Display } from "next/font/google";
 import {
   BookOpen,
@@ -38,10 +39,12 @@ import { Button, buttonVariants } from "@/components/ui/button";
 // Import de fonctions utilitaires
 import { prisma } from "@/lib/db/prisma";
 import {
+  buildWorkCardInclude,
   deriveWorkCardData,
-  workCardInclude,
 } from "@/lib/catalog/work-card-data";
-import { getLanguageLabel } from "@/lib/works/languages";
+import { Link, getPathname } from "@/i18n/navigation";
+import { routing, type AppLocale } from "@/i18n/routing";
+import { isKnownWorkLanguageCode } from "@/lib/works/work-language";
 import { cn } from "@/lib/utils";
 
 // Page publique, peu volatile : ISR toutes les heures. Les searchParams
@@ -57,21 +60,36 @@ const playfairDisplay = Playfair_Display({
 });
 
 export async function generateMetadata(): Promise<Metadata> {
+  const locale = ((await rootLocale()) ?? routing.defaultLocale) as AppLocale;
+  const t = await getTranslations("catalogue");
+
+  const languages = Object.fromEntries(
+    routing.locales.map((l) => [
+      l,
+      getPathname({ href: "/catalogue", locale: l }),
+    ]),
+  );
+
   return {
-    title: "Catalogue - Butterfly Studio Choral",
-    description:
-      "Parcourez le catalogue de partitions et de pistes de répétition par pupitre de Butterfly Studio Choral.",
-    alternates: { canonical: "/catalogue" },
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+    alternates: {
+      canonical: getPathname({ href: "/catalogue", locale }),
+      languages: {
+        ...languages,
+        "x-default": languages[routing.defaultLocale],
+      },
+    },
   };
 }
 
 // Type guards pour valider les searchParams côté serveur
 function isSortValue(value: string): value is SortValue {
-  return SORT_OPTIONS.some((option) => option.value === value);
+  return SORT_OPTIONS.some((option) => option === value);
 }
 
 function isPeriodValue(value: string): value is PeriodValue {
-  return PERIOD_OPTIONS.some((option) => option.value === value);
+  return PERIOD_OPTIONS.some((option) => option === value);
 }
 
 /**
@@ -119,7 +137,15 @@ function StatBox({
   );
 }
 
-export default async function CataloguePage(props: PageProps<"/catalogue">) {
+export default async function CataloguePage(
+  props: PageProps<"/[locale]/catalogue">,
+) {
+  const locale = ((await rootLocale()) ?? routing.defaultLocale) as AppLocale;
+
+  const t = await getTranslations("catalogue");
+  const tPeriod = await getTranslations("periodOptions");
+  const tCommon = await getTranslations("common");
+
   const rawSearchParams = await props.searchParams;
   // Extraction et validation des searchParams côté serveur
   const q =
@@ -146,7 +172,7 @@ export default async function CataloguePage(props: PageProps<"/catalogue">) {
     prisma.work.findMany({
       where: { isPublished: true },
       orderBy: { createdAt: "asc" },
-      include: workCardInclude,
+      include: buildWorkCardInclude(locale),
     }),
     prisma.work.count({ where: { isPublished: true } }),
     prisma.work.findMany({
@@ -173,22 +199,28 @@ export default async function CataloguePage(props: PageProps<"/catalogue">) {
 
   const composers = distinctComposerRows
     .map((row) => row.composer)
-    .sort((a, b) => a.localeCompare(b, "fr"));
+    .sort((a, b) => a.localeCompare(b, locale));
 
   const availablePeriodValues = new Set(
     distinctPeriodRows.map((row) => row.period),
   );
   // Ordre chronologique (celui de PERIOD_OPTIONS), pas l'ordre d'arrivée en base.
   const availablePeriods = PERIOD_OPTIONS.filter((option) =>
-    availablePeriodValues.has(option.value),
+    availablePeriodValues.has(option),
   );
   const availableVoicings = distinctVoicingRows
     .map((row) => row.voicing!)
-    .sort((a, b) => a.localeCompare(b, "fr"));
+    .sort((a, b) => a.localeCompare(b, locale));
+  const tWorkLanguage = await getTranslations("workLanguage");
+  // Repli sur le code brut si non répertorié dans messages/*.json (langue pas
+  // encore documentée) — jamais d'erreur de type ni d'écran cassé.
+  function translateWorkLanguage(code: string): string {
+    return isKnownWorkLanguageCode(code) ? tWorkLanguage(code) : code;
+  }
   const availableLanguages = distinctLanguageRows
     .map((row) => row.language!)
     .sort((a, b) =>
-      getLanguageLabel(a).localeCompare(getLanguageLabel(b), "fr"),
+      translateWorkLanguage(a).localeCompare(translateWorkLanguage(b), locale),
     );
 
   // Une catégorie sans valeur disponible n'est pas affichée dans le panneau.
@@ -196,17 +228,17 @@ export default async function CataloguePage(props: PageProps<"/catalogue">) {
   if (availablePeriods.length > 0) {
     filterCategories.push({
       key: "period",
-      label: "Période",
+      label: "period",
       options: availablePeriods.map((option) => ({
-        value: option.value,
-        label: option.label,
+        value: option,
+        label: tPeriod(option),
       })),
     });
   }
   if (availableVoicings.length > 0) {
     filterCategories.push({
       key: "voicing",
-      label: "Formation",
+      label: "voicing",
       options: availableVoicings.map((voicing) => ({
         value: voicing,
         label: voicing,
@@ -216,10 +248,10 @@ export default async function CataloguePage(props: PageProps<"/catalogue">) {
   if (availableLanguages.length > 0) {
     filterCategories.push({
       key: "language",
-      label: "Langue",
+      label: "language",
       options: availableLanguages.map((language) => ({
         value: language,
-        label: getLanguageLabel(language),
+        label: translateWorkLanguage(language),
       })),
     });
   }
@@ -238,16 +270,21 @@ export default async function CataloguePage(props: PageProps<"/catalogue">) {
   );
 
   let entries = allWorks.map((work) => ({
-    cardData: deriveWorkCardData(work),
+    cardData: deriveWorkCardData(work, locale),
     createdAt: work.createdAt,
   }));
 
   if (q) {
+    // Recherche dans le titre ET la description courte de la LANGUE ACTIVE
+    // (déjà résolues par deriveWorkCardData) : un anglophone qui tape "mass"
+    // doit trouver l'œuvre même si son incipit d'origine reste en français.
     const needle = q.toLowerCase();
     entries = entries.filter(
       (entry) =>
         entry.cardData.title.toLowerCase().includes(needle) ||
-        entry.cardData.composer.toLowerCase().includes(needle),
+        entry.cardData.composer.toLowerCase().includes(needle) ||
+        (entry.cardData.shortDescription?.toLowerCase().includes(needle) ??
+          false),
     );
   }
 
@@ -288,9 +325,9 @@ export default async function CataloguePage(props: PageProps<"/catalogue">) {
           (a.cardData.fromPriceCents ?? -Infinity)
         );
       case "title-asc":
-        return a.cardData.title.localeCompare(b.cardData.title, "fr");
+        return a.cardData.title.localeCompare(b.cardData.title, locale);
       case "composer-asc":
-        return a.cardData.composer.localeCompare(b.cardData.composer, "fr");
+        return a.cardData.composer.localeCompare(b.cardData.composer, locale);
       default:
         return a.createdAt.getTime() - b.createdAt.getTime();
     }
@@ -302,21 +339,21 @@ export default async function CataloguePage(props: PageProps<"/catalogue">) {
   const activeFilterPills: ActiveFilterPill[] = [
     ...periods.map((value) => ({
       categoryKey: "period" as const,
-      categoryLabel: "Période",
+      categoryLabel: "period",
       value,
-      label: PERIOD_OPTIONS.find((option) => option.value === value)!.label,
+      label: tPeriod(value),
     })),
     ...voicings.map((value) => ({
       categoryKey: "voicing" as const,
-      categoryLabel: "Formation",
+      categoryLabel: "voicing",
       value,
       label: value,
     })),
     ...languages.map((value) => ({
       categoryKey: "language" as const,
-      categoryLabel: "Langue",
+      categoryLabel: "language",
       value,
-      label: getLanguageLabel(value),
+      label: translateWorkLanguage(value),
     })),
   ];
 
@@ -325,15 +362,15 @@ export default async function CataloguePage(props: PageProps<"/catalogue">) {
       <section className="max-w-7xl mx-auto bg-background">
         <Container className="flex flex-col gap-8 pb-12 sm:pb-16 pt-2 sm:pt-6">
           <nav
-            aria-label="Fil d'Ariane"
+            aria-label={t("breadcrumbAriaLabel")}
             className="text-sm text-muted-foreground"
           >
             <Link href="/" className="hover:text-primary">
-              Accueil
+              {t("breadcrumbHome")}
             </Link>
             <span className="mx-2">/</span>
             <span aria-current="page" className="text-foreground">
-              Catalogue
+              {t("title")}
             </span>
           </nav>
 
@@ -344,12 +381,9 @@ export default async function CataloguePage(props: PageProps<"/catalogue">) {
                 playfairDisplay.className,
               )}
             >
-              Catalogue
+              {t("title")}
             </h1>
-            <p className="max-w-2xl text-muted-foreground">
-              Parcourez nos œuvres, écoutez un aperçu gratuit et choisissez le
-              mouvement ou le pupitre qui vous intéresse.
-            </p>
+            <p className="max-w-2xl text-muted-foreground">{t("intro")}</p>
           </div>
 
           {/* Statistiques globales du catalogue, avant filtrage */}
@@ -357,18 +391,22 @@ export default async function CataloguePage(props: PageProps<"/catalogue">) {
             <StatBox
               icon={BookOpen}
               value={String(worksCount)}
-              label="Œuvres disponibles"
+              label={t("statWorksAvailable")}
             />
             <StatBox
               icon={Users2}
               value={String(composers.length)}
-              label="Compositeurs"
+              label={t("statComposers")}
             />
-            <StatBox icon={Music2} value="SATB" label="Formation disponible" />
+            <StatBox
+              icon={Music2}
+              value={t("statVoicingValue")}
+              label={t("statVoicingLabel")}
+            />
             <StatBox
               icon={Headphones}
-              value="Pistes audio"
-              label="Incluses à l'achat"
+              value={t("statAudioValue")}
+              label={t("statAudioLabel")}
             />
           </div>
 
@@ -389,6 +427,7 @@ export default async function CataloguePage(props: PageProps<"/catalogue">) {
                   voicings={voicings}
                   languages={languages}
                   view={view}
+                  locale={locale}
                 />
                 <div className="flex flex-wrap items-center gap-2">
                   <SortSelect value={sort} />
@@ -411,7 +450,7 @@ export default async function CataloguePage(props: PageProps<"/catalogue">) {
 
           {works.length === 0 ? (
             <p className="py-16 text-center text-muted-foreground">
-              Aucune œuvre ne correspond à votre recherche.
+              {t("emptyState")}
             </p>
           ) : view === "grid" ? (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -424,13 +463,23 @@ export default async function CataloguePage(props: PageProps<"/catalogue">) {
               <table className="w-full text-left text-sm">
                 <thead className="border-b border-border bg-secondary/40 text-xs tracking-wide text-muted-foreground uppercase">
                   <tr>
-                    <th className="py-3 pr-4 pl-4 font-medium">Visuel</th>
-                    <th className="py-3 pr-4 font-medium">Titre</th>
-                    <th className="py-3 pr-4 font-medium">Compositeur</th>
-                    <th className="py-3 pr-4 font-medium">Effectif</th>
-                    <th className="py-3 pr-4 font-medium">Mouvements</th>
-                    <th className="py-3 pr-4 font-medium">Prix</th>
-                    <th className="py-3 pr-4 font-medium">Actions</th>
+                    <th className="py-3 pr-4 pl-4 font-medium">
+                      {t("tableVisual")}
+                    </th>
+                    <th className="py-3 pr-4 font-medium">{t("tableTitle")}</th>
+                    <th className="py-3 pr-4 font-medium">
+                      {t("tableComposer")}
+                    </th>
+                    <th className="py-3 pr-4 font-medium">
+                      {t("tableVoicing")}
+                    </th>
+                    <th className="py-3 pr-4 font-medium">
+                      {t("tableMovements")}
+                    </th>
+                    <th className="py-3 pr-4 font-medium">{t("tablePrice")}</th>
+                    <th className="py-3 pr-4 font-medium">
+                      {t("tableActions")}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -444,8 +493,7 @@ export default async function CataloguePage(props: PageProps<"/catalogue">) {
 
           <div className="flex flex-col items-center gap-3">
             <p className="text-sm text-muted-foreground">
-              {works.length}{" "}
-              {works.length > 1 ? "œuvres affichées" : "œuvre affichée"}
+              {t("resultsCount", { count: works.length })}
             </p>
             {/* TODO : pagination non nécessaire pour l'instant — une seule
                 page (4 œuvres au catalogue). Emplacement réservé, une seule
@@ -455,7 +503,7 @@ export default async function CataloguePage(props: PageProps<"/catalogue">) {
                 variant="outline"
                 size="icon"
                 disabled
-                aria-label="Page précédente"
+                aria-label={t("paginationPreviousAriaLabel")}
                 className="rounded-full"
               >
                 <ChevronLeft className="size-4" />
@@ -473,7 +521,7 @@ export default async function CataloguePage(props: PageProps<"/catalogue">) {
                 variant="outline"
                 size="icon"
                 disabled
-                aria-label="Page suivante"
+                aria-label={t("paginationNextAriaLabel")}
                 className="rounded-full"
               >
                 <ChevronRight className="size-4" />
@@ -492,10 +540,7 @@ export default async function CataloguePage(props: PageProps<"/catalogue">) {
                 aria-hidden="true"
               />
               <p className="text-sm text-muted-foreground">
-                Chaque œuvre est disponible par mouvement ou en intégralité,
-                pour un seul pupitre ou pour l&apos;ensemble des voix. Après
-                votre achat, retrouvez vos pistes audio dans votre bibliothèque
-                personnelle.
+                {t("infoBannerText")}
               </p>
             </div>
             <Link
@@ -505,7 +550,7 @@ export default async function CataloguePage(props: PageProps<"/catalogue">) {
                 "shrink-0 rounded-full",
               )}
             >
-              En savoir plus
+              {tCommon("learnMore")}
             </Link>
           </div>
         </Container>

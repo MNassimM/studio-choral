@@ -111,6 +111,44 @@ async function seedWorksAndMovements(): Promise<WorkAndMovementIds> {
   return { workIdBySlug, movementIdByKey };
 }
 
+async function seedWorkTranslations(workIdBySlug: Map<string, string>) {
+  console.log("Traductions d'œuvres (WorkTranslation) :");
+
+  for (const work of DEMO_CATALOG) {
+    const workId = workIdBySlug.get(work.slug);
+    if (!workId) {
+      throw new Error(
+        `Œuvre introuvable pour ses traductions ("${work.slug}")`,
+      );
+    }
+
+    for (const translation of work.translations) {
+      const data = {
+        workId,
+        locale: translation.locale,
+        slug: translation.slug,
+        title: translation.title,
+        shortDescription: translation.shortDescription,
+        description: translation.description,
+      };
+
+      const existing = await prisma.workTranslation.findUnique({
+        where: { workId_locale: { workId, locale: translation.locale } },
+      });
+
+      await prisma.workTranslation.upsert({
+        where: { workId_locale: { workId, locale: translation.locale } },
+        update: data,
+        create: data,
+      });
+
+      console.log(
+        `  ${existing ? "= déjà présente" : "+ créée"} : ${work.slug} (${translation.locale})`,
+      );
+    }
+  }
+}
+
 async function seedAudioFiles(
   movementIdByKey: Map<string, string>,
   voiceIdByCode: Map<string, string>,
@@ -295,6 +333,7 @@ async function seedProducts(
 async function main() {
   const voiceIdByCode = await seedVoices();
   const { workIdBySlug, movementIdByKey } = await seedWorksAndMovements();
+  await seedWorkTranslations(workIdBySlug);
   await seedAudioFiles(movementIdByKey, voiceIdByCode);
   await seedProducts(workIdBySlug, movementIdByKey, voiceIdByCode);
 }

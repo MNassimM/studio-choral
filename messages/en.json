@@ -1,0 +1,192 @@
+{
+  "metadata": {
+    "title": "Butterfly Studio Choral",
+    "description": "The studio for demanding choirs."
+  },
+  "nav": {
+    "catalogue": "Catalogue",
+    "howItWorks": "How it works"
+  },
+  "header": {
+    "myAccount": "My account",
+    "cartAriaLabel": "View cart"
+  },
+  "mobileNav": {
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "cart": "Cart",
+    "myAccount": "My account"
+  },
+  "footer": {
+    "tagline": "The studio for demanding choirs",
+    "navigationHeading": "Navigation",
+    "informationsHeading": "Information",
+    "followUsHeading": "Follow us",
+    "linkLibrary": "Library",
+    "linkAboutUs": "About us",
+    "linkTerms": "Terms and conditions",
+    "linkLegal": "Legal notice",
+    "linkPrivacy": "Privacy policy",
+    "copyright": "© {year} Butterfly Studio Choral - All rights reserved"
+  },
+  "common": {
+    "learnMore": "Learn more"
+  },
+  "home": {
+    "heroTitle": "A rehearsal library designed for choristers",
+    "heroDescription": "Butterfly Studio Choral provides rehearsal recordings for every work in the catalogue. Each voice part, soprano, alto, tenor, bass, has its own tracks, so every chorister can work on their part with precision before joining the ensemble.",
+    "viewCatalogue": "View catalogue",
+    "searchPlaceholder": "Search for a work",
+    "searchAriaLabel": "Search",
+    "howItWorksEyebrow": "How it works, at a glance",
+    "stepBrowseLabel": "Browse the catalogue",
+    "stepBrowseDescription": "Discover our works sorted by composer and voicing.",
+    "stepListenLabel": "Listen and rehearse",
+    "stepListenDescription": "Isolate each voice part to work on your voice independently.",
+    "stepSingLabel": "Sing with confidence",
+    "stepSingDescription": "Progress at your own pace, alone or with your choir.",
+    "viewFullCatalogue": "View the full catalogue"
+  },
+  "catalogue": {
+    "metaTitle": "Catalogue - Butterfly Studio Choral",
+    "metaDescription": "Browse Butterfly Studio Choral's catalogue of scores and voice-part rehearsal tracks.",
+    "breadcrumbAriaLabel": "Breadcrumb",
+    "breadcrumbHome": "Home",
+    "title": "Catalogue",
+    "intro": "Browse our works, listen to a free preview and choose the movement or voice part you're interested in.",
+    "statWorksAvailable": "Works available",
+    "statComposers": "Composers",
+    "statVoicingValue": "SATB",
+    "statVoicingLabel": "Voicing available",
+    "statAudioValue": "Audio tracks",
+    "statAudioLabel": "Included with purchase",
+    "searchPlaceholder": "Search for a work or composer",
+    "searchAriaLabel": "Search",
+    "sortAriaLabel": "Sort works",
+    "emptyState": "No work matches your search.",
+    "tableVisual": "Visual",
+    "tableTitle": "Title",
+    "tableComposer": "Composer",
+    "tableVoicing": "Voicing",
+    "tableMovements": "Movements",
+    "tablePrice": "Price",
+    "tableActions": "Actions",
+    "resultsCount": "{count, plural, one {# work shown} other {# works shown}}",
+    "paginationPreviousAriaLabel": "Previous page",
+    "paginationNextAriaLabel": "Next page",
+    "infoBannerText": "Every work is available by movement or in full, for a single voice part or for all voices. After your purchase, find your audio tracks in your personal library.",
+    "filters": {
+      "period": "Period",
+      "voicing": "Voicing",
+      "language": "Language",
+      "button": "Filters",
+      "clear": "Clear filters",
+      "viewResults": "View results",
+      "activeLabel": "Active filters:",
+      "resetAll": "Reset all",
+      "removeAriaLabel": "Remove filter {category}: {value}"
+    },
+    "viewToggle": {
+      "groupAriaLabel": "Display mode",
+      "gridAriaLabel": "Grid view",
+      "listAriaLabel": "Table view"
+    }
+  },
+  "workCard": {
+    "inclusionsLine": "Free preview · Packs by voice part",
+    "fromPrice": "From",
+    "fullPack": "Full pack:",
+    "viewWork": "View work",
+    "viewWorkShort": "View",
+    "addToCart": "Add to cart",
+    "discover": "Discover",
+    "movementsCount": "{count, plural, one {# movement} other {# movements}}"
+  },
+  "howItWorks": {
+    "metaTitle": "How it works — Butterfly Studio Choral",
+    "metaDescription": "Discover how to browse the catalogue, choose your offer and rehearse with Butterfly Studio Choral's voice-part audio tracks.",
+    "breadcrumbCurrent": "How it works",
+    "heroTitle": "How it works",
+    "heroDescription": "Access your works, listen, rehearse and progress with complete ease.",
+    "section1Heading": "1. Choose your work",
+    "browseCatalogTitle": "Browse our catalogue",
+    "browseCatalogDescription": "Discover works sorted by style, language, level and voicing.",
+    "listenExtractsTitle": "Listen to extracts",
+    "listenExtractsDescription": "Every work offers audio extracts to help you make your choice.",
+    "chooseOfferTitle": "Choose your offer",
+    "chooseOfferDescription": "Select the voice part(s) you want, or opt for the full pack.",
+    "checkoutTitle": "Add to cart and check out",
+    "checkoutDescription": "100% secure payment by card.",
+    "section2Heading": "2. Access your library",
+    "libraryImageAlt": "Preview of the personal library",
+    "findWorksTitle": "Find all your works",
+    "findWorksDescription": "Your purchases are available in your personal library, at any time.",
+    "downloadFilesTitle": "Download your files",
+    "downloadFilesDescription": "Access every audio track included in your offer and download them as many times as you like.",
+    "listenOnlineTitle": "Listen online",
+    "listenOnlineDescription": "Use our built-in player to rehearse wherever you are.",
+    "section3Heading": "3. Rehearse and progress",
+    "customizeTitle": "Personalise your listening",
+    "customizeDescription": "Adjust volumes, isolate your voice part, slow down the tempo and loop difficult passages.",
+    "workEfficientlyTitle": "Work efficiently",
+    "workEfficientlyDescription": "Our tools are designed to help you rehearse more calmly and efficiently.",
+    "progressTitle": "Progress at your own pace",
+    "progressDescription": "Professional-quality recordings to support you in your practice.",
+    "pleasureTitle": "The joy of singing",
+    "pleasureDescription": "Enjoy singing along with inspiring, immersive recordings.",
+    "secureAccessTitle": "Secure access",
+    "secureAccessDescription": "Your data and purchases are protected.",
+    "unlimitedDownloadsTitle": "Unlimited downloads",
+    "unlimitedDownloadsDescription": "Download your files as many times as you like.",
+    "updatesIncludedTitle": "Updates included",
+    "updatesIncludedDescription": "New versions of the works are included free of charge.",
+    "needHelpTitle": "Need help?",
+    "needHelpDescription": "Our team is here to support you.",
+    "ctaTitle": "Ready to get started?",
+    "ctaDescription": "Explore our catalogue and find the work that moves you.",
+    "ctaButton": "Discover the catalogue"
+  },
+  "sortOptions": {
+    "featured": "Featured",
+    "price-asc": "Price: low to high",
+    "price-desc": "Price: high to low",
+    "title-asc": "Title A-Z",
+    "composer-asc": "Composer A-Z"
+  },
+  "periodOptions": {
+    "MEDIEVAL": "Medieval",
+    "RENAISSANCE": "Renaissance",
+    "BAROQUE": "Baroque",
+    "CLASSICAL": "Classical",
+    "ROMANTIC": "Romantic",
+    "MODERN": "Modern",
+    "CONTEMPORARY": "Contemporary"
+  },
+  "workLanguage": {
+    "la": "Latin",
+    "fr": "French",
+    "de": "German",
+    "en": "English",
+    "it": "Italian"
+  },
+  "voiceLabels": {
+    "SOPRANO": "Soprano",
+    "ALTO": "Alto",
+    "TENOR": "Tenor",
+    "BASS": "Bass"
+  },
+  "product": {
+    "allVoices": "All voices",
+    "nameTemplate": "{voice} — {target}"
+  },
+  "languageSwitcher": {
+    "ariaLabel": "Choose language",
+    "fr": "Français",
+    "en": "English"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "The page you're looking for doesn't exist or has been moved.",
+    "backHome": "Back to home"
+  }
+}

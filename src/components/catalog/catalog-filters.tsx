@@ -8,19 +8,22 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { ChevronDown, RotateCcw, SlidersHorizontal } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 type FilterCategoryKey = "period" | "voicing" | "language";
 
 type FilterCategory = {
   key: FilterCategoryKey;
-  label: string;
+  /** Clé de message dans catalogue.filters, ex. "period" -> catalogue.filters.period. */
+  label: "period" | "voicing" | "language";
   options: { value: string; label: string }[];
 };
 
@@ -42,7 +45,7 @@ function useFiltersContext(): FiltersContextValue {
   const ctx = useContext(FiltersContext);
   if (!ctx) {
     throw new Error(
-      "CatalogFiltersButton doit être utilisé à l'intérieur de CatalogFiltersPanel",
+      "CatalogFiltersButton must be used inside CatalogFiltersPanel",
     );
   }
   return ctx;
@@ -73,6 +76,7 @@ function CatalogFiltersPanel({
 }: CatalogFiltersPanelProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const t = useTranslations("catalogue.filters");
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<DraftState>(() => ({
     period: new Set(activePeriods),
@@ -119,17 +123,18 @@ function CatalogFiltersPanel({
   }
 
   function applyAndClose(next: DraftState) {
-    const params = new URLSearchParams(searchParams.toString());
+    const query: Record<string, string> = {};
+    for (const [key, value] of searchParams.entries()) {
+      if (key === "period" || key === "voicing" || key === "language") continue;
+      query[key] = value;
+    }
     for (const category of categories) {
       const values = [...next[category.key]];
       if (values.length > 0) {
-        params.set(category.key, values.join(","));
-      } else {
-        params.delete(category.key);
+        query[category.key] = values.join(",");
       }
     }
-    const query = params.toString();
-    router.push(query ? `/catalogue?${query}` : "/catalogue");
+    router.push({ pathname: "/catalogue", query });
     setOpen(false);
   }
 
@@ -141,7 +146,7 @@ function CatalogFiltersPanel({
       <div ref={wrapperRef} className="relative">
         {children}
         {open ? (
-          <div className="absolute top-full z-20 mt-2 rounded-2xl border border-border bg-background p-6 shadow-lg right-0">
+          <div className="absolute top-full right-0 z-20 mt-2 max-w-3xl rounded-2xl border border-border bg-background p-6 shadow-lg">
             <div className="grid grid-cols-1 divide-y divide-border sm:grid-cols-3 sm:divide-x sm:divide-y-0">
               {categories.map((category) => (
                 <div
@@ -149,7 +154,7 @@ function CatalogFiltersPanel({
                   className="flex flex-col gap-3 py-5 first:pt-0 last:pb-0 sm:px-6 sm:py-0 sm:first:pl-0 sm:last:pr-0"
                 >
                   <span className="text-sm font-semibold">
-                    {category.label}
+                    {t(category.label)}
                   </span>
                   <div className="flex flex-col gap-2.5">
                     {category.options.map((option) => (
@@ -183,14 +188,14 @@ function CatalogFiltersPanel({
                 }}
               >
                 <RotateCcw className="size-4" />
-                Effacer les filtres
+                {t("clear")}
               </Button>
               <Button
                 type="button"
                 className="rounded-full"
                 onClick={() => applyAndClose(draft)}
               >
-                Voir les résultats
+                {t("viewResults")}
               </Button>
             </div>
           </div>
@@ -206,6 +211,7 @@ function CatalogFiltersPanel({
  */
 function CatalogFiltersButton() {
   const { open, setOpen, activeCount } = useFiltersContext();
+  const t = useTranslations("catalogue.filters");
 
   return (
     <button
@@ -219,7 +225,7 @@ function CatalogFiltersButton() {
       )}
     >
       <SlidersHorizontal className="size-4" aria-hidden="true" />
-      Filtres
+      {t("button")}
       {activeCount > 0 ? (
         <Badge variant="secondary" className="px-1.5 sm:hidden">
           {activeCount}

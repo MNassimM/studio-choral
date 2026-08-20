@@ -1,10 +1,8 @@
-import Link from "next/link";
+import { getTranslations, getFormatter } from "next-intl/server";
 import { Playfair_Display } from "next/font/google";
 import { ChevronRight, Headphones, Music2, ShoppingCart } from "lucide-react";
 
 import type { WorkCardData } from "@/lib/catalog/work-card-data";
-import { formatPriceCents } from "@/lib/products/format-price";
-import { PERIOD_OPTIONS } from "@/components/catalog/catalog-options";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -14,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 // Police serif locale à ce composant, pour les titres d'œuvre — cohérente
@@ -46,7 +45,15 @@ type WorkCardProps = {
   className?: string;
 };
 
-function WorkCard({ work, variant = "default", className }: WorkCardProps) {
+async function WorkCard({
+  work,
+  variant = "default",
+  className,
+}: WorkCardProps) {
+  const t = await getTranslations("workCard");
+  const tPeriod = await getTranslations("periodOptions");
+  const format = await getFormatter();
+
   if (variant === "compact") {
     return (
       <Card className={cn("overflow-hidden pt-0", className)}>
@@ -69,10 +76,10 @@ function WorkCard({ work, variant = "default", className }: WorkCardProps) {
             </p>
           ) : null}
           <Link
-            href={`/works/${work.slug}`}
+            href={{ pathname: "/works/[slug]", params: { slug: work.slug } }}
             className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
           >
-            Découvrir
+            {t("discover")}
             <ChevronRight className="size-4" />
           </Link>
         </CardContent>
@@ -97,57 +104,60 @@ function WorkCard({ work, variant = "default", className }: WorkCardProps) {
             <Badge variant="outline">{work.catalogueRef}</Badge>
           ) : null}
           {work.period ? (
-            <Badge variant="secondary">
-              {
-                PERIOD_OPTIONS.find((option) => option.value === work.period)
-                  ?.label
-              }
-            </Badge>
+            <Badge variant="secondary">{tPeriod(work.period)}</Badge>
           ) : null}
           {work.voicing ? (
             <Badge variant="secondary">{work.voicing}</Badge>
           ) : null}
           {work.movementsCount > 1 ? (
-            <Badge variant="secondary">{work.movementsCount} mouvements</Badge>
+            <Badge variant="secondary">
+              {t("movementsCount", { count: work.movementsCount })}
+            </Badge>
           ) : null}
         </div>
 
         <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
           <Headphones className="size-4 shrink-0" aria-hidden="true" />
-          Aperçu gratuit · Packs par voix
+          {t("inclusionsLine")}
         </div>
 
         <div className="mt-auto flex flex-col gap-0.5 border-t border-border pt-3">
           {work.fromPriceCents !== null ? (
             <p className="text-sm text-muted-foreground">
-              À partir de{" "}
+              {t("fromPrice")}{" "}
               <span className="font-semibold text-foreground">
-                {formatPriceCents(work.fromPriceCents, work.currency)}
+                {format.number(work.fromPriceCents / 100, {
+                  style: "currency",
+                  currency: work.currency,
+                })}
               </span>
             </p>
           ) : null}
           {work.fullPackPriceCents !== null ? (
             <p className="text-xs text-muted-foreground">
-              Pack complet :{" "}
-              {formatPriceCents(work.fullPackPriceCents, work.currency)}
+              {t("fullPack")}{" "}
+              {format.number(work.fullPackPriceCents / 100, {
+                style: "currency",
+                currency: work.currency,
+              })}
             </p>
           ) : null}
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row">
           <Link
-            href={`/works/${work.slug}`}
+            href={{ pathname: "/works/[slug]", params: { slug: work.slug } }}
             className={cn(
               buttonVariants({ variant: "outline" }),
               "flex-1 rounded-full",
             )}
           >
-            Voir l&apos;œuvre
+            {t("viewWork")}
           </Link>
           {/* TODO : panier non implémenté */}
           <Button disabled className="flex-1 gap-1.5 rounded-full">
             <ShoppingCart className="size-4" />
-            Ajouter au panier
+            {t("addToCart")}
           </Button>
         </div>
       </CardContent>

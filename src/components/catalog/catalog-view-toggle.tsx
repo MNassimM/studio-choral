@@ -1,7 +1,8 @@
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { LayoutGrid, List } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 type CatalogViewToggleProps = {
@@ -10,20 +11,19 @@ type CatalogViewToggleProps = {
   currentParams: Record<string, string | string[] | undefined>;
 };
 
-function buildViewHref(
+function buildViewQuery(
   currentParams: Record<string, string | string[] | undefined>,
   view: "grid" | "list",
-): string {
-  const params = new URLSearchParams();
+): Record<string, string> {
+  const query: Record<string, string> = {};
   for (const [key, value] of Object.entries(currentParams)) {
     if (key === "view" || value === undefined) continue;
-    params.set(key, Array.isArray(value) ? value[0] : value);
+    query[key] = Array.isArray(value) ? value[0] : value;
   }
   if (view === "list") {
-    params.set("view", "list");
+    query.view = "list";
   }
-  const query = params.toString();
-  return query ? `/catalogue?${query}` : "/catalogue";
+  return query;
 }
 
 /**
@@ -32,16 +32,24 @@ function buildViewHref(
  * demande aucun JavaScript, cohérent avec le reste de la page (recherche,
  * tri, filtre reposent déjà tous sur l'URL).
  */
-function CatalogViewToggle({ view, currentParams }: CatalogViewToggleProps) {
+async function CatalogViewToggle({
+  view,
+  currentParams,
+}: CatalogViewToggleProps) {
+  const t = await getTranslations("catalogue.viewToggle");
+
   return (
     <div
       role="group"
-      aria-label="Mode d'affichage"
+      aria-label={t("groupAriaLabel")}
       className="inline-flex items-center gap-1 rounded-full border border-border p-1"
     >
       <Link
-        href={buildViewHref(currentParams, "grid")}
-        aria-label="Affichage en grille"
+        href={{
+          pathname: "/catalogue",
+          query: buildViewQuery(currentParams, "grid"),
+        }}
+        aria-label={t("gridAriaLabel")}
         aria-current={view === "grid" ? "true" : undefined}
         className={cn(
           buttonVariants({
@@ -54,8 +62,11 @@ function CatalogViewToggle({ view, currentParams }: CatalogViewToggleProps) {
         <LayoutGrid className="size-4" />
       </Link>
       <Link
-        href={buildViewHref(currentParams, "list")}
-        aria-label="Affichage en tableau"
+        href={{
+          pathname: "/catalogue",
+          query: buildViewQuery(currentParams, "list"),
+        }}
+        aria-label={t("listAriaLabel")}
         aria-current={view === "list" ? "true" : undefined}
         className={cn(
           buttonVariants({

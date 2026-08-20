@@ -1,15 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Menu, ShoppingBag, UserRound, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Link } from "@/i18n/navigation";
 import { mainNavItems } from "@/components/layout/main-nav";
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
 
 function MobileNav() {
   const [open, setOpen] = useState(false);
+  const tNav = useTranslations("nav");
+  const t = useTranslations("mobileNav");
 
   return (
     <div className="md:hidden">
@@ -17,7 +21,7 @@ function MobileNav() {
         type="button"
         variant="ghost"
         size="icon"
-        aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
+        aria-label={open ? t("closeMenu") : t("openMenu")}
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
       >
@@ -34,7 +38,7 @@ function MobileNav() {
                 onClick={() => setOpen(false)}
                 className="rounded-md px-3 py-2.5 text-sm font-medium text-foreground/85 transition-colors hover:bg-muted hover:text-primary"
               >
-                {item.label}
+                {tNav(item.key)}
               </Link>
             ))}
             <Separator className="my-2" />
@@ -44,7 +48,7 @@ function MobileNav() {
               className="flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-foreground/85 transition-colors hover:bg-muted hover:text-primary"
             >
               <ShoppingBag className="size-4" />
-              Panier
+              {t("cart")}
             </Link>
             <Link
               href="/compte"
@@ -52,8 +56,12 @@ function MobileNav() {
               className="flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-foreground/85 transition-colors hover:bg-muted hover:text-primary"
             >
               <UserRound className="size-4" />
-              Mon espace
+              {t("myAccount")}
             </Link>
+            <Separator className="my-2" />
+            <div className="px-3 py-2">
+              <LanguageSwitcher />
+            </div>
           </nav>
         </div>
       ) : null}

@@ -1,0 +1,192 @@
+{
+  "metadata": {
+    "title": "Butterfly Studio Choral",
+    "description": "Le studio des chœurs exigeants."
+  },
+  "nav": {
+    "catalogue": "Catalogue",
+    "howItWorks": "Comment ça marche"
+  },
+  "header": {
+    "myAccount": "Mon espace",
+    "cartAriaLabel": "Voir le panier"
+  },
+  "mobileNav": {
+    "openMenu": "Ouvrir le menu",
+    "closeMenu": "Fermer le menu",
+    "cart": "Panier",
+    "myAccount": "Mon espace"
+  },
+  "footer": {
+    "tagline": "Le studio des chœurs exigeants",
+    "navigationHeading": "Navigation",
+    "informationsHeading": "Informations",
+    "followUsHeading": "Nous suivre",
+    "linkLibrary": "Bibliothèque",
+    "linkAboutUs": "À propos de nous",
+    "linkTerms": "Conditions générales",
+    "linkLegal": "Mentions légales",
+    "linkPrivacy": "Politique de confidentialité",
+    "copyright": "© {year} Butterfly Studio Choral - Tous droits réservés"
+  },
+  "common": {
+    "learnMore": "En savoir plus"
+  },
+  "home": {
+    "heroTitle": "Une bibliothèque de répétition pensée pour les choristes",
+    "heroDescription": "Butterfly Studio Choral fournit enregistrements de répétition pour chaque œuvre du catalogue. Chaque pupitre, soprano, alto, ténor, basse, dispose de ses propres pistes, pour que chaque choriste puisse travailler sa voix avec précision avant de rejoindre l'ensemble.",
+    "viewCatalogue": "Voir catalogue",
+    "searchPlaceholder": "Rechercher une œuvre",
+    "searchAriaLabel": "Rechercher",
+    "howItWorksEyebrow": "Aperçu du fonctionnement",
+    "stepBrowseLabel": "Parcourez le catalogue",
+    "stepBrowseDescription": "Découvrez nos œuvres classées par compositeur et effectif vocal.",
+    "stepListenLabel": "Écoutez et répétez",
+    "stepListenDescription": "Isolez chaque pupitre pour travailler votre voix en toute autonomie.",
+    "stepSingLabel": "Chantez avec assurance",
+    "stepSingDescription": "Progressez à votre rythme, seul ou avec votre chœur.",
+    "viewFullCatalogue": "Voir tout le catalogue"
+  },
+  "catalogue": {
+    "metaTitle": "Catalogue - Butterfly Studio Choral",
+    "metaDescription": "Parcourez le catalogue de partitions et de pistes de répétition par pupitre de Butterfly Studio Choral.",
+    "breadcrumbAriaLabel": "Fil d'Ariane",
+    "breadcrumbHome": "Accueil",
+    "title": "Catalogue",
+    "intro": "Parcourez nos œuvres, écoutez un aperçu gratuit et choisissez le mouvement ou le pupitre qui vous intéresse.",
+    "statWorksAvailable": "Œuvres disponibles",
+    "statComposers": "Compositeurs",
+    "statVoicingValue": "SATB",
+    "statVoicingLabel": "Formation disponible",
+    "statAudioValue": "Pistes audio",
+    "statAudioLabel": "Incluses à l'achat",
+    "searchPlaceholder": "Rechercher une œuvre ou un compositeur",
+    "searchAriaLabel": "Rechercher",
+    "sortAriaLabel": "Trier les œuvres",
+    "emptyState": "Aucune œuvre ne correspond à votre recherche.",
+    "tableVisual": "Visuel",
+    "tableTitle": "Titre",
+    "tableComposer": "Compositeur",
+    "tableVoicing": "Effectif",
+    "tableMovements": "Mouvements",
+    "tablePrice": "Prix",
+    "tableActions": "Actions",
+    "resultsCount": "{count, plural, one {# œuvre affichée} other {# œuvres affichées}}",
+    "paginationPreviousAriaLabel": "Page précédente",
+    "paginationNextAriaLabel": "Page suivante",
+    "infoBannerText": "Chaque œuvre est disponible par mouvement ou en intégralité, pour un seul pupitre ou pour l'ensemble des voix. Après votre achat, retrouvez vos pistes audio dans votre bibliothèque personnelle.",
+    "filters": {
+      "period": "Période",
+      "voicing": "Formation",
+      "language": "Langue",
+      "button": "Filtres",
+      "clear": "Effacer les filtres",
+      "viewResults": "Voir les résultats",
+      "activeLabel": "Filtres actifs :",
+      "resetAll": "Tout réinitialiser",
+      "removeAriaLabel": "Retirer le filtre {category} : {value}"
+    },
+    "viewToggle": {
+      "groupAriaLabel": "Mode d'affichage",
+      "gridAriaLabel": "Affichage en grille",
+      "listAriaLabel": "Affichage en tableau"
+    }
+  },
+  "workCard": {
+    "inclusionsLine": "Aperçu gratuit · Packs par voix",
+    "fromPrice": "À partir de",
+    "fullPack": "Pack complet :",
+    "viewWork": "Voir l'œuvre",
+    "viewWorkShort": "Voir",
+    "addToCart": "Ajouter au panier",
+    "discover": "Découvrir",
+    "movementsCount": "{count, plural, one {# mouvement} other {# mouvements}}"
+  },
+  "howItWorks": {
+    "metaTitle": "Comment ça marche — Butterfly Studio Choral",
+    "metaDescription": "Découvrez comment parcourir le catalogue, choisir votre offre et répéter avec les pistes audio par pupitre de Butterfly Studio Choral.",
+    "breadcrumbCurrent": "Comment ça marche",
+    "heroTitle": "Comment ça marche",
+    "heroDescription": "Accédez à vos œuvres, écoutez, répétez et progressez en toute simplicité.",
+    "section1Heading": "1. Choisissez votre œuvre",
+    "browseCatalogTitle": "Parcourez notre catalogue",
+    "browseCatalogDescription": "Découvrez des œuvres classées par style, langue, niveau et effectif.",
+    "listenExtractsTitle": "Écoutez des extraits",
+    "listenExtractsDescription": "Chaque œuvre propose des extraits audio pour vous aider à faire votre choix.",
+    "chooseOfferTitle": "Choisissez votre offre",
+    "chooseOfferDescription": "Sélectionnez la ou les voix souhaitées ou optez pour le pack complet.",
+    "checkoutTitle": "Ajoutez au panier et validez votre commande",
+    "checkoutDescription": "Paiement 100 % sécurisé par carte bancaire.",
+    "section2Heading": "2. Accédez à votre bibliothèque",
+    "libraryImageAlt": "Aperçu de la bibliothèque personnelle",
+    "findWorksTitle": "Retrouvez toutes vos œuvres",
+    "findWorksDescription": "Vos achats sont disponibles dans votre bibliothèque personnelle, à tout moment.",
+    "downloadFilesTitle": "Téléchargez vos fichiers",
+    "downloadFilesDescription": "Accédez à tous les audios inclus dans votre offre et téléchargez-les autant de fois que vous voulez.",
+    "listenOnlineTitle": "Écoutez en ligne",
+    "listenOnlineDescription": "Utilisez notre lecteur intégré pour répéter où que vous soyez.",
+    "section3Heading": "3. Répétez et progressez",
+    "customizeTitle": "Personnalisez votre écoute",
+    "customizeDescription": "Réglez les volumes, isolez votre voix, ralentissez le tempo et bouclez les passages difficiles.",
+    "workEfficientlyTitle": "Travaillez efficacement",
+    "workEfficientlyDescription": "Nos outils sont pensés pour vous aider à répéter plus sereinement et efficacement.",
+    "progressTitle": "Progressez à votre rythme",
+    "progressDescription": "Des enregistrements de qualité professionnelle pour vous accompagner dans votre pratique.",
+    "pleasureTitle": "Le plaisir de chanter",
+    "pleasureDescription": "Prenez du plaisir en chantant avec des enregistrements inspirants et immersifs.",
+    "secureAccessTitle": "Accès sécurisé",
+    "secureAccessDescription": "Vos données et vos achats sont protégés.",
+    "unlimitedDownloadsTitle": "Téléchargements illimités",
+    "unlimitedDownloadsDescription": "Téléchargez vos fichiers autant de fois que vous voulez.",
+    "updatesIncludedTitle": "Mises à jour incluses",
+    "updatesIncludedDescription": "Les nouvelles versions des œuvres sont incluses gratuitement.",
+    "needHelpTitle": "Besoin d'aide ?",
+    "needHelpDescription": "Notre équipe est là pour vous accompagner.",
+    "ctaTitle": "Prêt à commencer ?",
+    "ctaDescription": "Explorez notre catalogue et trouvez l'œuvre qui vous fera vibrer.",
+    "ctaButton": "Découvrir le catalogue"
+  },
+  "sortOptions": {
+    "featured": "Sélection",
+    "price-asc": "Prix croissant",
+    "price-desc": "Prix décroissant",
+    "title-asc": "Titre A-Z",
+    "composer-asc": "Compositeur A-Z"
+  },
+  "periodOptions": {
+    "MEDIEVAL": "Médiéval",
+    "RENAISSANCE": "Renaissance",
+    "BAROQUE": "Baroque",
+    "CLASSICAL": "Classique",
+    "ROMANTIC": "Romantique",
+    "MODERN": "Moderne",
+    "CONTEMPORARY": "Contemporain"
+  },
+  "workLanguage": {
+    "la": "Latin",
+    "fr": "Français",
+    "de": "Allemand",
+    "en": "Anglais",
+    "it": "Italien"
+  },
+  "voiceLabels": {
+    "SOPRANO": "Soprano",
+    "ALTO": "Alto",
+    "TENOR": "Ténor",
+    "BASS": "Basse"
+  },
+  "product": {
+    "allVoices": "Toutes les voix",
+    "nameTemplate": "{voice} — {target}"
+  },
+  "languageSwitcher": {
+    "ariaLabel": "Choisir la langue",
+    "fr": "Français",
+    "en": "English"
+  },
+  "notFound": {
+    "title": "Page introuvable",
+    "description": "La page que vous cherchez n'existe pas ou a été déplacée.",
+    "backHome": "Retour à l'accueil"
+  }
+}

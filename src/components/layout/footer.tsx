@@ -1,22 +1,27 @@
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { Mail } from "lucide-react";
 
 import { Container } from "@/components/layout/container";
 import { Logo } from "@/components/layout/logo";
 import { Separator } from "@/components/ui/separator";
+import { Link } from "@/i18n/navigation";
+import { mainNavItems } from "@/components/layout/main-nav";
 
+// footer.linkLibrary : seul lien du footer qui n'est pas déjà dans
+// mainNavItems (catalogue/comment ça marche) — d'où sa clé "library" propre,
+// pendant que les deux autres réutilisent nav.* pour ne pas dupliquer un
+// libellé identique dans deux namespaces.
 const footerNavItems = [
-  { label: "Catalogue", href: "/catalogue" },
-  { label: "Bibliothèque", href: "/bibliotheque" },
-  { label: "Comment ça marche", href: "/comment-ca-marche" },
-];
+  ...mainNavItems,
+  { key: "library", href: "/bibliotheque" },
+] as const;
 
 const footerInfoItems = [
-  { label: "À propos de nous", href: "/a-propos" },
-  { label: "Conditions générales", href: "/conditions-generales" },
-  { label: "Mentions légales", href: "/mentions-legales" },
-  { label: "Politique de confidentialité", href: "/confidentialite" },
-];
+  { messageKey: "linkAboutUs", href: "/a-propos" },
+  { messageKey: "linkTerms", href: "/conditions-generales" },
+  { messageKey: "linkLegal", href: "/mentions-legales" },
+  { messageKey: "linkPrivacy", href: "/confidentialite" },
+] as const;
 
 function FacebookIcon({ className }: { className?: string }) {
   return (
@@ -72,6 +77,8 @@ function YoutubeIcon({ className }: { className?: string }) {
   );
 }
 
+// Noms de marque/plateformes : identiques quelle que soit la langue de
+// l'interface, jamais traduits (comme le nom du studio dans logo.tsx).
 const socialLinks = [
   { label: "Facebook", href: "#", Icon: FacebookIcon },
   { label: "Instagram", href: "#", Icon: InstagramIcon },
@@ -83,7 +90,10 @@ const socialLinks = [
   },
 ];
 
-function Footer() {
+async function Footer() {
+  const tNav = await getTranslations("nav");
+  const t = await getTranslations("footer");
+
   return (
     <footer className="border-t border-border bg-background">
       <Container className="py-12 md:py-16">
@@ -91,13 +101,13 @@ function Footer() {
           <div className="flex flex-col gap-3">
             <Logo />
             <p className="max-w-xs text-sm text-muted-foreground">
-              Le studio des chœurs exigeants
+              {t("tagline")}
             </p>
           </div>
 
           <div className="flex flex-col gap-3">
             <h3 className="text-sm font-semibold text-foreground">
-              Navigation
+              {t("navigationHeading")}
             </h3>
             <ul className="flex flex-col gap-2.5">
               {footerNavItems.map((item) => (
@@ -106,7 +116,7 @@ function Footer() {
                     href={item.href}
                     className="text-sm text-muted-foreground transition-colors hover:text-primary"
                   >
-                    {item.label}
+                    {item.key === "library" ? t("linkLibrary") : tNav(item.key)}
                   </Link>
                 </li>
               ))}
@@ -115,7 +125,7 @@ function Footer() {
 
           <div className="flex flex-col gap-3">
             <h3 className="text-sm font-semibold text-foreground">
-              Informations
+              {t("informationsHeading")}
             </h3>
             <ul className="flex flex-col gap-2.5">
               {footerInfoItems.map((item) => (
@@ -124,7 +134,7 @@ function Footer() {
                     href={item.href}
                     className="text-sm text-muted-foreground transition-colors hover:text-primary"
                   >
-                    {item.label}
+                    {t(item.messageKey)}
                   </Link>
                 </li>
               ))}
@@ -133,18 +143,18 @@ function Footer() {
 
           <div className="flex flex-col gap-3">
             <h3 className="text-sm font-semibold text-foreground">
-              Nous suivre
+              {t("followUsHeading")}
             </h3>
             <div className="flex items-center gap-2.5">
               {socialLinks.map(({ label, href, Icon }) => (
-                <Link
+                <a
                   key={label}
                   href={href}
                   aria-label={label}
                   className="flex size-9 items-center justify-center rounded-full border border-border text-foreground/70 transition-colors hover:border-primary hover:text-primary"
                 >
                   <Icon className="size-4" />
-                </Link>
+                </a>
               ))}
             </div>
           </div>
@@ -153,8 +163,7 @@ function Footer() {
         <Separator className="my-8" />
 
         <p className="text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Butterfly Studio Choral - Tous droits
-          réservés
+          {t("copyright", { year: new Date().getFullYear() })}
         </p>
       </Container>
     </footer>

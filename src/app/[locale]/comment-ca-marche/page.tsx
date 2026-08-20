@@ -1,6 +1,7 @@
 import { Fragment } from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import { locale as rootLocale } from "next/root-params";
 import { Playfair_Display } from "next/font/google";
 import {
   AudioWaveform,
@@ -23,6 +24,8 @@ import {
 
 import { Container } from "@/components/layout/container";
 import { buttonVariants } from "@/components/ui/button";
+import { Link, getPathname } from "@/i18n/navigation";
+import { routing, type AppLocale } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
 // Police serif locale à cette page, pour les grands titres éditoriaux — le
@@ -32,116 +35,81 @@ const playfairDisplay = Playfair_Display({
   weight: ["500", "600"],
 });
 
+// Union explicite (pas juste `string`) : nécessaire pour que
+// `${messageKey}Title`/`${messageKey}Description` restent des littéraux de
+// type vérifiables par next-intl plutôt qu'un `string` générique élargi.
+type FeatureMessageKey =
+  | "browseCatalog"
+  | "listenExtracts"
+  | "chooseOffer"
+  | "checkout"
+  | "findWorks"
+  | "downloadFiles"
+  | "listenOnline"
+  | "customize"
+  | "workEfficiently"
+  | "progress"
+  | "pleasure"
+  | "secureAccess"
+  | "unlimitedDownloads"
+  | "updatesIncluded"
+  | "needHelp";
+
 type FeatureItem = {
   icon: LucideIcon;
-  title: string;
-  description: string;
+  // Nommé messageKey (pas "key") : un champ "key" serait intercepté par React
+  // à la place d'être transmis comme prop lors du spread {...item} en JSX.
+  messageKey: FeatureMessageKey;
 };
 
 const CHOOSE_WORK_STEPS: FeatureItem[] = [
-  {
-    icon: BookOpen,
-    title: "Parcourez notre catalogue",
-    description:
-      "Découvrez des œuvres classées par style, langue, niveau et effectif.",
-  },
-  {
-    icon: Headphones,
-    title: "Écoutez des extraits",
-    description:
-      "Chaque œuvre propose des extraits audio pour vous aider à faire votre choix.",
-  },
-  {
-    icon: ShoppingCart,
-    title: "Choisissez votre offre",
-    description:
-      "Sélectionnez la ou les voix souhaitées ou optez pour le pack complet.",
-  },
-  {
-    icon: CreditCard,
-    title: "Ajoutez au panier et validez votre commande",
-    description: "Paiement 100 % sécurisé par carte bancaire.",
-  },
+  { icon: BookOpen, messageKey: "browseCatalog" },
+  { icon: Headphones, messageKey: "listenExtracts" },
+  { icon: ShoppingCart, messageKey: "chooseOffer" },
+  { icon: CreditCard, messageKey: "checkout" },
 ];
 
 const LIBRARY_FEATURES: FeatureItem[] = [
-  {
-    icon: Music2,
-    title: "Retrouvez toutes vos œuvres",
-    description:
-      "Vos achats sont disponibles dans votre bibliothèque personnelle, à tout moment.",
-  },
-  {
-    icon: Download,
-    title: "Téléchargez vos fichiers",
-    description:
-      "Accédez à tous les audios inclus dans votre offre et téléchargez-les autant de fois que vous voulez.",
-  },
-  {
-    icon: Headphones,
-    title: "Écoutez en ligne",
-    description:
-      "Utilisez notre lecteur intégré pour répéter où que vous soyez.",
-  },
+  { icon: Music2, messageKey: "findWorks" },
+  { icon: Download, messageKey: "downloadFiles" },
+  { icon: Headphones, messageKey: "listenOnline" },
 ];
 
 const PRACTICE_FEATURES: FeatureItem[] = [
-  {
-    icon: SlidersVertical,
-    title: "Personnalisez votre écoute",
-    description:
-      "Réglez les volumes, isolez votre voix, ralentissez le tempo et bouclez les passages difficiles.",
-  },
-  {
-    icon: AudioWaveform,
-    title: "Travaillez efficacement",
-    description:
-      "Nos outils sont pensés pour vous aider à répéter plus sereinement et efficacement.",
-  },
-  {
-    icon: BarChart3,
-    title: "Progressez à votre rythme",
-    description:
-      "Des enregistrements de qualité professionnelle pour vous accompagner dans votre pratique.",
-  },
-  {
-    icon: Heart,
-    title: "Le plaisir de chanter",
-    description:
-      "Prenez du plaisir en chantant avec des enregistrements inspirants et immersifs.",
-  },
+  { icon: SlidersVertical, messageKey: "customize" },
+  { icon: AudioWaveform, messageKey: "workEfficiently" },
+  { icon: BarChart3, messageKey: "progress" },
+  { icon: Heart, messageKey: "pleasure" },
 ];
 
 const TRUST_ITEMS: FeatureItem[] = [
-  {
-    icon: Lock,
-    title: "Accès sécurisé",
-    description: "Vos données et vos achats sont protégés.",
-  },
-  {
-    icon: InfinityIcon,
-    title: "Téléchargements illimités",
-    description: "Téléchargez vos fichiers autant de fois que vous voulez.",
-  },
-  {
-    icon: RefreshCw,
-    title: "Mises à jour incluses",
-    description:
-      "Les nouvelles versions des œuvres sont incluses gratuitement.",
-  },
-  {
-    icon: Headset,
-    title: "Besoin d'aide ?",
-    description: "Notre équipe est là pour vous accompagner.",
-  },
+  { icon: Lock, messageKey: "secureAccess" },
+  { icon: InfinityIcon, messageKey: "unlimitedDownloads" },
+  { icon: RefreshCw, messageKey: "updatesIncluded" },
+  { icon: Headset, messageKey: "needHelp" },
 ];
 
 export async function generateMetadata(): Promise<Metadata> {
+  const locale = ((await rootLocale()) ?? routing.defaultLocale) as AppLocale;
+  const t = await getTranslations("howItWorks");
+
+  const languages = Object.fromEntries(
+    routing.locales.map((l) => [
+      l,
+      getPathname({ href: "/comment-ca-marche", locale: l }),
+    ]),
+  );
+
   return {
-    title: "Comment ça marche — Butterfly Studio Choral",
-    description:
-      "Découvrez comment parcourir le catalogue, choisir votre offre et répéter avec les pistes audio par pupitre de Butterfly Studio Choral.",
-    alternates: { canonical: "/comment-ca-marche" },
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+    alternates: {
+      canonical: getPathname({ href: "/comment-ca-marche", locale }),
+      languages: {
+        ...languages,
+        "x-default": languages[routing.defaultLocale],
+      },
+    },
   };
 }
 
@@ -167,27 +135,39 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
   );
 }
 
-function StepCircleItem({ icon: Icon, title, description }: FeatureItem) {
+type HowItWorksTranslator = Awaited<
+  ReturnType<typeof getTranslations<"howItWorks">>
+>;
+
+function StepCircleItem({
+  icon: Icon,
+  messageKey,
+  t,
+}: FeatureItem & { t: HowItWorksTranslator }) {
   return (
     <div className="flex flex-col items-center gap-3 text-center">
       <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-secondary text-primary">
         <Icon className="size-6" aria-hidden="true" />
       </div>
-      <h3 className="font-medium">{title}</h3>
-      <p className="max-w-56 text-sm text-muted-foreground">{description}</p>
+      <h3 className="font-medium">{t(`${messageKey}Title`)}</h3>
+      <p className="max-w-56 text-sm text-muted-foreground">
+        {t(`${messageKey}Description`)}
+      </p>
     </div>
   );
 }
 
-function ChooseWorkSection() {
+async function ChooseWorkSection() {
+  const t = await getTranslations("howItWorks");
+
   return (
     <section className="bg-background">
       <Container className="flex flex-col gap-10 py-16 sm:py-20">
-        <SectionHeading>1. Choisissez votre œuvre</SectionHeading>
+        <SectionHeading>{t("section1Heading")}</SectionHeading>
         <div className="grid grid-cols-1 items-start gap-10 md:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr]">
           {CHOOSE_WORK_STEPS.map((step, index) => (
-            <Fragment key={step.title}>
-              <StepCircleItem {...step} />
+            <Fragment key={step.messageKey}>
+              <StepCircleItem {...step} t={t} />
               {index < CHOOSE_WORK_STEPS.length - 1 ? (
                 <ChevronRight
                   className="mt-5 hidden size-5 shrink-0 text-muted-foreground md:block"
@@ -202,30 +182,38 @@ function ChooseWorkSection() {
   );
 }
 
-function LibraryFeatureRow({ icon: Icon, title, description }: FeatureItem) {
+function LibraryFeatureRow({
+  icon: Icon,
+  messageKey,
+  t,
+}: FeatureItem & { t: HowItWorksTranslator }) {
   return (
     <div className="flex items-start gap-4">
       <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary text-primary">
         <Icon className="size-5" aria-hidden="true" />
       </div>
       <div className="flex flex-col gap-1">
-        <h3 className="font-medium">{title}</h3>
-        <p className="text-sm text-muted-foreground">{description}</p>
+        <h3 className="font-medium">{t(`${messageKey}Title`)}</h3>
+        <p className="text-sm text-muted-foreground">
+          {t(`${messageKey}Description`)}
+        </p>
       </div>
     </div>
   );
 }
 
-function LibrarySection() {
+async function LibrarySection() {
+  const t = await getTranslations("howItWorks");
+
   return (
     <section className="bg-secondary/30">
       <Container className="py-16 sm:py-20">
-        <SectionHeading>2. Accédez à votre bibliothèque</SectionHeading>
+        <SectionHeading>{t("section2Heading")}</SectionHeading>
         <div className="mt-10 grid grid-cols-1 items-center gap-10 md:grid-cols-2">
           <div
             className="flex aspect-[4/3] items-center justify-center rounded-xl border border-border bg-background"
             role="img"
-            aria-label="Aperçu de la bibliothèque personnelle"
+            aria-label={t("libraryImageAlt")}
           >
             {/* TODO : remplacer par une capture réelle de la bibliothèque */}
             <Music2
@@ -235,7 +223,7 @@ function LibrarySection() {
           </div>
           <div className="flex flex-col gap-8">
             {LIBRARY_FEATURES.map((feature) => (
-              <LibraryFeatureRow key={feature.title} {...feature} />
+              <LibraryFeatureRow key={feature.messageKey} {...feature} t={t} />
             ))}
           </div>
         </div>
@@ -244,24 +232,32 @@ function LibrarySection() {
   );
 }
 
-function PracticeFeatureItem({ icon: Icon, title, description }: FeatureItem) {
+function PracticeFeatureItem({
+  icon: Icon,
+  messageKey,
+  t,
+}: FeatureItem & { t: HowItWorksTranslator }) {
   return (
     <div className="flex flex-col items-center gap-3 text-center">
       <Icon className="size-6 text-primary" aria-hidden="true" />
-      <h3 className="font-medium">{title}</h3>
-      <p className="max-w-56 text-sm text-muted-foreground">{description}</p>
+      <h3 className="font-medium">{t(`${messageKey}Title`)}</h3>
+      <p className="max-w-56 text-sm text-muted-foreground">
+        {t(`${messageKey}Description`)}
+      </p>
     </div>
   );
 }
 
-function PracticeSection() {
+async function PracticeSection() {
+  const t = await getTranslations("howItWorks");
+
   return (
     <section className="bg-background">
       <Container className="flex flex-col gap-10 py-16 sm:py-20">
-        <SectionHeading>3. Répétez et progressez</SectionHeading>
+        <SectionHeading>{t("section3Heading")}</SectionHeading>
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
           {PRACTICE_FEATURES.map((feature) => (
-            <PracticeFeatureItem key={feature.title} {...feature} />
+            <PracticeFeatureItem key={feature.messageKey} {...feature} t={t} />
           ))}
         </div>
       </Container>
@@ -269,27 +265,35 @@ function PracticeSection() {
   );
 }
 
-function TrustItem({ icon: Icon, title, description }: FeatureItem) {
+function TrustItem({
+  icon: Icon,
+  messageKey,
+  t,
+}: FeatureItem & { t: HowItWorksTranslator }) {
   return (
     <div className="flex items-start gap-3">
       <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-primary">
         <Icon className="size-4" aria-hidden="true" />
       </div>
       <div className="flex flex-col gap-0.5">
-        <h3 className="text-sm font-medium">{title}</h3>
-        <p className="text-xs text-muted-foreground">{description}</p>
+        <h3 className="text-sm font-medium">{t(`${messageKey}Title`)}</h3>
+        <p className="text-xs text-muted-foreground">
+          {t(`${messageKey}Description`)}
+        </p>
       </div>
     </div>
   );
 }
 
-function TrustSection() {
+async function TrustSection() {
+  const t = await getTranslations("howItWorks");
+
   return (
     <section className="border border-border bg-secondary/30">
       <Container className="py-10">
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {TRUST_ITEMS.map((item) => (
-            <TrustItem key={item.title} {...item} />
+            <TrustItem key={item.messageKey} {...item} t={t} />
           ))}
         </div>
       </Container>
@@ -297,7 +301,9 @@ function TrustSection() {
   );
 }
 
-function CtaSection() {
+async function CtaSection() {
+  const t = await getTranslations("howItWorks");
+
   return (
     <section className="bg-background">
       <Container className="py-16 sm:py-20">
@@ -309,12 +315,9 @@ function CtaSection() {
                 playfairDisplay.className,
               )}
             >
-              Prêt à commencer ?
+              {t("ctaTitle")}
             </h2>
-            <p className="text-muted-foreground">
-              Explorez notre catalogue et trouvez l&apos;œuvre qui vous fera
-              vibrer.
-            </p>
+            <p className="text-muted-foreground">{t("ctaDescription")}</p>
           </div>
           <Link
             href="/catalogue"
@@ -323,7 +326,7 @@ function CtaSection() {
               "shrink-0 gap-1.5 rounded-full px-6",
             )}
           >
-            Découvrir le catalogue
+            {t("ctaButton")}
             <ChevronRight className="size-4" aria-hidden="true" />
           </Link>
         </div>
@@ -332,23 +335,27 @@ function CtaSection() {
   );
 }
 
-export default function CommentCaMarchePage() {
-  return (<>
+export default async function CommentCaMarchePage() {
+  const t = await getTranslations("howItWorks");
+  const tCatalogue = await getTranslations("catalogue");
+
+  return (
+    <>
       <section className="max-w-7xl mx-auto bg-background">
         <Container className="flex flex-col gap-8 pt-2 sm:pt-6">
           <nav
-            aria-label="Fil d'Ariane"
+            aria-label={tCatalogue("breadcrumbAriaLabel")}
             className="text-sm text-muted-foreground"
           >
             <Link href="/" className="hover:text-primary">
-              Accueil
+              {tCatalogue("breadcrumbHome")}
             </Link>
-            <span className="mx-2">-{'>'}</span>
+            <span className="mx-2">-{">"}</span>
             <span aria-current="page" className="text-foreground">
-              Comment ça marche
+              {t("breadcrumbCurrent")}
             </span>
           </nav>
-          </Container>
+        </Container>
       </section>
       <section className="bg-background">
         <Container className="flex flex-col items-center gap-4 py-16 text-center sm:py-20">
@@ -358,12 +365,11 @@ export default function CommentCaMarchePage() {
               playfairDisplay.className,
             )}
           >
-            Comment ça marche
+            {t("heroTitle")}
           </h1>
           <OrnamentalRule />
           <p className="max-w-2xl text-muted-foreground sm:text-lg">
-            Accédez à vos œuvres, écoutez, répétez et progressez en toute
-            simplicité.
+            {t("heroDescription")}
           </p>
         </Container>
       </section>
