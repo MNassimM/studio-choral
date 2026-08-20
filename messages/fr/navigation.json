@@ -24,7 +24,7 @@
     "copyright": "© {year} Butterfly Studio Choral - Tous droits réservés"
   },
   "languageSwitcher": {
-    "ariaLabel": "Choisir la langue",
+    "triggerAriaLabel": "Changer de langue, {language} actuellement sélectionné",
     "fr": "Français",
     "en": "English"
   }

@@ -1,11 +1,20 @@
 "use client";
 
+import { Fragment } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import { Menu } from "@base-ui/react/menu";
+import { ChevronDown } from "lucide-react";
 
 import { Link, usePathname } from "@/i18n/navigation";
-import { routing } from "@/i18n/routing";
+import { routing, type AppLocale } from "@/i18n/routing";
+import { FranceFlag, UnitedKingdomFlag } from "@/components/layout/flags";
 import { cn } from "@/lib/utils";
+
+const FLAGS: Record<AppLocale, typeof FranceFlag> = {
+  fr: FranceFlag,
+  en: UnitedKingdomFlag,
+};
 
 /**
  * Bascule de langue — Client Component isolé (même catégorie d'exception au
@@ -17,7 +26,8 @@ import { cn } from "@/lib/utils";
  * fait pas automatiquement en changeant de locale. usePathname() renvoie ici
  * la clé canonique de routing.pathnames (ex. "/catalogue"), pas le segment
  * déjà traduit affiché à l'écran — Link recalcule la version localisée pour
- * chaque langue à partir de cette même clé.
+ * chaque langue à partir de cette même clé. Comportement inchangé par rapport
+ * à la version précédente : seul l'habillage (Menu Base UI + drapeaux) change.
  *
  * LIMITE CONNUE : pour un futur segment dynamique (/works/[slug]), le SLUG
  * lui-même n'est PAS retraduit ici — next-intl retraduit les segments
@@ -28,41 +38,74 @@ import { cn } from "@/lib/utils";
 function LanguageSwitcher() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const activeLocale = useLocale();
+  const activeLocale = useLocale() as AppLocale;
   const t = useTranslations("navigation");
   const query = Object.fromEntries(searchParams.entries());
 
+  const ActiveFlag = FLAGS[activeLocale];
+
   return (
-    <div
-      role="group"
-      aria-label={t("languageSwitcher.ariaLabel")}
-      className="inline-flex items-center gap-1 rounded-full border border-border p-1"
-    >
-      {routing.locales.map((loc) => (
-        <Link
-          key={loc}
-          // usePathname() renvoie une des clés de routing.pathnames, mais
-          // typée comme leur UNION (ex. "/" | "/catalogue" | ...) — pas la
-          // forme discriminée { pathname: "/" } | { pathname: "/catalogue" }
-          // | ... qu'attend href. La valeur runtime est toujours l'une de
-          // ces clés (par construction de usePathname), l'assertion ne fait
-          // que combler cet écart de représentation entre les deux types.
-          href={
-            { pathname, query } as React.ComponentProps<typeof Link>["href"]
-          }
-          locale={loc}
-          aria-current={loc === activeLocale ? "true" : undefined}
-          className={cn(
-            "rounded-full px-2.5 py-1 text-xs font-medium transition-colors",
-            loc === activeLocale
-              ? "bg-primary text-primary-foreground"
-              : "text-muted-foreground hover:text-foreground",
-          )}
+    <Menu.Root>
+      <Menu.Trigger
+        aria-label={t("languageSwitcher.triggerAriaLabel", {
+          language: t(`languageSwitcher.${activeLocale}`),
+        })}
+        className="group/lang-trigger inline-flex items-center gap-1.5 rounded-full border border-border bg-background py-1 pr-2.5 pl-1 text-xs font-medium transition-colors outline-none hover:bg-secondary/60 focus-visible:ring-3 focus-visible:ring-ring/50 data-[popup-open]:bg-secondary/60"
+      >
+        <ActiveFlag />
+        <span className="uppercase">{activeLocale}</span>
+        <ChevronDown
+          className="size-3.5 text-muted-foreground transition-transform duration-200 group-data-[popup-open]/lang-trigger:rotate-180"
+          aria-hidden="true"
+        />
+      </Menu.Trigger>
+      <Menu.Portal>
+        <Menu.Positioner
+          side="bottom"
+          align="start"
+          sideOffset={6}
+          collisionPadding={8}
+          className="z-50 outline-none"
         >
-          {t(`languageSwitcher.${loc}`)}
-        </Link>
-      ))}
-    </div>
+          <Menu.Popup className="min-w-48 overflow-hidden rounded-xl border border-border bg-popover p-1 text-popover-foreground shadow-md data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95">
+            {routing.locales.map((loc, index) => {
+              const Flag = FLAGS[loc];
+              const isActive = loc === activeLocale;
+
+              return (
+                <Fragment key={loc}>
+                  {index > 0 ? (
+                    <div aria-hidden="true" className="my-1 h-px bg-border" />
+                  ) : null}
+                  <Menu.LinkItem
+                    closeOnClick
+                    aria-current={isActive ? "true" : undefined}
+                    className={cn(
+                      "flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm outline-none select-none data-highlighted:bg-accent",
+                      isActive ? "font-medium text-primary" : "text-foreground",
+                    )}
+                    render={
+                      <Link
+                        href={
+                          {
+                            pathname,
+                            query,
+                          } as React.ComponentProps<typeof Link>["href"]
+                        }
+                        locale={loc}
+                      />
+                    }
+                  >
+                    <Flag />
+                    {t(`languageSwitcher.${loc}`)}
+                  </Menu.LinkItem>
+                </Fragment>
+              );
+            })}
+          </Menu.Popup>
+        </Menu.Positioner>
+      </Menu.Portal>
+    </Menu.Root>
   );
 }
 

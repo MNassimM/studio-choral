@@ -1,7 +1,7 @@
 {
   "myAccount": "My account",
   "links": {
-    "catalogue": "Catalogue",
+    "catalogue": "Catalog",
     "howItWorks": "How it works"
   },
   "header": {
@@ -24,7 +24,7 @@
     "copyright": "© {year} Butterfly Studio Choral - All rights reserved"
   },
   "languageSwitcher": {
-    "ariaLabel": "Choose language",
+    "triggerAriaLabel": "Change language, {language} currently selected",
     "fr": "Français",
     "en": "English"
   }
