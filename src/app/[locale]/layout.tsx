@@ -9,6 +9,7 @@ import "../globals.css";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { routing } from "@/i18n/routing";
+import { DynamicRouteAlternatesProvider } from "@/components/layout/dynamic-route-alternates";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -51,9 +52,11 @@ export default async function RootLayout({
     >
       <body>
         <NextIntlClientProvider>
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
+          <DynamicRouteAlternatesProvider>
+            <Header />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </DynamicRouteAlternatesProvider>
         </NextIntlClientProvider>
       </body>
     </html>

@@ -11,6 +11,11 @@ import { routing, type AppLocale } from "@/i18n/routing";
 import { FranceFlag, UnitedKingdomFlag } from "@/components/layout/flags";
 import { cn } from "@/lib/utils";
 
+import {
+  useDynamicRouteAlternates,
+} from "@/components/layout/dynamic-route-alternates";
+
+
 const FLAGS: Record<AppLocale, typeof FranceFlag> = {
   fr: FranceFlag,
   en: UnitedKingdomFlag,
@@ -36,6 +41,7 @@ const FLAGS: Record<AppLocale, typeof FranceFlag> = {
  * chaque locale (WorkTranslation.slug) plutôt que d'utiliser ce composant.
  */
 function LanguageSwitcher() {
+  const dynamicAlternates = useDynamicRouteAlternates();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const activeLocale = useLocale() as AppLocale;
@@ -87,6 +93,15 @@ function LanguageSwitcher() {
                     render={
                       <Link
                         href={
+                          pathname === "/works/[slug]" && dynamicAlternates?.[loc]
+                          ? {
+                              pathname,
+                              params: {
+                                slug: dynamicAlternates[loc],
+                              },
+                              query,
+                            }
+                          : 
                           {
                             pathname,
                             query,
