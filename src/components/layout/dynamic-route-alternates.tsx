@@ -37,7 +37,9 @@ function DynamicRouteAlternatesProvider({
   const [alternates, setAlternates] = useState<DynamicRouteAlternates>(null);
 
   return (
-    <DynamicRouteAlternatesContext.Provider value={{ alternates, setAlternates }}>
+    <DynamicRouteAlternatesContext.Provider
+      value={{ alternates, setAlternates }}
+    >
       {children}
     </DynamicRouteAlternatesContext.Provider>
   );

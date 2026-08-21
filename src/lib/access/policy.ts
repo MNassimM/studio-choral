@@ -28,4 +28,6 @@ export const ACCESS_POLICY = {
 
   // Le Studio (tempo, mix) est réservé aux mouvements réellement débloqués.
   studioRequiresOwnership: true,
+
+  ownedVoiceUnlocksSoloDownload: false,
 } as const;

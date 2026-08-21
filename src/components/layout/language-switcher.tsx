@@ -11,10 +11,7 @@ import { routing, type AppLocale } from "@/i18n/routing";
 import { FranceFlag, UnitedKingdomFlag } from "@/components/layout/flags";
 import { cn } from "@/lib/utils";
 
-import {
-  useDynamicRouteAlternates,
-} from "@/components/layout/dynamic-route-alternates";
-
+import { useDynamicRouteAlternates } from "@/components/layout/dynamic-route-alternates";
 
 const FLAGS: Record<AppLocale, typeof FranceFlag> = {
   fr: FranceFlag,
@@ -93,19 +90,19 @@ function LanguageSwitcher() {
                     render={
                       <Link
                         href={
-                          pathname === "/works/[slug]" && dynamicAlternates?.[loc]
-                          ? {
-                              pathname,
-                              params: {
-                                slug: dynamicAlternates[loc],
-                              },
-                              query,
-                            }
-                          : 
-                          {
-                            pathname,
-                            query,
-                          } as React.ComponentProps<typeof Link>["href"]
+                          pathname === "/works/[slug]" &&
+                          dynamicAlternates?.[loc]
+                            ? {
+                                pathname,
+                                params: {
+                                  slug: dynamicAlternates[loc],
+                                },
+                                query,
+                              }
+                            : ({
+                                pathname,
+                                query,
+                              } as React.ComponentProps<typeof Link>["href"])
                         }
                         locale={loc}
                       />

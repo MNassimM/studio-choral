@@ -21,6 +21,14 @@ function dedupeVoiceCodes(lists: string[][]): string[] {
 }
 
 /**
+ * Valeur de ACCESS_POLICY exposée telle quelle : l'appelant (une page, un
+ * composant) ne doit jamais importer ACCESS_POLICY directement — seul ce
+ * module a le droit de le lire. Ce ré-export est une simple valeur, pas un
+ * point de décision : rien de plus qu'un raccourci de lecture.
+ */
+export const PREVIEW_DURATION_SECONDS = ACCESS_POLICY.previewDurationSeconds;
+
+/**
  * Calcule, pour une œuvre et une liste de droits (déjà filtrés « actifs »
  * par l'appelant — voir src/lib/catalog), ce que l'utilisateur possède.
  *
@@ -128,7 +136,17 @@ export function capabilitiesFor(
   }
 
   switch (type) {
-    case "SOLO":
+    case "SOLO": {
+      if (!voiceCode || !movement.ownedVoiceCodes.includes(voiceCode)) {
+        return [];
+      }
+      const capabilities: Capability[] = ["STREAM"];
+      if (ACCESS_POLICY.ownedVoiceUnlocksSoloDownload) {
+        capabilities.push("DOWNLOAD");
+      }
+      if (movement.unlocked) capabilities.push("STUDIO");
+      return capabilities;
+    }
     case "PREDOMINANT": {
       if (!voiceCode || !movement.ownedVoiceCodes.includes(voiceCode)) {
         return [];

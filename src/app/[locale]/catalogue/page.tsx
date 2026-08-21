@@ -368,7 +368,7 @@ export default async function CataloguePage(
             <Link href="/" className="hover:text-primary">
               {tCommon("breadcrumbHome")}
             </Link>
-            <span className="mx-2">/</span>
+            <span className="mx-2">-{">"}</span>
             <span aria-current="page" className="text-foreground">
               {t("title")}
             </span>
