@@ -35,6 +35,17 @@ enum MusicalPeriod {
   CONTEMPORARY
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum GrantSource {
+  PURCHASE
+  MANUAL_GRANT
+  PROMO
+}
+
 model Work {
   id               String         @id @default(cuid())
   slug             String         @unique
@@ -63,6 +74,7 @@ model Work {
   movements    Movement[]
   products     Product[]
   translations WorkTranslation[]
+  libraryItems LibraryItem[]
 
   @@index([period])
   @@map("works")
@@ -105,9 +117,10 @@ model Movement {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  work       Work        @relation(fields: [workId], references: [id], onDelete: Cascade)
-  audioFiles AudioFile[]
-  products   Product[]
+  work         Work          @relation(fields: [workId], references: [id], onDelete: Cascade)
+  audioFiles   AudioFile[]
+  products     Product[]
+  libraryItems LibraryItem[]
 
   @@unique([workId, slug])
   @@unique([workId, position])
@@ -120,8 +133,9 @@ model Voice {
   label    String
   position Int
 
-  audioFiles AudioFile[]
-  products   Product[]
+  audioFiles   AudioFile[]
+  products     Product[]
+  libraryItems LibraryItem[]
 
   @@map("voices")
 }
@@ -174,4 +188,74 @@ model Product {
   @@unique([workId, movementId, voiceId, coverage])
   @@index([workId, isActive])
   @@map("products")
+}
+
+// Volontairement minimal : pas de mot de passe, pas de session, pas de champ
+// emailVerified. L'authentification (magic link via Auth.js) viendra bien
+// plus tard et générera ses propres tables via son adaptateur — ne pas les
+// anticiper ici, le format serait de toute façon à refaire.
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  role      UserRole @default(USER)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  libraryItems LibraryItem[]
+
+  @@map("users")
+}
+
+/// Le droit qu'un utilisateur détient sur une œuvre — contrepartie d'une
+/// offre (Product) achetée, offerte ou obtenue par code promo. Sa structure
+/// reprend volontairement celle de Product (mêmes scope/coverage,
+/// mêmes règles de cohérence avec movementId/voiceId — voir
+/// src/lib/library-items/invariants.ts, calqué sur
+/// src/lib/products/invariants.ts).
+///
+/// DÉDUPLICATION SÉMANTIQUE NON TRAITÉE ICI : posséder « Alto — œuvre
+/// entière » (scope WORK) rend redondant « Alto — Kyrie » (scope MOVEMENT),
+/// mais aucune contrainte SQL ne peut exprimer cette relation d'inclusion.
+/// Cette déduplication relève du code de lecture des droits (prochaine
+/// étape, src/lib/access), pas de ce modèle ni de sa migration.
+model LibraryItem {
+  id         String        @id @default(cuid())
+  userId     String        @map("user_id")
+  workId     String        @map("work_id")
+  /// NULL si scope = WORK (droit sur l'œuvre entière).
+  movementId String?       @map("movement_id")
+  /// NULL si coverage = ALL_VOICES.
+  voiceId    String?       @map("voice_id")
+  scope      AccessScope
+  coverage   VoiceCoverage
+  source     GrantSource   @default(PURCHASE)
+
+  /// Colonne simple, SANS relation pour l'instant : PurchaseItem n'existe
+  /// pas encore. La relation (et la contrainte de clé étrangère) sera
+  /// ajoutée à l'étape Stripe, en même temps que les modèles Purchase et
+  /// PurchaseItem.
+  purchaseItemId String? @map("purchase_item_id")
+
+  grantedAt DateTime  @default(now()) @map("granted_at")
+  /// Retrait d'un droit (remboursement, litige) sans suppression de la
+  /// ligne — l'historique doit rester consultable. Toute lecture de droits
+  /// effectifs doit filtrer sur revokedAt: null.
+  revokedAt DateTime? @map("revoked_at")
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  work     Work      @relation(fields: [workId], references: [id], onDelete: Cascade)
+  movement Movement? @relation(fields: [movementId], references: [id], onDelete: Cascade)
+  voice    Voice?    @relation(fields: [voiceId], references: [id])
+
+  // Postgres traite chaque NULL comme distinct : cet unique composite ne
+  // protège que la combinaison MOVEMENT + SINGLE_VOICE (movementId ET
+  // voiceId renseignés). Les trois autres combinaisons impliquent au moins
+  // un NULL et échappent à cette contrainte — voir les index uniques
+  // partiels ajoutés à la main dans la migration user_and_library_items,
+  // sur le modèle de ceux de products/audio_files.
+  @@unique([userId, workId, movementId, voiceId, coverage])
+  @@index([userId, workId])
+  @@index([userId])
+  @@map("library_items")
 }

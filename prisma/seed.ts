@@ -5,8 +5,11 @@ import {
   buildDemoAudioTracks,
   buildDemoProducts,
   DEMO_CATALOG,
+  DEMO_LIBRARY_ITEMS,
+  DEMO_USERS,
   DEMO_VOICES,
 } from "../src/lib/demo/dataset";
+import { assertValidLibraryItem } from "../src/lib/library-items/invariants";
 import { assertValidProduct } from "../src/lib/products/invariants";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
@@ -330,12 +333,140 @@ async function seedProducts(
   }
 }
 
+async function seedUsers(): Promise<Map<string, string>> {
+  console.log("Comptes de démonstration (User) :");
+  const userIdByEmail = new Map<string, string>();
+
+  for (const user of DEMO_USERS) {
+    const existing = await prisma.user.findUnique({
+      where: { email: user.email },
+    });
+
+    const saved = await prisma.user.upsert({
+      where: { email: user.email },
+      update: { name: user.name, role: user.role },
+      create: user,
+    });
+
+    userIdByEmail.set(saved.email, saved.id);
+
+    console.log(
+      `  ${existing ? "= déjà présent" : "+ créé"} : ${saved.email} (${saved.name})`,
+    );
+  }
+
+  return userIdByEmail;
+}
+
+async function seedLibraryItems(
+  userIdByEmail: Map<string, string>,
+  workIdBySlug: Map<string, string>,
+  movementIdByKey: Map<string, string>,
+  voiceIdByCode: Map<string, string>,
+) {
+  console.log("Droits d'accès (LibraryItem) :");
+
+  const summaryByUserEmail = new Map<
+    string,
+    { created: number; existing: number }
+  >();
+
+  for (const item of DEMO_LIBRARY_ITEMS) {
+    const userId = userIdByEmail.get(item.userEmail);
+    if (!userId) {
+      throw new Error(`Utilisateur introuvable : "${item.userEmail}"`);
+    }
+
+    const workId = workIdBySlug.get(item.workSlug);
+    if (!workId) {
+      throw new Error(
+        `Œuvre introuvable pour le droit de "${item.userEmail}" (workSlug="${item.workSlug}")`,
+      );
+    }
+
+    const movementId = item.movementSlug
+      ? (movementIdByKey.get(`${item.workSlug}/${item.movementSlug}`) ?? null)
+      : null;
+    if (item.movementSlug && !movementId) {
+      throw new Error(
+        `Mouvement introuvable pour le droit de "${item.userEmail}" ("${item.workSlug}/${item.movementSlug}")`,
+      );
+    }
+
+    const voiceId = item.voiceCode
+      ? (voiceIdByCode.get(item.voiceCode) ?? null)
+      : null;
+    if (item.voiceCode && !voiceId) {
+      throw new Error(
+        `Voix introuvable pour le droit de "${item.userEmail}" ("${item.voiceCode}")`,
+      );
+    }
+
+    // Validation des invariants scope/coverage <-> movementId/voiceId AVANT
+    // toute écriture en base — échoue bruyamment avec l'identité fautive.
+    const data = assertValidLibraryItem({
+      userId,
+      workId,
+      movementId,
+      voiceId,
+      scope: item.scope,
+      coverage: item.coverage,
+      source: item.source,
+      purchaseItemId: null,
+    });
+
+    // movementId/voiceId peuvent valoir NULL : comme pour AudioFile, l'unique
+    // composite ne peut pas cibler ces lignes via upsert (Postgres traite
+    // chaque NULL comme distinct). On cherche à la main puis on crée ou met
+    // à jour par id.
+    const existing = await prisma.libraryItem.findFirst({
+      where: {
+        userId: data.userId,
+        workId: data.workId,
+        movementId: data.movementId,
+        voiceId: data.voiceId,
+        coverage: data.coverage,
+      },
+    });
+
+    if (existing) {
+      await prisma.libraryItem.update({ where: { id: existing.id }, data });
+    } else {
+      await prisma.libraryItem.create({ data });
+    }
+
+    const summary = summaryByUserEmail.get(item.userEmail) ?? {
+      created: 0,
+      existing: 0,
+    };
+    if (existing) {
+      summary.existing++;
+    } else {
+      summary.created++;
+    }
+    summaryByUserEmail.set(item.userEmail, summary);
+  }
+
+  for (const [userEmail, summary] of summaryByUserEmail) {
+    console.log(
+      `  ${userEmail} : ${summary.created} créé(s), ${summary.existing} déjà présent(s)`,
+    );
+  }
+}
+
 async function main() {
   const voiceIdByCode = await seedVoices();
   const { workIdBySlug, movementIdByKey } = await seedWorksAndMovements();
   await seedWorkTranslations(workIdBySlug);
   await seedAudioFiles(movementIdByKey, voiceIdByCode);
   await seedProducts(workIdBySlug, movementIdByKey, voiceIdByCode);
+  const userIdByEmail = await seedUsers();
+  await seedLibraryItems(
+    userIdByEmail,
+    workIdBySlug,
+    movementIdByKey,
+    voiceIdByCode,
+  );
 }
 
 main()

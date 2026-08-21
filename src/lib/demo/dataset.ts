@@ -597,3 +597,107 @@ export function buildDemoProducts(): DemoProduct[] {
 
   return products;
 }
+
+export type DemoUserRole = "USER" | "ADMIN";
+
+export type DemoUser = {
+  email: string;
+  name: string;
+  role: DemoUserRole;
+};
+
+/**
+ * MOCK / TEMPORAIRE — quatre comptes de démonstration, chacun illustrant un
+ * état différent de la page œuvre (voir DEMO_LIBRARY_ITEMS ci-dessous). Pas
+ * d'authentification réelle derrière : voir src/lib/auth/current-user.ts,
+ * qui bascule entre ces comptes via la variable d'environnement
+ * DEMO_USER_EMAIL.
+ */
+export const DEMO_USERS: DemoUser[] = [
+  {
+    email: "demo-aucun-achat@butterfly.test",
+    name: "Choriste curieux",
+    role: "USER",
+  },
+  {
+    email: "demo-alto-partiel@butterfly.test",
+    name: "Choriste alto",
+    role: "USER",
+  },
+  {
+    email: "demo-oeuvre-complete@butterfly.test",
+    name: "Chef de chœur",
+    role: "USER",
+  },
+  {
+    email: "demo-multi-oeuvres@butterfly.test",
+    name: "Choriste basse",
+    role: "USER",
+  },
+];
+
+export type DemoGrantSource = "PURCHASE" | "MANUAL_GRANT" | "PROMO";
+
+export type DemoLibraryItem = {
+  userEmail: string;
+  workSlug: string;
+  /** NULL si scope = WORK (droit sur l'œuvre entière). */
+  movementSlug: string | null;
+  /** NULL si coverage = ALL_VOICES. */
+  voiceCode: SatbVoiceCode | null;
+  scope: DemoProductScope;
+  coverage: DemoProductCoverage;
+  source: DemoGrantSource;
+};
+
+/**
+ * MOCK / TEMPORAIRE — droits de démonstration, exprimés par slug/code (jamais
+ * par id, résolus par la seed comme le reste du dataset). Tous en
+ * source = MANUAL_GRANT : aucun ne provient d'un achat réel (pas de Purchase
+ * à ce stade). Sept lignes au total, réparties sur trois des quatre comptes
+ * ("demo-aucun-achat" n'a délibérément aucun droit).
+ */
+export const DEMO_LIBRARY_ITEMS: DemoLibraryItem[] = [
+  // demo-alto-partiel : pupitre ALTO sur 4 des 6 mouvements de la messe —
+  // état "4/6 mouvements débloqués".
+  ...(["kyrie", "gloria", "credo", "sanctus"] as const).map(
+    (movementSlug): DemoLibraryItem => ({
+      userEmail: "demo-alto-partiel@butterfly.test",
+      workSlug: "messe-en-sol-majeur",
+      movementSlug,
+      voiceCode: "ALTO",
+      scope: "MOVEMENT",
+      coverage: "SINGLE_VOICE",
+      source: "MANUAL_GRANT",
+    }),
+  ),
+  // demo-oeuvre-complete : toutes les voix, œuvre entière — un seul droit.
+  {
+    userEmail: "demo-oeuvre-complete@butterfly.test",
+    workSlug: "messe-en-sol-majeur",
+    movementSlug: null,
+    voiceCode: null,
+    scope: "WORK",
+    coverage: "ALL_VOICES",
+    source: "MANUAL_GRANT",
+  },
+  // demo-multi-oeuvres : deux œuvres différentes, pour tester la bibliothèque.
+  {
+    userEmail: "demo-multi-oeuvres@butterfly.test",
+    workSlug: "messe-en-sol-majeur",
+    movementSlug: null,
+    voiceCode: "BASS",
+    scope: "WORK",
+    coverage: "SINGLE_VOICE",
+    source: "MANUAL_GRANT",
+  },
+  {
+    userEmail: "demo-multi-oeuvres@butterfly.test",
+    workSlug: "mille-regretz",
+    movementSlug: null,
+    voiceCode: null,
+    scope: "WORK",
+    coverage: "ALL_VOICES",
+    source: "MANUAL_GRANT",
+  },
+];

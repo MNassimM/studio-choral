@@ -92,16 +92,16 @@ async function WorkCard({
     >
       <WorkCoverPlaceholder className="h-40" />
       <CardHeader>
-        <CardTitle className={cn("text-lg", playfairDisplay.className)}>
+        <CardTitle className={cn("flex flex-wrap items-center gap-2","text-lg", playfairDisplay.className)}>
           {work.title}
+          {work.catalogueRef ? (
+            <Badge variant="outline">{work.catalogueRef}</Badge>
+          ) : null}
         </CardTitle>
         <CardDescription>{work.composer}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-1 flex-col gap-4">
         <div className="flex flex-wrap items-center gap-1.5">
-          {work.catalogueRef ? (
-            <Badge variant="outline">{work.catalogueRef}</Badge>
-          ) : null}
           {work.period ? (
             <Badge variant="secondary">{t(`period.${work.period}`)}</Badge>
           ) : null}
