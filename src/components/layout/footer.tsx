@@ -96,7 +96,7 @@ async function Footer() {
 
   return (
     <footer className="border-t border-border bg-background">
-      <Container className="py-12 md:py-16">
+      <Container className="pt-12 md:pt-16">
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
           <div className="flex flex-col gap-3">
             <Logo />
@@ -164,7 +164,7 @@ async function Footer() {
 
         <Separator className="my-8" />
 
-        <p className="text-center text-xs text-muted-foreground">
+        <p className="pb-6 text-center text-xs text-muted-foreground">
           {t("footer.copyright", { year: new Date().getFullYear() })}
         </p>
       </Container>
