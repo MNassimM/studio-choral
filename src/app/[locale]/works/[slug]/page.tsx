@@ -9,6 +9,7 @@ import { Music2 } from "lucide-react";
 import { Container } from "@/components/layout/container";
 import { Badge } from "@/components/ui/badge";
 import { AccessSidebar } from "@/components/work/access-sidebar";
+import { CollapsibleAccessPanel } from "@/components/work/collapsible-access-panel";
 import { StudioPlaceholder } from "@/components/work/studio-placeholder";
 import { DownloadFileGrid } from "@/components/work/download-file-grid";
 import { MovementOfferPanel } from "@/components/work/movement-offer-panel";
@@ -413,13 +414,17 @@ export default async function WorkPage(
             </div>
           </div>
 
-          {/* « Votre accès » - dans le flux (pleine largeur, en tête) jusqu'à
-              1920px ; au-delà, déportée hors du Container et collée au bord
-              droit de la fenêtre (fixed), sans déplacer le centrage du
-              Container lui-même puisqu'un élément fixed est retiré du flux. */}
-          <div className="w-full lg:fixed lg:top-20 lg:right-4 lg:z-30 lg:w-60 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
+          {/* « Votre accès » - masquée en dessous de lg (pas assez de place
+              pour la déporter hors du flux sans empiéter sur le contenu) ;
+              à partir de lg, déportée hors du Container et collée au bord
+              droit de la fenêtre (fixed), rétractable pour dégager la vue. */}
+          <CollapsibleAccessPanel
+            expandLabel={tWorkPage("sidebarExpand")}
+            collapseLabel={tWorkPage("sidebarCollapse")}
+            movements={movementVoiceAccess}
+          >
             {sidebar}
-          </div>
+          </CollapsibleAccessPanel>
           <StudioPlaceholder unlocked={access.unlockedMovementCount > 0} />
 
           {/* Téléchargements */}

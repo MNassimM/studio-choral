@@ -16,7 +16,7 @@ async function DownloadFileGrid({ entries }: { entries: DownloadFileEntry[] }) {
   console.log("entries", entries);
 
   return (
-    <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+    <div className="grid grid-cols-3 gap-2 sm:grid-cols-5" style={{ gridTemplateColumns: `repeat(${entries.length}, minmax(0, 1fr))` }}>
       {entries.map((entry, index) => (
         <div
           key={`${entry.audioType}-${entry.voiceLabel ?? "all"}-${index}`}

@@ -62,6 +62,8 @@
       "ACCOMPANIMENT": "Accompaniment"
     },
     "sidebarHeading": "Your access",
+    "sidebarExpand": "Show access panel",
+    "sidebarCollapse": "Collapse access panel",
     "sidebarNoAccess": "No movement unlocked yet.",
     "sidebarIncludesHeading": "This gives you access to:",
     "sidebarBulletListening": "Listening to unlocked movements",

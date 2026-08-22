@@ -62,6 +62,8 @@
       "ACCOMPANIMENT": "Accompagnement"
     },
     "sidebarHeading": "Votre accès",
+    "sidebarExpand": "Afficher le panneau d'accès",
+    "sidebarCollapse": "Réduire le panneau d'accès",
     "sidebarNoAccess": "Aucun mouvement débloqué pour l'instant.",
     "sidebarIncludesHeading": "Cela vous donne accès à :",
     "sidebarBulletListening": "Écoute des mouvements débloqués",

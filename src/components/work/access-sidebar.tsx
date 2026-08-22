@@ -61,7 +61,7 @@ async function AccessSidebar({
   );
 
   return (
-    <aside className="flex flex-col gap-3 rounded-2xl border border-border bg-card/95 p-2 shadow-sm backdrop-blur-sm">
+    <aside className="flex flex-col gap-3 rounded-2xl border border-border bg-card/95 p-4 shadow-sm backdrop-blur-sm">
       <h2 className="text-lg font-semibold">{t("sidebarHeading")}</h2>
 
       <div className="flex flex-col gap-3">
@@ -78,7 +78,10 @@ async function AccessSidebar({
               <span className="text-sm font-medium">
                 {movement.movementTitle}
               </span>
-            ) : null}
+            ) : 
+              <span className="text-sm font-medium">
+                {movement.movementTitle}
+              </span>}
             <div className="flex flex-wrap gap-1.5">
               {movement.voices.map((voice) => (
                 <VoicePill

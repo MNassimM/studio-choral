@@ -1,0 +1,56 @@
+"use client";
+
+import { useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
+/**
+ * Enveloppe client du panneau « Votre accès » : gère uniquement l'état
+ * ouvert/replié (aucune logique de droits). Repliée, seul le bord gauche du
+ * panneau dépasse encore de l'écran, avec la flèche pour le rouvrir ; ouverte,
+ * la flèche s'inverse pour le refermer. Le contenu (AccessSidebar) est déjà
+ * rendu côté serveur et simplement passé en enfant.
+ */
+function CollapsibleAccessPanel({
+  expandLabel,
+  collapseLabel,
+  children,
+  movements,
+}: {
+  expandLabel: string;
+  collapseLabel: string;
+  children: React.ReactNode;
+  movements: {
+    voices: { code: string; label: string; owned: boolean }[];
+  }[];
+}) {
+  const ownsAnything = movements.some((movement) =>
+    movement.voices.some((voice) => voice.owned),
+  );
+  const [open, setOpen] = useState(ownsAnything);
+
+  return (
+    <div
+      className="hidden lg:fixed lg:top-20 lg:right-4 lg:z-30 lg:block lg:w-60 lg:transition-transform lg:duration-300 lg:ease-out"
+      style={{ transform: open ? "translateX(0)" : "translateX(calc(100% ))" }}
+    >
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        aria-label={open ? collapseLabel : expandLabel}
+        aria-expanded={open}
+        className="absolute top-1/2 -left-4 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-card shadow-sm hover:bg-accent"
+      >
+        {open ? (
+          <ChevronRight className="size-4" aria-hidden="true" />
+        ) : (
+          <ChevronLeft className="size-4" aria-hidden="true" />
+        )}
+      </button>
+      <div className="max-h-[calc(100vh-6rem)] w-60 overflow-y-auto">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+export { CollapsibleAccessPanel };
