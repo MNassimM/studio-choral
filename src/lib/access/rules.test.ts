@@ -81,10 +81,34 @@ test("« Alto - Kyrie » débloque l'alto du Kyrie", () => {
   assert.equal(
     canDownload(access, {
       movementId: "kyrie",
-      type: "SOLO",
+      type: "PREDOMINANT",
       voiceCode: "ALTO",
     }),
     true,
+  );
+});
+
+test("un pupitre possédé permet d'écouter la voix seule, mais pas de la télécharger", () => {
+  const access = resolveWorkAccess(messe, [
+    grant({
+      scope: "MOVEMENT",
+      movementId: "kyrie",
+      coverage: "SINGLE_VOICE",
+      voiceCode: "ALTO",
+    }),
+  ]);
+
+  assert.equal(
+    canStream(access, { movementId: "kyrie", type: "SOLO", voiceCode: "ALTO" }),
+    true,
+  );
+  assert.equal(
+    canDownload(access, {
+      movementId: "kyrie",
+      type: "SOLO",
+      voiceCode: "ALTO",
+    }),
+    false,
   );
 });
 

@@ -6,7 +6,6 @@ import { locale as rootLocale } from "next/root-params";
 import { Playfair_Display } from "next/font/google";
 import {
   CheckCircle2,
-  Disc3,
   LockKeyhole,
   Download,
   Lock,
@@ -195,14 +194,14 @@ type MovementDownloadGroup = {
 
 type SimpleOfferView = { sku: string; name: string; priceLabel: string };
 
+type OwnedOfferView = SimpleOfferView & { alreadyOwned: boolean };
+
 type MovementOfferGroup = {
   movementId: string;
   movementTitle: string;
   fullyOwned: boolean;
-  offers: SimpleOfferView[];
+  offers: OwnedOfferView[];
 };
-
-type OwnedOfferView = SimpleOfferView & { alreadyOwned: boolean };
 
 // ─── Petits composants de présentation ─────────────────────────────────────
 
@@ -397,7 +396,7 @@ async function DownloadFileGrid({ entries }: { entries: DownloadFileEntry[] }) {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-2 sm:grid-cols-5">
+    <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
       {entries.map((entry, index) => (
         <div
           key={`${entry.audioType}-${entry.voiceLabel ?? "all"}-${index}`}
@@ -452,6 +451,7 @@ function PackCard({
   alreadyOwnedBadge,
   unlocksLabel,
   unlocksVoices,
+  size = "default",
 }: {
   offer: SimpleOfferView;
   bullets: string[];
@@ -462,31 +462,63 @@ function PackCard({
   alreadyOwnedBadge?: string;
   unlocksLabel?: string;
   unlocksVoices?: string[];
+  /** "sm" pour les cartes par mouvement — visuellement plus petites que
+   * celles de l'œuvre complète, l'offre principale. */
+  size?: "default" | "sm";
 }) {
+  const isSmall = size === "sm";
+
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 rounded-xl border p-4",
+        "relative flex flex-col items-center gap-2 rounded-2xl border text-center",
+        isSmall ? "p-4" : "p-6",
         alreadyOwned
           ? "border-border bg-muted/30 opacity-60"
           : featured
-            ? "border-primary ring-1 ring-primary/30"
-            : "border-border",
+            ? "border-primary bg-card shadow-md ring-1 ring-primary/30"
+            : "border-border bg-card shadow-sm",
       )}
     >
       {alreadyOwned && alreadyOwnedBadge ? (
-        <Badge variant="outline" className="w-fit">
+        <Badge
+          variant="outline"
+          className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-background"
+        >
           {alreadyOwnedBadge}
         </Badge>
       ) : featured && featuredBadge ? (
-        <Badge className="w-fit">{featuredBadge}</Badge>
+        <Badge className="absolute -top-2.5 left-1/2 -translate-x-1/2">
+          {featuredBadge}
+        </Badge>
       ) : null}
-      <div className="flex flex-col gap-0.5">
-        <span className="font-medium">{offer.name}</span>
-        <span className="text-sm text-muted-foreground">
-          {offer.priceLabel}
-        </span>
+
+      <div
+        aria-hidden="true"
+        className={cn(
+          "flex shrink-0 items-center justify-center rounded-full",
+          isSmall ? "size-9" : "size-14",
+          alreadyOwned
+            ? "bg-muted text-muted-foreground"
+            : "bg-secondary text-primary",
+        )}
+      >
+        <Music2 className={isSmall ? "size-4" : "size-6"} />
       </div>
+
+      <span className={cn("font-medium", isSmall ? "text-xs" : "text-sm")}>
+        {offer.name}
+      </span>
+      <span
+        className={cn(
+          "font-semibold",
+          alreadyOwned ? "text-muted-foreground" : "text-primary",
+          isSmall ? "text-lg" : "text-3xl",
+        )}
+      >
+        {offer.priceLabel}
+      </span>
+
       {!alreadyOwned &&
       unlocksLabel &&
       unlocksVoices &&
@@ -495,20 +527,34 @@ function PackCard({
           {unlocksLabel} {unlocksVoices.join(", ")}
         </p>
       ) : null}
-      <ul className="flex flex-col gap-1 text-sm text-muted-foreground">
+
+      <ul
+        className={cn(
+          "flex flex-col gap-1 text-muted-foreground",
+          isSmall ? "text-xs" : "text-sm",
+        )}
+      >
         {bullets.map((bullet) => (
-          <li key={bullet} className="flex items-center gap-1.5">
+          <li key={bullet} className="flex items-center gap-1.5 text-start">
             <CheckCircle2
-              className="size-3.5 shrink-0 text-primary"
+              className={cn(
+                "shrink-0 text-primary",
+                isSmall ? "size-3" : "size-3.5",
+              )}
               aria-hidden="true"
             />
             {bullet}
           </li>
         ))}
       </ul>
+
       {alreadyOwned ? null : (
         // TODO : panier non implémenté
-        <Button disabled size="sm" className="mt-auto rounded-full">
+        <Button
+          disabled
+          size={isSmall ? "sm" : "default"}
+          className="mt-2 w-full rounded-full"
+        >
           {addToCartLabel}
         </Button>
       )}
@@ -516,7 +562,7 @@ function PackCard({
   );
 }
 
-async function MovementOfferPanel({ offers }: { offers: SimpleOfferView[] }) {
+async function MovementOfferPanel({ offers }: { offers: OwnedOfferView[] }) {
   const t = await getTranslations("work.workPage");
   const tCard = await getTranslations("work.card");
 
@@ -529,20 +575,22 @@ async function MovementOfferPanel({ offers }: { offers: SimpleOfferView[] }) {
   }
 
   const bullets = [
-    t("extendAccessBulletSolo"),
     t("extendAccessBulletPredominant"),
     t("extendAccessBulletMix"),
     t("extendAccessBulletTempo"),
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
       {offers.map((offer) => (
         <PackCard
           key={offer.sku}
           offer={offer}
           bullets={bullets}
           addToCartLabel={tCard("addToCart")}
+          alreadyOwned={offer.alreadyOwned}
+          alreadyOwnedBadge={t("extendAccessAlreadyOwnedBadge")}
+          size="sm"
         />
       ))}
     </div>
@@ -564,13 +612,11 @@ async function WholeWorkOffers({
   const tCard = await getTranslations("work.card");
 
   const singleVoiceBullets = [
-    t("extendAccessBulletSolo"),
     t("extendAccessBulletPredominant"),
     t("extendAccessBulletMix"),
     t("extendAccessBulletTempo"),
   ];
   const allVoicesBullets = [
-    t("extendAccessBulletSolo"),
     t("extendAccessBulletPredominant"),
     t("extendAccessBulletTuttiDownload"),
     t("extendAccessBulletMix"),
@@ -578,7 +624,7 @@ async function WholeWorkOffers({
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
       {singleVoiceCards.map((offer) => (
         <PackCard
           key={offer.sku}
@@ -629,10 +675,12 @@ export default async function WorkPage(
         ?.slug ?? work.slug,
   };
 
+  // User actuel + voices (pour traduire voiceId → voiceCode, puis voiceCode → label traduit)
   const [currentUser, voices] = await Promise.all([
     getCurrentUser(),
     prisma.voice.findMany({ orderBy: { position: "asc" } }),
   ]);
+  // Droits du user
   const grants: Grant[] = currentUser
     ? await getUserGrants(currentUser.id)
     : [];
@@ -658,11 +706,14 @@ export default async function WorkPage(
     voices.map((voice, index) => [voice.code, index]),
   );
 
+  // Construit WorkAccessInput du domaine (src/types/domain.ts) à partir de la Work
   const workAccessInput = buildWorkAccessInput(
     work.id,
     work.movements,
     voiceCodeById,
   );
+
+  // Résout les droits de l'utilisateur sur l'œuvre entière, par mouvement et par pupitre
   const access: WorkAccess = resolveWorkAccess(workAccessInput, grants);
   const voiceCodesByMovementId = new Map(
     workAccessInput.movements.map((movement) => [
@@ -671,11 +722,12 @@ export default async function WorkPage(
     ]),
   );
 
+  // Détermine si l'utilisateur possède tous les pupitres d'un mouvement donné
   function isMovementFullyOwned(movementId: string): boolean {
-    const voiceCodes = voiceCodesByMovementId.get(movementId) ?? [];
-    const owned = access.movements[movementId]?.ownedVoiceCodes ?? [];
+    const voiceCodes = voiceCodesByMovementId.get(movementId) ?? []; // tous les pupitres du mouvement
+    const owned = access.movements[movementId]?.ownedVoiceCodes ?? []; // pupitres possédés par l'utilisateur sur ce mouvement
     return (
-      voiceCodes.length > 0 && voiceCodes.every((code) => owned.includes(code))
+      voiceCodes.length > 0 && voiceCodes.every((code) => owned.includes(code)) // vrai si pupitres possédés = pupitres du mouvement
     );
   }
 
@@ -723,7 +775,6 @@ export default async function WorkPage(
       const entries: DownloadFileEntry[] = [];
       for (const track of movement.audioFiles) {
         if (track.type === "PREVIEW") continue;
-        if (track.type === "SOLO") continue;
         const voiceCode = track.voiceId
           ? (voiceCodeById.get(track.voiceId) ?? null)
           : null;
@@ -765,7 +816,7 @@ export default async function WorkPage(
     downloadGroups[0]?.movementId ??
     "";
 
-  // --- Offres - filtrées via absorbs() : jamais de contenu déjà possédé ---
+  // Construire le nom affiché d'un produit (pupitre ou œuvre complète) pour l'affichage dans les cartes de pack.
   function composeName(product: WorkWithDetail["products"][number]): string {
     const voiceLabel = product.voice
       ? (voiceLabelByCode.get(product.voice.code) ?? product.voice.label)
@@ -794,11 +845,13 @@ export default async function WorkPage(
     coverage: product.coverage,
   });
 
+  // Savoir si  l'utilisateur possède déjà le produit (pupitre ou œuvre complète) : si un Grant existant absorbe le produit.
   function isAbsorbed(product: WorkWithDetail["products"][number]): boolean {
     const candidate = buildCandidate(product);
     return grants.some((grant) => absorbs(grant, candidate));
   }
 
+  // Construit le libellé de prix d'un produit (pupitre ou œuvre complète) pour l'affichage dans les cartes de pack.
   function priceLabelFor(product: WorkWithDetail["products"][number]): string {
     return format.number(product.priceCents / 100, {
       style: "currency",
@@ -806,8 +859,7 @@ export default async function WorkPage(
     });
   }
 
-  // --- 4a. Par mouvement - un panneau de cartes de pack par mouvement,
-  // filtré via absorbs() (jamais de contenu déjà possédé) ---
+  // Toutes les offres du mouvement (déjà possédées comprises, grisées avec un bandeau)
   const movementOfferGroups: MovementOfferGroup[] = work.movements.map(
     (movement) => ({
       movementId: movement.id,
@@ -816,14 +868,13 @@ export default async function WorkPage(
       offers: work.products
         .filter(
           (product) =>
-            product.scope === "MOVEMENT" &&
-            product.movementId === movement.id &&
-            !isAbsorbed(product),
+            product.scope === "MOVEMENT" && product.movementId === movement.id,
         )
         .map((product) => ({
           sku: product.sku,
           name: composeName(product),
           priceLabel: priceLabelFor(product),
+          alreadyOwned: isAbsorbed(product),
         })),
     }),
   );
@@ -832,8 +883,7 @@ export default async function WorkPage(
     movementOfferGroups[0]?.movementId ??
     "";
 
-  // --- 4b. Œuvre complète - toujours les 4 pupitres (déjà possédés compris,
-  // affichés grisés avec un bandeau plutôt que masqués) + « toutes les voix ». ---
+  // Œuvre complète - toujours les 4 pupitres (déjà possédés compris,affichés grisés avec un bandeau)
   const workScopeProducts = work.products.filter(
     (product) => product.scope === "WORK",
   );
