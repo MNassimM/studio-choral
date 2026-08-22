@@ -289,7 +289,7 @@ async function seedProducts(
     }
 
     // Validation des invariants scope/coverage <-> movementId/voiceId AVANT
-    // toute écriture en base — échoue bruyamment avec le sku fautif.
+    // toute écriture en base - échoue bruyamment avec le sku fautif.
     const data = assertValidProduct({
       sku: product.sku,
       name: product.name,
@@ -403,7 +403,7 @@ async function seedLibraryItems(
     }
 
     // Validation des invariants scope/coverage <-> movementId/voiceId AVANT
-    // toute écriture en base — échoue bruyamment avec l'identité fautive.
+    // toute écriture en base - échoue bruyamment avec l'identité fautive.
     const data = assertValidLibraryItem({
       userId,
       workId,

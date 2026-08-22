@@ -49,7 +49,7 @@ import { cn } from "@/lib/utils";
 
 // Page publique, peu volatile : ISR toutes les heures. Les searchParams
 // (recherche, tri, filtre) forcent de toute façon un rendu dynamique par
-// requête — cette valeur s'appliquera si la page devient un jour cacheable
+// requête - cette valeur s'appliquera si la page devient un jour cacheable
 // indépendamment de ses paramètres (ex. contenu au-dessus du fil coupé du
 // reste via une future limite de streaming).
 export const revalidate = 3600;
@@ -95,7 +95,7 @@ function isPeriodValue(value: string): value is PeriodValue {
 /**
  * Parse un paramètre multi-valeur au format "A,B,C". Chaque valeur est
  * validée indépendamment via `isValid` ; une valeur inconnue est ignorée
- * silencieusement (jamais d'erreur) — une URL entièrement invalide retombe
+ * silencieusement (jamais d'erreur) - une URL entièrement invalide retombe
  * simplement sur "aucun filtre de cette catégorie".
  */
 function parseMultiValueParam<T extends string>(
@@ -159,7 +159,7 @@ export default async function CataloguePage(
     rawSearchParams.view === "list" ? "list" : "grid";
 
   // Œuvres publiées, compositeurs distincts (stat "Compositeurs") et valeurs
-  // distinctes de period/voicing/language (options du panneau de filtres) —
+  // distinctes de period/voicing/language (options du panneau de filtres) -
   // toujours calculées depuis la base, jamais écrites en dur.
   const [
     allWorks,
@@ -213,7 +213,7 @@ export default async function CataloguePage(
     .sort((a, b) => a.localeCompare(b, locale));
   const tWorkLanguage = await getTranslations("work.language");
   // Repli sur le code brut si non répertorié dans messages/*.json (langue pas
-  // encore documentée) — jamais d'erreur de type ni d'écran cassé.
+  // encore documentée) - jamais d'erreur de type ni d'écran cassé.
   function translateWorkLanguage(code: string): string {
     return isKnownWorkLanguageCode(code) ? tWorkLanguage(code) : code;
   }
@@ -257,7 +257,7 @@ export default async function CataloguePage(
   }
 
   // period : validé contre l'enum MusicalPeriod. voicing/language : validés
-  // contre les valeurs réellement présentes en base (calculées ci-dessus) —
+  // contre les valeurs réellement présentes en base (calculées ci-dessus) -
   // dans les deux cas, un token inconnu est ignoré silencieusement.
   const periods = parseMultiValueParam(rawSearchParams.period, isPeriodValue);
   const voicings = parseMultiValueParam(
@@ -495,7 +495,7 @@ export default async function CataloguePage(
             <p className="text-sm text-muted-foreground">
               {t("resultsCount", { count: works.length })}
             </p>
-            {/* TODO : pagination non nécessaire pour l'instant — une seule
+            {/* TODO : pagination non nécessaire pour l'instant - une seule
                 page (4 œuvres au catalogue). Emplacement réservé, une seule
                 page réelle : précédent/suivant désactivés. */}
             <div className="flex items-center gap-2">

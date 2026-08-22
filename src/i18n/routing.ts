@@ -7,8 +7,8 @@ import { defineRouting } from "next-intl/routing";
  *
  * /works/[slug] est déclaré alors que la page n'existe pas encore (demandé
  * explicitement) ; /panier, /compte, /bibliotheque, /a-propos et les pages
- * légales du footer sont dans le même cas — déjà liées depuis header.tsx,
- * mobile-nav.tsx et footer.tsx sans page derrière — et déclarées ici pour la
+ * légales du footer sont dans le même cas - déjà liées depuis header.tsx,
+ * mobile-nav.tsx et footer.tsx sans page derrière - et déclarées ici pour la
  * même raison : le Link i18n exige que tout href interne soit une clé
  * connue de cette table dès qu'elle contient un chemin traduit, donc les
  * laisser de côté aurait cassé la compilation des liens existants.

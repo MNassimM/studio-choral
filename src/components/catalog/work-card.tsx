@@ -15,7 +15,7 @@ import {
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
-// Police serif locale à ce composant, pour les titres d'œuvre — cohérente
+// Police serif locale à ce composant, pour les titres d'œuvre - cohérente
 // avec le grand titre serif de la page d'accueil (next/font dédup le fichier
 // de police réellement chargé même si l'appel a lieu à plusieurs endroits).
 const playfairDisplay = Playfair_Display({

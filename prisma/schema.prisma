@@ -56,11 +56,11 @@ model Work {
   description      String?
   coverImageKey    String?        @map("cover_image_key")
   /// Année de composition, approximative pour l'ancien répertoire. NULL si
-  /// aucune date fiable n'est établie — ne jamais deviner.
+  /// aucune date fiable n'est établie - ne jamais deviner.
   composedYear     Int?           @map("composed_year")
   /// Courant musical. NULL si l'œuvre est en cours de catalogage.
   period           MusicalPeriod?
-  /// Formation vocale (SATB, SATB div., SSAA...), saisie à la main —
+  /// Formation vocale (SATB, SATB div., SSAA...), saisie à la main -
   /// jamais déduite des AudioFile. Voir src/lib/works/voicing.ts.
   voicing          String?
   /// Langue du texte CHANTÉ (code ISO 639-1 : "fr", "la", "de", "en", "it"...),
@@ -80,20 +80,20 @@ model Work {
   @@map("works")
 }
 
-// Surcharges par langue d'une Work — jamais de colonnes suffixées (titleEn...) :
+// Surcharges par langue d'une Work - jamais de colonnes suffixées (titleEn...) :
 // ajouter une langue est une insertion de lignes, pas une migration. Le
 // français reste la langue de référence, portée par Work elle-même.
 model WorkTranslation {
   id               String  @id @default(cuid())
   workId           String  @map("work_id")
-  /// Code de langue d'interface (ex. "en") — sans rapport avec Work.language
+  /// Code de langue d'interface (ex. "en") - sans rapport avec Work.language
   /// (la langue du texte CHANTÉ). Voir src/lib/works/resolve-translation.ts.
   locale           String
   /// Slug localisé (ex. "mass-in-g-major"). Résolution : chercher d'abord ici
   /// pour la locale demandée, retomber sur Work.slug si absent.
   slug             String
   /// NULL = conserver le titre original (cas des incipits, ex. "Mille
-  /// regretz", qui ne se traduisent jamais) — pas une traduction manquante.
+  /// regretz", qui ne se traduisent jamais) - pas une traduction manquante.
   title            String?
   shortDescription String? @map("short_description")
   description      String?
@@ -161,7 +161,7 @@ model AudioFile {
   @@map("audio_files")
 }
 
-// Une offre achetable — jamais un fichier audio. Voir src/lib/products/invariants.ts
+// Une offre achetable - jamais un fichier audio. Voir src/lib/products/invariants.ts
 // pour les règles de cohérence scope/coverage <-> movementId/voiceId que Postgres
 // ne peut pas exprimer nativement.
 model Product {
@@ -192,7 +192,7 @@ model Product {
 
 // Volontairement minimal : pas de mot de passe, pas de session, pas de champ
 // emailVerified. L'authentification (magic link via Auth.js) viendra bien
-// plus tard et générera ses propres tables via son adaptateur — ne pas les
+// plus tard et générera ses propres tables via son adaptateur - ne pas les
 // anticiper ici, le format serait de toute façon à refaire.
 model User {
   id        String   @id @default(cuid())
@@ -207,15 +207,15 @@ model User {
   @@map("users")
 }
 
-/// Le droit qu'un utilisateur détient sur une œuvre — contrepartie d'une
+/// Le droit qu'un utilisateur détient sur une œuvre - contrepartie d'une
 /// offre (Product) achetée, offerte ou obtenue par code promo. Sa structure
 /// reprend volontairement celle de Product (mêmes scope/coverage,
-/// mêmes règles de cohérence avec movementId/voiceId — voir
+/// mêmes règles de cohérence avec movementId/voiceId - voir
 /// src/lib/library-items/invariants.ts, calqué sur
 /// src/lib/products/invariants.ts).
 ///
-/// DÉDUPLICATION SÉMANTIQUE NON TRAITÉE ICI : posséder « Alto — œuvre
-/// entière » (scope WORK) rend redondant « Alto — Kyrie » (scope MOVEMENT),
+/// DÉDUPLICATION SÉMANTIQUE NON TRAITÉE ICI : posséder « Alto - œuvre
+/// entière » (scope WORK) rend redondant « Alto - Kyrie » (scope MOVEMENT),
 /// mais aucune contrainte SQL ne peut exprimer cette relation d'inclusion.
 /// Cette déduplication relève du code de lecture des droits (prochaine
 /// étape, src/lib/access), pas de ce modèle ni de sa migration.
@@ -239,7 +239,7 @@ model LibraryItem {
 
   grantedAt DateTime  @default(now()) @map("granted_at")
   /// Retrait d'un droit (remboursement, litige) sans suppression de la
-  /// ligne — l'historique doit rester consultable. Toute lecture de droits
+  /// ligne - l'historique doit rester consultable. Toute lecture de droits
   /// effectifs doit filtrer sur revokedAt: null.
   revokedAt DateTime? @map("revoked_at")
 
@@ -251,7 +251,7 @@ model LibraryItem {
   // Postgres traite chaque NULL comme distinct : cet unique composite ne
   // protège que la combinaison MOVEMENT + SINGLE_VOICE (movementId ET
   // voiceId renseignés). Les trois autres combinaisons impliquent au moins
-  // un NULL et échappent à cette contrainte — voir les index uniques
+  // un NULL et échappent à cette contrainte - voir les index uniques
   // partiels ajoutés à la main dans la migration user_and_library_items,
   // sur le modèle de ceux de products/audio_files.
   @@unique([userId, workId, movementId, voiceId, coverage])

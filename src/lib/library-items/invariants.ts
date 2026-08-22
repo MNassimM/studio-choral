@@ -1,7 +1,7 @@
 /**
  * Invariants du modèle de droit d'accès (LibraryItem) que la base de données
  * ne peut pas exprimer nativement (pas de CHECK constraint conditionnelle
- * ici) — exactement les mêmes règles croisées que Product (voir
+ * ici) - exactement les mêmes règles croisées que Product (voir
  * src/lib/products/invariants.ts), le droit étant la contrepartie d'une
  * offre :
  *
@@ -13,9 +13,9 @@
  * TOUTE création de droit (seed, octroi manuel, futur webhook Stripe) doit
  * passer par `libraryItemInputSchema` avant insertion en base.
  *
- * Ne traite PAS la déduplication sémantique (« Alto — œuvre entière » rend
- * « Alto — Kyrie » redondant) : c'est une question de droits EFFECTIFS,
- * hors de portée d'une validation de forme à l'insertion — elle relève de
+ * Ne traite PAS la déduplication sémantique (« Alto - œuvre entière » rend
+ * « Alto - Kyrie » redondant) : c'est une question de droits EFFECTIFS,
+ * hors de portée d'une validation de forme à l'insertion - elle relève de
  * la prochaine étape (lib/access).
  */
 
@@ -39,7 +39,7 @@ const libraryItemShapeSchema = z.object({
 
 /**
  * Schéma complet d'un droit, avec les quatre règles de cohérence
- * scope/coverage <-> movementId/voiceId appliquées comme raffinements —
+ * scope/coverage <-> movementId/voiceId appliquées comme raffinements -
  * identiques à `productInputSchema`, dupliquées ici (pas réutilisées via
  * `.refine`) car les deux schémas de base portent des champs différents.
  */

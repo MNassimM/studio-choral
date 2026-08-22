@@ -59,7 +59,7 @@ function buildResetQuery(
 }
 
 /**
- * Barre des filtres actifs — rien n'est affiché si `pills` est vide (pas de
+ * Barre des filtres actifs - rien n'est affiché si `pills` est vide (pas de
  * barre vide, pas de libellé orphelin). Pastilles et lien de réinitialisation
  * sont des <Link> réels (jamais des boutons JS) : fonctionnels sans JS,
  * ouvrables dans un nouvel onglet, indexables.

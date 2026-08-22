@@ -22,14 +22,14 @@ async function WorkTableRow({ work }: { work: WorkCardData }) {
       </td>
       <td className="py-3 pr-4 font-medium">{work.title}</td>
       <td className="py-3 pr-4 text-muted-foreground">{work.composer}</td>
-      <td className="py-3 pr-4 text-muted-foreground">{work.voicing ?? "—"}</td>
+      <td className="py-3 pr-4 text-muted-foreground">{work.voicing ?? "-"}</td>
       <td className="py-3 pr-4 text-muted-foreground">
         {t("movementsCount", { count: work.movementsCount })}
       </td>
       <td className="py-3 pr-4 font-medium">
         {work.fromPriceCents !== null
           ? `${t("fromPrice")} ${format.number(work.fromPriceCents / 100, { style: "currency", currency: work.currency })}`
-          : "—"}
+          : "-"}
       </td>
       <td className="py-3 pr-4">
         <div className="flex items-center gap-2">

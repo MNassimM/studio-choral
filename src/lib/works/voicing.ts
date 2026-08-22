@@ -4,7 +4,7 @@
  * « SATB div. », « SATB + soli », « SAB »...) pour une liste fermée, qui
  * imposerait une migration à chaque nouvelle formation rencontrée.
  *
- * Elle est saisie à la main, œuvre par œuvre — jamais déduite des AudioFile
+ * Elle est saisie à la main, œuvre par œuvre - jamais déduite des AudioFile
  * en base : une œuvre peut comporter des divisions ponctuelles (un pupitre
  * divisé sur un seul passage) tout en restant désignée par son effectif
  * d'usage. Aucune fonction de ce module ne calcule ni ne vérifie le voicing
@@ -14,7 +14,7 @@
 import { z } from "zod";
 
 /**
- * Suggestions pour une future interface d'admin — pas une contrainte : toute
+ * Suggestions pour une future interface d'admin - pas une contrainte : toute
  * autre chaîne reste acceptée par `voicingSchema`.
  */
 export const COMMON_VOICINGS = [

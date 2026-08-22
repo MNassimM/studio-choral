@@ -7,7 +7,7 @@
  * voix") et de la cible (mouvement ou œuvre), via messages/*.json
  * ("product.allVoices", "product.nameTemplate").
  *
- * Pas encore appelée par une page (aucune page œuvre n'existe encore) —
+ * Pas encore appelée par une page (aucune page œuvre n'existe encore) -
  * préparée à l'avance comme la route /works/[slug], pour ne pas avoir à
  * reprendre le modèle de nommage plus tard.
  */

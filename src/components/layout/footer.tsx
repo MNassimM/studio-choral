@@ -8,7 +8,7 @@ import { Link } from "@/i18n/navigation";
 import { mainNavItems } from "@/components/layout/main-nav";
 
 // footer.linkLibrary : seul lien du footer qui n'est pas déjà dans
-// mainNavItems (catalogue/comment ça marche) — d'où sa clé "library" propre,
+// mainNavItems (catalogue/comment ça marche) - d'où sa clé "library" propre,
 // pendant que les deux autres réutilisent nav.* pour ne pas dupliquer un
 // libellé identique dans deux namespaces.
 const footerNavItems = [

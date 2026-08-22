@@ -7,7 +7,7 @@ import { routing } from "@/i18n/routing";
  * ci-dessous : le jour où une nouvelle langue arrive, seul ce fichier change.
  *
  * `title` null dans WorkTranslation signifie « conserver le titre original »
- * (cas des incipits, ex. « Mille regretz ») — jamais une traduction
+ * (cas des incipits, ex. « Mille regretz ») - jamais une traduction
  * manquante à combler.
  */
 

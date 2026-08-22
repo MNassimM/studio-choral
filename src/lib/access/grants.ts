@@ -1,7 +1,7 @@
 /**
- * Déduplication SÉMANTIQUE des droits — ce qu'aucune contrainte SQL ne peut
+ * Déduplication SÉMANTIQUE des droits - ce qu'aucune contrainte SQL ne peut
  * exprimer (voir le commentaire sur le modèle Prisma LibraryItem) :
- * posséder « Alto — œuvre entière » rend « Alto — Kyrie » redondant, parce
+ * posséder « Alto - œuvre entière » rend « Alto - Kyrie » redondant, parce
  * que le premier COUVRE le second.
  *
  * Non utilisée nulle part pour l'instant : sera appelée par le futur
@@ -13,7 +13,7 @@ import type { Grant } from "@/types/domain";
 
 /**
  * `a` rend-il `b` inutile ? Vrai si `a` couvre tout ce que `b` couvre (même
- * œuvre, scope au moins aussi large, coverage au moins aussi large) — y
+ * œuvre, scope au moins aussi large, coverage au moins aussi large) - y
  * compris quand `a` et `b` sont identiques (un droit se couvre lui-même).
  */
 export function absorbs(a: Grant, b: Grant): boolean {
@@ -53,7 +53,7 @@ function grantKey(grant: Grant): string {
  */
 export function dedupeGrants(grants: Grant[]): Grant[] {
   // 1. Retirer les doublons stricts (même œuvre/scope/mouvement/coverage/
-  //    voix), en conservant la première occurrence — sans cette passe, deux
+  //    voix), en conservant la première occurrence - sans cette passe, deux
   //    droits identiques s'absorberaient mutuellement et disparaîtraient
   //    tous les deux à l'étape 2.
   const seen = new Set<string>();

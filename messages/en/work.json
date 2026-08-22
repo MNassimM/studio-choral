@@ -33,10 +33,10 @@
   },
   "product": {
     "allVoices": "All voices",
-    "nameTemplate": "{voice} — {target}"
+    "nameTemplate": "{voice} - {target}"
   },
   "workPage": {
-    "metaTitleTemplate": "{title} — Butterfly Studio Choral",
+    "metaTitleTemplate": "{title} - Butterfly Studio Choral",
     "metaDescriptionFallback": "Discover {title} by {composer}: free extracts, movements and voice parts available on Butterfly Studio Choral.",
     "sidebarProgressByVoice": "{voices}: {unlocked}/{total} {total, plural, one {movement unlocked} other {movements unlocked}}",
     "fullWorkOwned": "You own this work in full.",

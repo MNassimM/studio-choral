@@ -31,7 +31,7 @@ import enAuth from "../../messages/en/auth.json";
  * permet à TypeScript d'inférer la forme exacte plutôt que Record<string, any>.
  *
  * home.json exporte deux namespaces indépendants ({ home, howItWorks }) et
- * est donc étalé (...frHome) plutôt qu'assigné sous une seule clé — les
+ * est donc étalé (...frHome) plutôt qu'assigné sous une seule clé - les
  * autres fichiers correspondent chacun à exactement un namespace, nommé
  * d'après le fichier.
  */
@@ -52,7 +52,7 @@ const fr = {
 
 // `satisfies typeof fr`, pas `: typeof fr` : échoue au typecheck si un
 // fichier en/*.json a une clé en trop, en moins, ou de forme différente par
-// rapport à son équivalent fr/*.json — un filet de sécurité qui n'existait
+// rapport à son équivalent fr/*.json - un filet de sécurité qui n'existait
 // pas avec l'ancien fichier unique (chargé dynamiquement, typé en any).
 const en = {
   ...enHome,

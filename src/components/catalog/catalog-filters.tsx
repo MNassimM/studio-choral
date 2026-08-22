@@ -63,7 +63,7 @@ type CatalogFiltersPanelProps = {
  * Fournit l'état (ouverture + cases cochées avant validation) au bouton
  * "Filtres" et au panneau, positionnés à deux endroits différents du DOM
  * (le bouton dans la barre d'outils, le panneau en pleine largeur juste en
- * dessous) — d'où le Context plutôt qu'un simple useState local au bouton.
+ * dessous) - d'où le Context plutôt qu'un simple useState local au bouton.
  * `children` (recherche, tri, bascule vue) reste serveur : seul ce wrapper
  * et le bouton sont client.
  */
@@ -206,7 +206,7 @@ function CatalogFiltersPanel({
 }
 
 /**
- * Bouton "Filtres" — doit être rendu dans les `children` de
+ * Bouton "Filtres" - doit être rendu dans les `children` de
  * `CatalogFiltersPanel` pour accéder au Context.
  */
 function CatalogFiltersButton() {

@@ -28,7 +28,7 @@ import { Link, getPathname } from "@/i18n/navigation";
 import { routing, type AppLocale } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
-// Police serif locale à cette page, pour les grands titres éditoriaux — le
+// Police serif locale à cette page, pour les grands titres éditoriaux - le
 // reste du site (Header, Footer, composants partagés) reste en Geist.
 const playfairDisplay = Playfair_Display({
   subsets: ["latin"],
@@ -113,7 +113,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-// Trait décoratif fin — volontairement un simple div plutôt que le composant
+// Trait décoratif fin - volontairement un simple div plutôt que le composant
 // Separator partagé : celui-ci impose data-horizontal:w-full avec la même
 // spécificité qu'un override d'instance (ex. w-12), donc une largeur réduite
 // ne le bat jamais de façon fiable. Purement ornemental ici (pas de rôle

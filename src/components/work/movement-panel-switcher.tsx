@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 type MovementSwitcherOption = {
   id: string;
   label: string;
-  /** Contenu déjà résolu côté serveur (droits déjà appliqués) — ce composant ne fait que choisir lequel afficher, jamais de logique de droits. */
+  /** Contenu déjà résolu côté serveur (droits déjà appliqués) - ce composant ne fait que choisir lequel afficher, jamais de logique de droits. */
   panel: React.ReactNode;
 };
 
@@ -17,7 +17,7 @@ type MovementSwitcherOption = {
  * propre état (deux instances sur la page = deux sélections indépendantes,
  * jamais synchronisées entre elles).
  *
- * Ne reçoit que des panneaux DÉJÀ RENDUS côté serveur (droits déjà résolus) —
+ * Ne reçoit que des panneaux DÉJÀ RENDUS côté serveur (droits déjà résolus) -
  * bascule laquelle est visible, ne calcule jamais quoi que ce soit à partir
  * des droits. Toutes les pistes/offres de tous les mouvements sont déjà dans
  * le DOM (comme la grille de téléchargements elle-même, qui affiche aussi les

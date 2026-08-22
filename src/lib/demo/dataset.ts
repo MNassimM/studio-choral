@@ -4,7 +4,7 @@
  * Ce module est la seule source de vérité du catalogue de démonstration :
  * œuvres, mouvements, référentiel des pupitres, pistes audio de synthèse
  * (aucun enregistrement réel) et produits commerciaux (offres achetables,
- * avec leurs tarifs de démonstration — voir la section "pricing" ci-dessous).
+ * avec leurs tarifs de démonstration - voir la section "pricing" ci-dessous).
  * Il est importé par la seed Prisma (`prisma/seed.ts`, qui ne contient plus
  * aucune donnée), par le générateur de fichiers WAV de démonstration
  * (`scripts/generate-demo-audio.ts`) et par `buildDemoProducts()`, afin que
@@ -15,7 +15,7 @@
  * insertion en base.
  *
  * En production, les fichiers audio vivront dans un bucket privé et seront
- * servis par URL signée après vérification des droits — `storageKey` n'est
+ * servis par URL signée après vérification des droits - `storageKey` n'est
  * jamais une URL.
  */
 
@@ -33,12 +33,12 @@ export type DemoMovement = {
 };
 
 /**
- * MOCK / TEMPORAIRE — tarifs de démonstration, à arbitrer œuvre par œuvre.
+ * MOCK / TEMPORAIRE - tarifs de démonstration, à arbitrer œuvre par œuvre.
  *
  * Pas de grille commune : chaque œuvre déclare ses propres montants, à côté
  * de son propre catalogue de mouvements, dans son entrée `DEMO_CATALOG`.
  * `movementSingleVoiceCents`/`movementAllVoicesCents` valent `null` pour une
- * œuvre à un seul mouvement — cela empêche `buildDemoProducts()` de générer
+ * œuvre à un seul mouvement - cela empêche `buildDemoProducts()` de générer
  * des offres de scope MOVEMENT strictement identiques (et concurrentes en
  * prix) aux offres de scope WORK de la même œuvre.
  */
@@ -52,7 +52,7 @@ export type DemoWorkPricing = {
 /**
  * Surcharge par langue d'une œuvre (voir model WorkTranslation). `title` null
  * signifie « conserver le titre original » (cas des incipits, qui ne se
- * traduisent jamais) — jamais une traduction manquante à combler.
+ * traduisent jamais) - jamais une traduction manquante à combler.
  */
 export type DemoWorkTranslation = {
   locale: string;
@@ -71,19 +71,19 @@ export type DemoWork = {
   description: string;
   /**
    * Année de composition, approximative pour l'ancien répertoire. `null` si
-   * aucune date fiable n'est établie — ne jamais deviner une valeur.
+   * aucune date fiable n'est établie - ne jamais deviner une valeur.
    */
   composedYear: number | null;
   /** Courant musical. `null` si l'œuvre est en cours de catalogage. */
   period: MusicalPeriod | null;
   /**
-   * Formation vocale saisie à la main (voir src/lib/works/voicing.ts) —
+   * Formation vocale saisie à la main (voir src/lib/works/voicing.ts) -
    * jamais déduite des AudioFile de l'œuvre.
    */
   voicing: string | null;
   /**
    * Langue du texte chanté (code ISO 639-1, voir src/lib/works/languages.ts)
-   * — sans rapport avec la langue d'interface du site.
+   * - sans rapport avec la langue d'interface du site.
    */
   language: string | null;
   isPublished: boolean;
@@ -94,7 +94,7 @@ export type DemoWork = {
    * Surcharge ponctuelle d'un prix pour un produit précis de cette œuvre,
    * indexée par sku (ex. un Kyrie plus court vendu moins cher que les autres
    * mouvements). Absente ou vide : tous les produits de l'œuvre utilisent
-   * les montants de `pricing`. N'affecte qu'un sku à la fois — ce n'est pas
+   * les montants de `pricing`. N'affecte qu'un sku à la fois - ce n'est pas
    * une seconde grille de prix.
    */
   priceOverrides?: Record<string, number>;
@@ -116,7 +116,7 @@ export const DEMO_CATALOG: DemoWork[] = [
       "Composée par Franz Schubert en 1815, cette messe fait partie de ses premières œuvres liturgiques. Écrite pour chœur mixte et orchestre, elle se distingue par un style mélodique simple et chaleureux. Ses six mouvements suivent l'ordinaire de la messe, du Kyrie à l'Agnus Dei.",
     composedYear: 1815,
     // Schubert est à la charnière classique/romantique ; CLASSICAL retenu au
-    // vu de la date de composition (1815). Choix arbitrable — signalé à
+    // vu de la date de composition (1815). Choix arbitrable - signalé à
     // l'utilisateur en fin de tâche.
     period: "CLASSICAL",
     voicing: "SATB",
@@ -299,7 +299,7 @@ export type DemoVoice = {
  * les effectifs autres que SATB, pas encore utilisés par aucune œuvre.
  * Position : ordre du plus aigu au plus grave. SOPRANO/SOPRANO_1 et
  * ALTO/ALTO_1 partagent la même position car un pupitre non divisé occupe le
- * même registre que le premier de ses pupitres divisés — ce ne sont pas deux
+ * même registre que le premier de ses pupitres divisés - ce ne sont pas deux
  * rangs distincts, juste deux façons d'organiser la même tessiture.
  */
 export const DEMO_VOICES: DemoVoice[] = [
@@ -468,7 +468,7 @@ function resolvePriceCents(
 function requirePriceCents(sku: string, priceCents: number | null): number {
   if (priceCents === null) {
     throw new Error(
-      `buildDemoProducts: prix manquant pour le produit "${sku}" — aucune valeur de repli n'est calculée.`,
+      `buildDemoProducts: prix manquant pour le produit "${sku}" - aucune valeur de repli n'est calculée.`,
     );
   }
   return priceCents;
@@ -511,7 +511,7 @@ export function buildDemoProducts(): DemoProduct[] {
 
           addProduct({
             sku,
-            name: `${VOICE_LABEL_BY_CODE[voiceCode]} — ${movement.title}`,
+            name: `${VOICE_LABEL_BY_CODE[voiceCode]} - ${movement.title}`,
             workSlug: work.slug,
             movementSlug: movement.slug,
             voiceCode,
@@ -534,7 +534,7 @@ export function buildDemoProducts(): DemoProduct[] {
 
         addProduct({
           sku,
-          name: `Toutes les voix — ${movement.title}`,
+          name: `Toutes les voix - ${movement.title}`,
           workSlug: work.slug,
           movementSlug: movement.slug,
           voiceCode: null,
@@ -557,7 +557,7 @@ export function buildDemoProducts(): DemoProduct[] {
 
       addProduct({
         sku,
-        name: `${VOICE_LABEL_BY_CODE[voiceCode]} — ${work.title}`,
+        name: `${VOICE_LABEL_BY_CODE[voiceCode]} - ${work.title}`,
         workSlug: work.slug,
         movementSlug: null,
         voiceCode,
@@ -582,7 +582,7 @@ export function buildDemoProducts(): DemoProduct[] {
 
     addProduct({
       sku: workAllVoicesSku,
-      name: `Toutes les voix — ${work.title}`,
+      name: `Toutes les voix - ${work.title}`,
       workSlug: work.slug,
       movementSlug: null,
       voiceCode: null,
@@ -607,7 +607,7 @@ export type DemoUser = {
 };
 
 /**
- * MOCK / TEMPORAIRE — quatre comptes de démonstration, chacun illustrant un
+ * MOCK / TEMPORAIRE - quatre comptes de démonstration, chacun illustrant un
  * état différent de la page œuvre (voir DEMO_LIBRARY_ITEMS ci-dessous). Pas
  * d'authentification réelle derrière : voir src/lib/auth/current-user.ts,
  * qui bascule entre ces comptes via la variable d'environnement
@@ -651,14 +651,14 @@ export type DemoLibraryItem = {
 };
 
 /**
- * MOCK / TEMPORAIRE — droits de démonstration, exprimés par slug/code (jamais
+ * MOCK / TEMPORAIRE - droits de démonstration, exprimés par slug/code (jamais
  * par id, résolus par la seed comme le reste du dataset). Tous en
  * source = MANUAL_GRANT : aucun ne provient d'un achat réel (pas de Purchase
  * à ce stade). Sept lignes au total, réparties sur trois des quatre comptes
  * ("demo-aucun-achat" n'a délibérément aucun droit).
  */
 export const DEMO_LIBRARY_ITEMS: DemoLibraryItem[] = [
-  // demo-alto-partiel : pupitre ALTO sur 4 des 6 mouvements de la messe —
+  // demo-alto-partiel : pupitre ALTO sur 4 des 6 mouvements de la messe -
   // état "4/6 mouvements débloqués".
   ...(["kyrie", "gloria", "credo", "sanctus"] as const).map(
     (movementSlug): DemoLibraryItem => ({
@@ -671,7 +671,7 @@ export const DEMO_LIBRARY_ITEMS: DemoLibraryItem[] = [
       source: "MANUAL_GRANT",
     }),
   ),
-  // demo-oeuvre-complete : toutes les voix, œuvre entière — un seul droit.
+  // demo-oeuvre-complete : toutes les voix, œuvre entière - un seul droit.
   {
     userEmail: "demo-oeuvre-complete@butterfly.test",
     workSlug: "messe-en-sol-majeur",

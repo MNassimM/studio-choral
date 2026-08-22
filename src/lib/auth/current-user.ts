@@ -8,7 +8,7 @@
  * des quatre comptes disponibles et l'état qu'ils illustrent chacun).
  *
  * Brancher Auth.js consistera à remplacer le CORPS de cette fonction
- * (résoudre l'utilisateur depuis la session réelle) — rien d'autre. Tout le
+ * (résoudre l'utilisateur depuis la session réelle) - rien d'autre. Tout le
  * code qui a besoin de l'utilisateur courant doit appeler getCurrentUser()
  * plutôt que de lire une session ou une variable d'environnement lui-même :
  * c'est ce qui rendra la bascule indolore.

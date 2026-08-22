@@ -25,7 +25,7 @@ async function Header() {
 
         <div className="flex items-center gap-2 col-start-3 justify-self-end">
           {/* En dessous de md, MobileNav affiche son propre LanguageSwitcher
-              dans le menu ouvert — l'afficher aussi ici le dupliquerait. */}
+              dans le menu ouvert - l'afficher aussi ici le dupliquerait. */}
           <div className="hidden md:block">
             <LanguageSwitcher />
           </div>

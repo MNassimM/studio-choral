@@ -34,7 +34,7 @@ npx prisma studio           # interface graphique pour explorer les données
 npm run db:seed             # charger les données de développement (rejouable sans risque)
 ```
 
-Copie `.env.example` vers `.env` si ce n'est pas déjà fait — les identifiants
+Copie `.env.example` vers `.env` si ce n'est pas déjà fait - les identifiants
 par défaut (`butterfly` / `butterfly`) sont des identifiants de développement
 local, pas des secrets.
 

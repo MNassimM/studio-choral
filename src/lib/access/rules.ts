@@ -1,6 +1,6 @@
 /**
  * Résolution des droits d'accès. Fonctions pures : aucun import de Prisma,
- * React ou Next ici — elles reçoivent des données déjà en forme domaine
+ * React ou Next ici - elles reçoivent des données déjà en forme domaine
  * (src/types/domain.ts) et rendent un verdict sérialisable. C'est ce qui les
  * rend testables sans base de données et réutilisables telles quelles côté
  * Client Component.
@@ -22,7 +22,7 @@ function dedupeVoiceCodes(lists: string[][]): string[] {
 
 /**
  * Valeur de ACCESS_POLICY exposée telle quelle : l'appelant (une page, un
- * composant) ne doit jamais importer ACCESS_POLICY directement — seul ce
+ * composant) ne doit jamais importer ACCESS_POLICY directement - seul ce
  * module a le droit de le lire. Ce ré-export est une simple valeur, pas un
  * point de décision : rien de plus qu'un raccourci de lecture.
  */
@@ -30,7 +30,7 @@ export const PREVIEW_DURATION_SECONDS = ACCESS_POLICY.previewDurationSeconds;
 
 /**
  * Calcule, pour une œuvre et une liste de droits (déjà filtrés « actifs »
- * par l'appelant — voir src/lib/catalog), ce que l'utilisateur possède.
+ * par l'appelant - voir src/lib/catalog), ce que l'utilisateur possède.
  *
  * Règles de couverture :
  *   - un droit de scope WORK couvre TOUS les mouvements de l'œuvre

@@ -17,7 +17,7 @@ import {
 
 /**
  * Met à jour un paramètre de l'URL courante et navigue (les autres
- * paramètres — recherche, autre filtre — sont conservés). Retirer le
+ * paramètres - recherche, autre filtre - sont conservés). Retirer le
  * paramètre plutôt que d'écrire sa valeur "par défaut" garde des URLs
  * propres.
  *

@@ -13,7 +13,7 @@ import type { Grant, WorkAccessInput } from "@/types/domain";
 
 const SATB = ["SOPRANO", "ALTO", "TENOR", "BASS"];
 
-// Œuvre de test : 2 mouvements, 4 pupitres chacun — donnée construite à la
+// Œuvre de test : 2 mouvements, 4 pupitres chacun - donnée construite à la
 // main, aucune base de données.
 const messe: WorkAccessInput = {
   id: "work-messe",
@@ -64,7 +64,7 @@ test("l'extrait reste accessible sans achat", () => {
   );
 });
 
-test("« Alto — Kyrie » débloque l'alto du Kyrie", () => {
+test("« Alto - Kyrie » débloque l'alto du Kyrie", () => {
   const access = resolveWorkAccess(messe, [
     grant({
       scope: "MOVEMENT",
@@ -88,7 +88,7 @@ test("« Alto — Kyrie » débloque l'alto du Kyrie", () => {
   );
 });
 
-test("« Alto — Kyrie » ne débloque PAS le ténor du Kyrie", () => {
+test("« Alto - Kyrie » ne débloque PAS le ténor du Kyrie", () => {
   const access = resolveWorkAccess(messe, [
     grant({
       scope: "MOVEMENT",
@@ -108,7 +108,7 @@ test("« Alto — Kyrie » ne débloque PAS le ténor du Kyrie", () => {
   );
 });
 
-test("« Alto — Kyrie » ne débloque PAS l'alto du Gloria", () => {
+test("« Alto - Kyrie » ne débloque PAS l'alto du Gloria", () => {
   const access = resolveWorkAccess(messe, [
     grant({
       scope: "MOVEMENT",
@@ -167,7 +167,7 @@ test("un pupitre possédé ne permet PAS de télécharger le tutti", () => {
   );
 });
 
-test("« toutes voix — Kyrie » permet de télécharger le tutti du Kyrie", () => {
+test("« toutes voix - Kyrie » permet de télécharger le tutti du Kyrie", () => {
   const access = resolveWorkAccess(messe, [
     grant({
       scope: "MOVEMENT",
@@ -186,7 +186,7 @@ test("« toutes voix — Kyrie » permet de télécharger le tutti du Kyrie", ()
   );
 });
 
-test("« toutes voix — œuvre entière » débloque tout, sur tous les mouvements", () => {
+test("« toutes voix - œuvre entière » débloque tout, sur tous les mouvements", () => {
   const access = resolveWorkAccess(messe, [grant({})]);
 
   assert.equal(access.ownsFullWork, true);
@@ -204,7 +204,7 @@ test("« toutes voix — œuvre entière » débloque tout, sur tous les mouveme
   }
 });
 
-test("« Alto — œuvre entière » débloque l'alto sur TOUS les mouvements", () => {
+test("« Alto - œuvre entière » débloque l'alto sur TOUS les mouvements", () => {
   const access = resolveWorkAccess(messe, [
     grant({ scope: "WORK", coverage: "SINGLE_VOICE", voiceCode: "ALTO" }),
   ]);
@@ -349,6 +349,6 @@ test("un droit portant sur une autre œuvre est ignoré", () => {
 test("preuve que la politique commerciale est bien centralisée", () => {
   // Sanity check du fixture lui-même : si cette valeur n'est plus `false`
   // par défaut, le test 7 ci-dessus (le plus important du fichier) doit
-  // échouer — voir la procédure de bascule manuelle dans le résumé de tâche.
+  // échouer - voir la procédure de bascule manuelle dans le résumé de tâche.
   assert.equal(ACCESS_POLICY.ownedVoiceUnlocksTuttiDownload, false);
 });

@@ -3,12 +3,12 @@ import { cn } from "@/lib/utils";
 /**
  * SVG inline, jamais d'emoji drapeau (🇫🇷/🇬🇧) : Windows ne fournit pas les
  * glyphes correspondants et les affiche en lettres brutes ("FR"/"GB") sur une
- * grande partie des postes — un bug silencieux, invisible depuis macOS.
+ * grande partie des postes - un bug silencieux, invisible depuis macOS.
  *
  * Le recadrage en cercle fait partie du composant lui-même (pas de la
  * responsabilité de l'appelant) : un wrapper span rounded-full+overflow-hidden
  * contient un SVG en "xMidYMid slice" qui déborde puis se fait rogner, plutôt
- * qu'un clipPath SVG — évite toute collision d'id si plusieurs instances du
+ * qu'un clipPath SVG - évite toute collision d'id si plusieurs instances du
  * même drapeau sont montées à la fois (bouton + ligne de menu, desktop +
  * mobile).
  */

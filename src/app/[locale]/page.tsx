@@ -18,7 +18,7 @@ import {
   deriveWorkCardData,
 } from "@/lib/catalog/work-card-data";
 
-// Police serif locale à cette page, pour les grands titres éditoriaux — le
+// Police serif locale à cette page, pour les grands titres éditoriaux - le
 // reste du site (Header, Footer, composants partagés) reste en Geist.
 const playfairDisplay = Playfair_Display({
   subsets: ["latin"],

@@ -7,6 +7,7 @@ import { Playfair_Display } from "next/font/google";
 import {
   CheckCircle2,
   Disc3,
+  LockKeyhole,
   Download,
   Lock,
   Music2,
@@ -55,7 +56,7 @@ const playfairDisplay = Playfair_Display({
  * sélectionné, impossible de le laisser fuiter par erreur plus loin.
  *
  * Enveloppée dans React `cache()` : generateMetadata() et la page elle-même
- * appellent cette fonction avec les mêmes arguments dans la même requête —
+ * appellent cette fonction avec les mêmes arguments dans la même requête -
  * sans ce cache, ce serait deux allers-retours base de données identiques.
  */
 const findPublishedWorkBySlug = cache(
@@ -173,7 +174,7 @@ export async function generateMetadata(
 type SidebarVoiceView = { code: string; label: string };
 
 // PREVIEW n'est jamais téléchargeable (voir la boucle qui construit
-// downloadGroups : les pistes PREVIEW sont exclues avant insertion) — type
+// downloadGroups : les pistes PREVIEW sont exclues avant insertion) - type
 // resserré pour que ce soit vérifié statiquement, pas seulement en commentaire.
 type DownloadableAudioType = Exclude<AudioType, "PREVIEW">;
 
@@ -231,7 +232,7 @@ function VoicePill({
       {label}
       <span className="sr-only">
         {" "}
-        — {owned ? t("voiceOwned") : t("voiceLocked")}
+        - {owned ? t("voiceOwned") : t("voiceLocked")}
       </span>
     </span>
   );
@@ -367,7 +368,7 @@ async function StudioPlaceholder({ unlocked }: { unlocked: boolean }) {
           {t("studioLockedNotice")}
         </p>
       ) : null}
-      {/* TODO : Studio audio — étape suivante */}
+      {/* TODO : Studio audio - étape suivante */}
     </div>
   );
 }
@@ -396,55 +397,45 @@ async function DownloadFileGrid({ entries }: { entries: DownloadFileEntry[] }) {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-2 sm:grid-cols-5">
       {entries.map((entry, index) => (
         <div
           key={`${entry.audioType}-${entry.voiceLabel ?? "all"}-${index}`}
           className={cn(
-            "flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5",
+            "flex flex-col items-center justify-between rounded-xl border px-3 py-4 text-center transition-colors",
             entry.owned
               ? "border-border"
               : "border-border/60 bg-muted/30 opacity-70",
           )}
         >
-          <div className="flex min-w-0 items-center gap-2">
-            <Disc3
-              className={cn(
-                "size-4 shrink-0",
-                entry.owned ? "text-primary" : "text-muted-foreground",
-              )}
-              aria-hidden="true"
-            />
-            <div className="flex min-w-0 flex-col">
-              <span className="truncate text-sm">
-                {entry.voiceLabel ? `${entry.voiceLabel} — ` : ""}
-                {t(`audioType.${entry.audioType}`)}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                {formatAudioFormatLabel(entry.mimeType)}
-                {entry.sizeBytes !== null
-                  ? ` · ${formatFileSize(entry.sizeBytes, t)}`
-                  : ""}
-              </span>
-            </div>
+          {/* Icône en haut */}
+          <div className="flex flex-1 items-center justify-center">
+            {entry.owned ? (
+              <Download
+                className="size-6 text-primary"
+                aria-hidden="true"
+              />
+            ) : (
+              <LockKeyhole
+                className="size-6 text-muted-foreground"
+                aria-hidden="true"
+              />
+            )}
           </div>
-          {entry.owned ? (
-            // TODO : URLs signées — étape stockage
-            <Button
-              disabled
-              size="icon"
-              variant="outline"
-              className="shrink-0 rounded-full"
-              aria-label={t("downloadButton")}
-            >
-              <Download className="size-4" />
-            </Button>
-          ) : (
-            <span className="flex shrink-0 items-center gap-1 text-muted-foreground">
-              <Lock className="size-4" aria-hidden="true" />
-              <span className="sr-only">{t("downloadFileLocked")}</span>
-            </span>
-          )}
+
+          {/* Texte principal */}
+          <div className="mt-2 w-full min-w-0 space-y-0.5">
+            <p className="truncate text-sm font-medium leading-tight">
+              {entry.voiceLabel ? `${entry.voiceLabel} - ` : ""}
+              {t(`audioType.${entry.audioType}`)}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {formatAudioFormatLabel(entry.mimeType)}
+              {entry.sizeBytes !== null && (
+                <> · {formatFileSize(entry.sizeBytes, t)}</>
+              )}
+            </p>
+          </div>
         </div>
       ))}
     </div>
@@ -653,7 +644,7 @@ export default async function WorkPage(
   const format = await getFormatter();
 
   const voiceCodeById = new Map(voices.map((voice) => [voice.id, voice.code]));
-  // Voice.label (base) est en français, saisi pour l'admin — jamais affiché
+  // Voice.label (base) est en français, saisi pour l'admin - jamais affiché
   // tel quel : on préfère la traduction work.voice.* quand le code SATB est
   // connu, repli sur le libellé brut pour un pupitre divisé pas encore
   // documenté (SOPRANO_1...).
@@ -725,7 +716,7 @@ export default async function WorkPage(
     .filter((code) => !access.ownedVoiceCodes.includes(code))
     .map((code) => ({ code, label: voiceLabelByCode.get(code) ?? code }));
 
-  // --- Téléchargements — dérivés exclusivement de canDownload(), fichiers
+  // --- Téléchargements - dérivés exclusivement de canDownload(), fichiers
   // verrouillés inclus (grisés, sans URL) ---
   const downloadGroups: MovementDownloadGroup[] = work.movements.map(
     (movement) => {
@@ -774,7 +765,7 @@ export default async function WorkPage(
     downloadGroups[0]?.movementId ??
     "";
 
-  // --- Offres — filtrées via absorbs() : jamais de contenu déjà possédé ---
+  // --- Offres - filtrées via absorbs() : jamais de contenu déjà possédé ---
   function composeName(product: WorkWithDetail["products"][number]): string {
     const voiceLabel = product.voice
       ? (voiceLabelByCode.get(product.voice.code) ?? product.voice.label)
@@ -815,7 +806,7 @@ export default async function WorkPage(
     });
   }
 
-  // --- 4a. Par mouvement — un panneau de cartes de pack par mouvement,
+  // --- 4a. Par mouvement - un panneau de cartes de pack par mouvement,
   // filtré via absorbs() (jamais de contenu déjà possédé) ---
   const movementOfferGroups: MovementOfferGroup[] = work.movements.map(
     (movement) => ({
@@ -841,7 +832,7 @@ export default async function WorkPage(
     movementOfferGroups[0]?.movementId ??
     "";
 
-  // --- 4b. Œuvre complète — toujours les 4 pupitres (déjà possédés compris,
+  // --- 4b. Œuvre complète - toujours les 4 pupitres (déjà possédés compris,
   // affichés grisés avec un bandeau plutôt que masqués) + « toutes les voix ». ---
   const workScopeProducts = work.products.filter(
     (product) => product.scope === "WORK",
@@ -911,7 +902,7 @@ export default async function WorkPage(
             </div>
 
             <div className="flex flex-col gap-4">
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2 items-baseline">
                 <h1
                   className={cn(
                     "text-3xl tracking-tight sm:text-4xl",
@@ -955,7 +946,7 @@ export default async function WorkPage(
             </div>
           </div>
 
-          {/* « Votre accès » — dans le flux (pleine largeur, en tête) jusqu'à
+          {/* « Votre accès » - dans le flux (pleine largeur, en tête) jusqu'à
               1920px ; au-delà, déportée hors du Container et collée au bord
               droit de la fenêtre (fixed), sans déplacer le centrage du
               Container lui-même puisqu'un élément fixed est retiré du flux. */}
@@ -984,7 +975,7 @@ export default async function WorkPage(
             )}
           </div>
 
-          {/* Étendre votre accès — absente si l'œuvre est déjà possédée en
+          {/* Étendre votre accès - absente si l'œuvre est déjà possédée en
               intégralité ; sinon toujours au moins la carte « toutes les
               voix », le mouvement d'abord (engagement faible), l'œuvre
               complète ensuite (offre principale, en conclusion). */}

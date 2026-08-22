@@ -8,7 +8,7 @@ import type { AppLocale } from "@/i18n/routing";
  * Pont entre une page à segment dynamique (ex. /works/[slug]) et le
  * LanguageSwitcher global du header : next-intl retraduit les segments
  * STATIQUES d'un chemin en changeant de locale, jamais la VALEUR d'un
- * paramètre — le slug d'une œuvre diffère par locale (WorkTranslation.slug)
+ * paramètre - le slug d'une œuvre diffère par locale (WorkTranslation.slug)
  * et n'a aucun moyen d'être connu côté client sans base de données.
  *
  * La page fournit donc la correspondance locale -> valeur traduite via
