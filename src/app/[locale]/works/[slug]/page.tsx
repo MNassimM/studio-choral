@@ -279,7 +279,6 @@ export default async function WorkPage(
   }
 
   const {
-    ownedVoiceViews,
     lockedVoiceViews,
     downloadGroups,
     hasTuttiDownload,
@@ -302,11 +301,35 @@ export default async function WorkPage(
     isAlreadyOwned: isAbsorbed,
   });
 
+  // Pupitres débloqués/verrouillés par mouvement, pour l'affichage dans
+  // « Votre accès » (AccessSidebar) : un mouvement -> ses pupitres, chacun
+  // marqué possédé ou non.
+  const voiceCodeById = new Map(voices.map((voice) => [voice.id, voice.code]));
+  const movementVoiceAccess = work.movements.map((movement) => {
+    const movementVoiceCodes = new Set<string>();
+    for (const track of movement.audioFiles) {
+      if (track.voiceId) {
+        const code = voiceCodeById.get(track.voiceId);
+        if (code) movementVoiceCodes.add(code);
+      }
+    }
+    const ownedCodes = access.movements[movement.id]?.ownedVoiceCodes ?? [];
+    return {
+      movementId: movement.id,
+      movementTitle: movement.title,
+      voices: voices
+        .filter((voice) => movementVoiceCodes.has(voice.code))
+        .map((voice) => ({
+          code: voice.code,
+          label: getVoiceLabel(voice.code),
+          owned: ownedCodes.includes(voice.code),
+        })),
+    };
+  });
+
   const sidebar = (
     <AccessSidebar
-      access={access}
-      ownedVoices={ownedVoiceViews}
-      lockedVoices={lockedVoiceViews}
+      movements={movementVoiceAccess}
       hasTuttiDownload={hasTuttiDownload}
       hasAccompanimentDownload={hasAccompanimentDownload}
     />
@@ -394,7 +417,7 @@ export default async function WorkPage(
               1920px ; au-delà, déportée hors du Container et collée au bord
               droit de la fenêtre (fixed), sans déplacer le centrage du
               Container lui-même puisqu'un élément fixed est retiré du flux. */}
-          <div className="w-full min-[1920px]:fixed min-[1920px]:top-20 min-[1920px]:right-4 min-[1920px]:z-30 min-[1920px]:w-60 min-[1920px]:max-h-[calc(100vh-6rem)] min-[1920px]:overflow-y-auto">
+          <div className="w-full lg:fixed lg:top-20 lg:right-4 lg:z-30 lg:w-60 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
             {sidebar}
           </div>
           <StudioPlaceholder unlocked={access.unlockedMovementCount > 0} />
