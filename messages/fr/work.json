@@ -79,6 +79,7 @@
     "extendAccessBulletTuttiDownload": "Téléchargement du mix complet (tutti)",
     "extendAccessUnlocksLabel": "Débloque en plus :",
     "extendAccessMovementFullyOwnedNotice": "Vous possédez déjà entièrement ce mouvement.",
-    "offersScopeMovement": "Par mouvement"
+    "offersScopeMovement": "Par mouvement",
+    "offersScopeWork": "Par œuvre"
   }
 }

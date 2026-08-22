@@ -79,6 +79,7 @@
     "extendAccessBulletTuttiDownload": "Full mix download (tutti)",
     "extendAccessUnlocksLabel": "Also unlocks:",
     "extendAccessMovementFullyOwnedNotice": "You already own this movement in full.",
-    "offersScopeMovement": "By movement"
+    "offersScopeMovement": "By movement",
+    "offersScopeWork": "By work"
   }
 }
