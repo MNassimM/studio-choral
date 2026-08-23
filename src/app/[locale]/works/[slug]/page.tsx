@@ -10,6 +10,7 @@ import { Container } from "@/components/layout/container";
 import { Badge } from "@/components/ui/badge";
 import { AccessSidebar } from "@/components/work/access-sidebar";
 import { CollapsibleAccessPanel } from "@/components/work/collapsible-access-panel";
+import { CollapsibleOfferSection } from "@/components/work/collapsible-offer-section";
 import { StudioPlaceholder } from "@/components/work/studio-placeholder";
 import { DownloadFileGrid } from "@/components/work/download-file-grid";
 import { MovementOfferPanel } from "@/components/work/movement-offer-panel";
@@ -458,10 +459,9 @@ export default async function WorkPage(
               </h2>
 
               {!hasSingleMovement ? (
-                <div className="flex flex-col gap-4">
-                  <h3 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
-                    {tWorkPage("offersScopeMovement")}
-                  </h3>
+                <CollapsibleOfferSection
+                  heading={tWorkPage("offersScopeMovement")}
+                >
                   <MovementPanelSwitcher
                     selectorLabel={tWorkPage("movementSelectorLabel")}
                     defaultMovementId={defaultOfferMovementId}
@@ -474,17 +474,16 @@ export default async function WorkPage(
                       panel: <MovementOfferPanel offers={group.offers} />,
                     }))}
                   />
-                </div>
+                </CollapsibleOfferSection>
               ) : null}
-              <h3 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
-                    {tWorkPage("offersScopeWork")}
-                  </h3>
-              <WholeWorkOffers
-                singleVoiceCards={workSingleVoiceCards}
-                allVoicesCard={workAllVoicesCard}
-                ownsAnything={access.ownsAnything}
-                unlocksVoices={lockedVoiceViews.map((voice) => voice.label)}
-              />
+              <CollapsibleOfferSection heading={tWorkPage("offersScopeWork")}>
+                <WholeWorkOffers
+                  singleVoiceCards={workSingleVoiceCards}
+                  allVoicesCard={workAllVoicesCard}
+                  ownsAnything={access.ownsAnything}
+                  unlocksVoices={lockedVoiceViews.map((voice) => voice.label)}
+                />
+              </CollapsibleOfferSection>
             </div>
           ) : null}
         </Container>

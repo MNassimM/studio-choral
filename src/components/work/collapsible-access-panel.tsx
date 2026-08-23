@@ -30,7 +30,7 @@ function CollapsibleAccessPanel({
 
   return (
     <div
-      className="hidden lg:fixed lg:top-20 lg:right-4 lg:z-30 lg:block lg:w-60 lg:transition-transform lg:duration-300 lg:ease-out"
+      className="hidden 2xl:fixed 2xl:top-20 2xl:right-4 2xl:z-30 2xl:block 2xl:w-60 2xl:transition-transform 2xl:duration-300 2xl:ease-out"
       style={{ transform: open ? "translateX(0)" : "translateX(calc(100% ))" }}
     >
       <button

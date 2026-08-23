@@ -37,7 +37,7 @@ async function Hero() {
 
   return (
     <section className="bg-background">
-      <Container className="flex flex-col items-center gap-6 py-20 text-center sm:py-28">
+      <Container className="flex flex-col items-center gap-6 pt-20 text-center sm:pt-28">
         <h1
           className={cn(
             "max-w-2xl text-4xl tracking-tight text-balance sm:text-5xl",
@@ -78,7 +78,7 @@ async function SearchBar({ locale }: { locale: AppLocale }) {
 
   return (
     <section className="bg-background">
-      <Container className="pb-16 sm:pb-20">
+      <Container className="pb-16 sm:pb-20 pt-8 sm:pt-10">
         <form
           action={action}
           method="GET"
