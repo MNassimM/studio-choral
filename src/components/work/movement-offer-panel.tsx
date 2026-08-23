@@ -33,7 +33,20 @@ async function MovementOfferPanel({ offers }: { offers: OwnedOfferView[] }) {
           alreadyOwned={offer.alreadyOwned}
           alreadyOwnedBadge={t("extendAccessAlreadyOwnedBadge")}
           size="sm"
-        /> 
+          discount={offer.discount}
+          discountBadgeLabel={
+            offer.discount
+              ? tCard("discountBadge", { percent: offer.discount.percentOff })
+              : undefined
+          }
+          discountOriginalPriceSrLabel={
+            offer.discount
+              ? t("extendAccessDiscountOriginalPriceSr", {
+                  price: offer.discount.originalPriceLabel,
+                })
+              : undefined
+          }
+        />
       ))}
     </div>
   );

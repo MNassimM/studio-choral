@@ -8,7 +8,8 @@
     "addToCart": "Add to cart",
     "byItNow": "Buy now",
     "discover": "Discover",
-    "movementsCount": "{count, plural, one {# movement} other {# movements}}"
+    "movementsCount": "{count, plural, one {# movement} other {# movements}}",
+    "discountBadge": "-{percent}%"
   },
   "period": {
     "MEDIEVAL": "Medieval",
@@ -81,6 +82,7 @@
     "extendAccessBulletTempo": "Tempo control (Studio)",
     "extendAccessBulletTuttiDownload": "Full mix download (tutti)",
     "extendAccessUnlocksLabel": "Also unlocks:",
+    "extendAccessDiscountOriginalPriceSr": "Catalog price, before discount: {price}",
     "extendAccessMovementFullyOwnedNotice": "You already own this movement in full.",
     "offersScopeMovement": "By movement",
     "offersScopeWork": "By work"

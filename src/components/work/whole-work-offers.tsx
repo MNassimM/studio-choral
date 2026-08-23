@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { PackCard } from "@/components/work/pack-card";
 import type {
   OwnedOfferView,
-  SimpleOfferView,
+  WorkAllVoicesOfferView,
 } from "@/lib/works/work-page-view-model";
 
 async function WholeWorkOffers({
@@ -13,7 +13,7 @@ async function WholeWorkOffers({
   unlocksVoices,
 }: {
   singleVoiceCards: OwnedOfferView[];
-  allVoicesCard: SimpleOfferView | null;
+  allVoicesCard: WorkAllVoicesOfferView | null;
   ownsAnything: boolean;
   unlocksVoices: string[];
 }) {
@@ -57,6 +57,21 @@ async function WholeWorkOffers({
             ownsAnything ? t("extendAccessUnlocksLabel") : undefined
           }
           unlocksVoices={ownsAnything ? unlocksVoices : undefined}
+          discount={allVoicesCard.discount}
+          discountBadgeLabel={
+            allVoicesCard.discount
+              ? tCard("discountBadge", {
+                  percent: allVoicesCard.discount.percentOff,
+                })
+              : undefined
+          }
+          discountOriginalPriceSrLabel={
+            allVoicesCard.discount
+              ? t("extendAccessDiscountOriginalPriceSr", {
+                  price: allVoicesCard.discount.originalPriceLabel,
+                })
+              : undefined
+          }
         />
       ) : null}
     </div>

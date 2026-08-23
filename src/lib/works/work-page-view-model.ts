@@ -1,5 +1,6 @@
 import type { AccessScope, AudioType, VoiceCoverage, WorkAccess } from "@/types/domain";
 import { canDownload } from "@/lib/access/rules";
+import { computeAllVoicesDiscount } from "@/lib/pricing/all-voices-discount";
 
 // ─── Types de vue ──────────────────────────────────────────────────────────
 // Déplacés tels quels depuis src/app/[locale]/works/[slug]/page.tsx.
@@ -28,7 +29,36 @@ export type MovementDownloadGroup = {
 
 export type SimpleOfferView = { sku: string; name: string; priceLabel: string };
 
-export type OwnedOfferView = SimpleOfferView & { alreadyOwned: boolean };
+/**
+ * Remise proportionnelle sur un produit ALL_VOICES (scope WORK ou MOVEMENT) -
+ * voir src/lib/pricing/all-voices-discount.ts. `percentOff` est un entier à
+ * usage d'affichage (pastille) uniquement. Couverture calculée sur l'œuvre
+ * entière pour un produit de scope WORK, sur le seul mouvement pour un
+ * produit de scope MOVEMENT - même principe, périmètre différent.
+ */
+export type AllVoicesDiscountView = {
+  percentOff: number;
+  originalPriceLabel: string;
+  discountedPriceLabel: string;
+};
+
+// Type dédié plutôt qu'un SimpleOfferView aux champs optionnels : la remise
+// ne concerne QUE la carte ALL_VOICES de scope WORK - offre unique, hors
+// liste - donc un type à part plutôt qu'un champ nullable sur SimpleOfferView.
+export type WorkAllVoicesOfferView = SimpleOfferView & {
+  /** `null` = pas de remise (aucune voix déjà possédée) - comportement identique à aujourd'hui. */
+  discount: AllVoicesDiscountView | null;
+};
+
+// discount est obligatoire (jamais optionnel) mais nul pour les offres non
+// concernées (produit SINGLE_VOICE, ou ALL_VOICES sans voix déjà possédée) -
+// ces offres se mélangent dans une même liste (workSingleVoiceCards,
+// offers d'un MovementOfferGroup), donc un champ toujours présent plutôt
+// qu'un type à part par offre.
+export type OwnedOfferView = SimpleOfferView & {
+  alreadyOwned: boolean;
+  discount: AllVoicesDiscountView | null;
+};
 
 export type MovementOfferGroup = {
   movementId: string;
@@ -100,7 +130,7 @@ export type WorkPageViewModel = {
   movementOfferGroups: MovementOfferGroup[];
   defaultOfferMovementId: string;
   workSingleVoiceCards: OwnedOfferView[];
-  workAllVoicesCard: SimpleOfferView | null;
+  workAllVoicesCard: WorkAllVoicesOfferView | null;
   hasSingleMovement: boolean;
 };
 
@@ -227,7 +257,62 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
     return composeProductName(voiceLabel, targetTitle);
   }
 
-  // Toutes les offres du mouvement (déjà possédées comprises, grisées avec un bandeau)
+  // Remise proportionnelle sur un produit ALL_VOICES, dérivée de la
+  // couverture déjà possédée sur le périmètre concerné (prorata des
+  // cellules mouvement × voix pour l'œuvre entière, ou des seules voix pour
+  // un mouvement donné - voir src/lib/pricing/all-voices-discount.ts).
+  // `null` si aucune voix concernée n'est encore possédée (comportement
+  // identique à aujourd'hui).
+  // TODO(webhook Stripe) : au moment de facturer, le webhook devra appeler
+  // computeAllVoicesDiscount() côté serveur avec la même couverture - cette
+  // remise affichée n'a aucune valeur contraignante tant que ce n'est pas fait.
+  function buildAllVoicesDiscountView(
+    product: TProduct,
+    coverage: { ownedUnits: number; totalUnits: number },
+  ): AllVoicesDiscountView | null {
+    if (coverage.ownedUnits === 0 || coverage.totalUnits === 0) return null;
+
+    const { percentOff, discountedCents } = computeAllVoicesDiscount(
+      coverage,
+      product.priceCents,
+    );
+    return {
+      percentOff,
+      originalPriceLabel: getPriceLabel(product.priceCents, product.currency),
+      discountedPriceLabel: getPriceLabel(discountedCents, product.currency),
+    };
+  }
+
+  // Couverture (cellules mouvement × voix possédées / totales) d'un seul
+  // mouvement - pour la remise sur son propre produit ALL_VOICES.
+  function movementCoverage(movementId: string): {
+    ownedUnits: number;
+    totalUnits: number;
+  } {
+    const voiceCodes = voiceCodesByMovementId.get(movementId) ?? [];
+    const owned = access.movements[movementId]?.ownedVoiceCodes ?? [];
+    return {
+      totalUnits: voiceCodes.length,
+      ownedUnits: voiceCodes.filter((code) => owned.includes(code)).length,
+    };
+  }
+
+  // Couverture (cellules mouvement × voix possédées / totales) de l'œuvre
+  // entière - pour la remise sur le produit ALL_VOICES de scope WORK.
+  function workCoverage(): { ownedUnits: number; totalUnits: number } {
+    let ownedUnits = 0;
+    let totalUnits = 0;
+    for (const [movementId, voiceCodes] of voiceCodesByMovementId) {
+      totalUnits += voiceCodes.length;
+      const owned = access.movements[movementId]?.ownedVoiceCodes ?? [];
+      ownedUnits += voiceCodes.filter((code) => owned.includes(code)).length;
+    }
+    return { ownedUnits, totalUnits };
+  }
+
+  // Toutes les offres du mouvement (déjà possédées comprises, grisées avec
+  // un bandeau) - le produit ALL_VOICES du mouvement porte en plus la remise
+  // proportionnelle à ce que l'utilisateur possède déjà SUR CE MOUVEMENT.
   const movementOfferGroups: MovementOfferGroup[] = movements.map((movement) => ({
     movementId: movement.id,
     movementTitle: movement.title,
@@ -242,6 +327,10 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
         name: composeName(product),
         priceLabel: getPriceLabel(product.priceCents, product.currency),
         alreadyOwned: isAlreadyOwned(product),
+        discount:
+          product.coverage === "ALL_VOICES"
+            ? buildAllVoicesDiscountView(product, movementCoverage(movement.id))
+            : null,
       })),
   }));
   const defaultOfferMovementId =
@@ -258,11 +347,12 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
       name: composeName(product),
       priceLabel: getPriceLabel(product.priceCents, product.currency),
       alreadyOwned: isAlreadyOwned(product),
+      discount: null,
     }));
   const workAllVoicesProduct = workScopeProducts.find(
     (product) => product.coverage === "ALL_VOICES",
   );
-  const workAllVoicesCard: SimpleOfferView | null = workAllVoicesProduct
+  const workAllVoicesCard: WorkAllVoicesOfferView | null = workAllVoicesProduct
     ? {
         sku: workAllVoicesProduct.sku,
         name: composeName(workAllVoicesProduct),
@@ -270,6 +360,7 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
           workAllVoicesProduct.priceCents,
           workAllVoicesProduct.currency,
         ),
+        discount: buildAllVoicesDiscountView(workAllVoicesProduct, workCoverage()),
       }
     : null;
 

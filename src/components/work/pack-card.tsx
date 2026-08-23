@@ -3,7 +3,10 @@ import { CheckCircle2, Music2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { SimpleOfferView } from "@/lib/works/work-page-view-model";
+import type {
+  AllVoicesDiscountView,
+  SimpleOfferView,
+} from "@/lib/works/work-page-view-model";
 
 function PackCard({
   offer,
@@ -17,6 +20,9 @@ function PackCard({
   unlocksLabel,
   unlocksVoices,
   size = "default",
+  discount,
+  discountBadgeLabel,
+  discountOriginalPriceSrLabel,
 }: {
   offer: SimpleOfferView;
   bullets: string[];
@@ -31,6 +37,12 @@ function PackCard({
   /** "sm" pour les cartes par mouvement — visuellement plus petites que
    * celles de l'œuvre complète, l'offre principale. */
   size?: "default" | "sm";
+  /** Remise proportionnelle ALL_VOICES (scope WORK) - voir work-page-view-model. */
+  discount?: AllVoicesDiscountView | null;
+  /** Libellé de la pastille, ex. "-17 %" - déjà interpolé par l'appelant (next-intl). */
+  discountBadgeLabel?: string;
+  /** Lu par un lecteur d'écran à la place du prix catalogue barré, pour ne pas le faire passer pour le prix à payer. */
+  discountOriginalPriceSrLabel?: string;
 }) {
   const isSmall = size === "sm";
 
@@ -75,15 +87,40 @@ function PackCard({
       <span className={cn("font-medium", isSmall ? "text-xs" : "text-sm")}>
         {offer.name}
       </span>
-      <span
-        className={cn(
-          "font-semibold",
-          alreadyOwned ? "text-muted-foreground" : "text-primary",
-          isSmall ? "text-lg" : "text-3xl",
-        )}
-      >
-        {offer.priceLabel}
-      </span>
+      {!alreadyOwned && discount && discount.percentOff > 0 ? (
+        <span className="flex flex-wrap items-baseline justify-center gap-x-2 gap-y-1">
+          <del
+            aria-label={discountOriginalPriceSrLabel}
+            className={cn(
+              "font-medium text-muted-foreground line-through",
+              isSmall ? "text-sm" : "text-lg",
+            )}
+          >
+            <span aria-hidden="true">{discount.originalPriceLabel}</span>
+          </del>
+          <span
+            className={cn(
+              "font-semibold text-primary",
+              isSmall ? "text-lg" : "text-3xl",
+            )}
+          >
+            {discount.discountedPriceLabel}
+          </span>
+          {discountBadgeLabel ? (
+            <Badge variant="secondary">{discountBadgeLabel}</Badge>
+          ) : null}
+        </span>
+      ) : (
+        <span
+          className={cn(
+            "font-semibold",
+            alreadyOwned ? "text-muted-foreground" : "text-primary",
+            isSmall ? "text-lg" : "text-3xl",
+          )}
+        >
+          {offer.priceLabel}
+        </span>
+      )}
 
       {!alreadyOwned &&
       unlocksLabel &&
@@ -127,7 +164,7 @@ function PackCard({
         <Button
           disabled
           size={isSmall ? "sm" : "default"}
-          className="w-full rounded-full bg-secondary text-black hover:bg-secondary/90"
+          className="w-full rounded-full bg-secondary text-text-primary-foreground hover:bg-secondary/90"
         >
           {byItNowLabel}
         </Button>
