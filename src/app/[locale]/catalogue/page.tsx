@@ -164,6 +164,7 @@ export default async function CataloguePage(
   const [
     allWorks,
     worksCount,
+    audioFilesCount,
     distinctComposerRows,
     distinctPeriodRows,
     distinctVoicingRows,
@@ -175,6 +176,7 @@ export default async function CataloguePage(
       include: buildWorkCardInclude(locale),
     }),
     prisma.work.count({ where: { isPublished: true } }),
+    prisma.audioFile.count(),
     prisma.work.findMany({
       where: { isPublished: true },
       distinct: ["composer"],
@@ -400,9 +402,15 @@ export default async function CataloguePage(
             />
             <StatBox
               icon={Music2}
+              value={String(audioFilesCount)}
+              label={t("statAudioFiles")}
+            />
+            {/*
+            <StatBox
+              icon={Music2}
               value={t("statVoicingValue")}
               label={t("statVoicingLabel")}
-            />
+            />*/}
             <StatBox
               icon={Headphones}
               value={t("statAudioValue")}

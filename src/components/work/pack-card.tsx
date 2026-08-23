@@ -127,7 +127,7 @@ function PackCard({
         <Button
           disabled
           size={isSmall ? "sm" : "default"}
-          className="w-full rounded-full bg-secondary text-primary hover:bg-secondary/90"
+          className="w-full rounded-full bg-secondary text-black hover:bg-secondary/90"
         >
           {byItNowLabel}
         </Button>
