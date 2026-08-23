@@ -9,6 +9,7 @@ function PackCard({
   offer,
   bullets,
   addToCartLabel,
+  byItNowLabel,
   featured = false,
   featuredBadge,
   alreadyOwned = false,
@@ -20,6 +21,7 @@ function PackCard({
   offer: SimpleOfferView;
   bullets: string[];
   addToCartLabel: string;
+  byItNowLabel: string;
   featured?: boolean;
   featuredBadge?: string;
   alreadyOwned?: boolean;
@@ -114,6 +116,7 @@ function PackCard({
 
       {alreadyOwned ? null : (
         // TODO : panier non implémenté
+        <>
         <Button
           disabled
           size={isSmall ? "sm" : "default"}
@@ -121,6 +124,14 @@ function PackCard({
         >
           {addToCartLabel}
         </Button>
+        <Button
+          disabled
+          size={isSmall ? "sm" : "default"}
+          className="w-full rounded-full bg-secondary text-primary hover:bg-secondary/90"
+        >
+          {byItNowLabel}
+        </Button>
+        </>
       )}
     </div>
   );

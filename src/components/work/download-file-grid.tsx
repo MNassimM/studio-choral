@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { Download, LockKeyhole } from "lucide-react";
+import { Download, LockKeyhole, Music2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { formatAudioFormatLabel, formatFileSize } from "@/lib/format/file-size";
@@ -13,37 +13,27 @@ async function DownloadFileGrid({ entries }: { entries: DownloadFileEntry[] }) {
       <p className="text-sm text-muted-foreground">{t("downloadsEmpty")}</p>
     );
   }
-  console.log("entries", entries);
 
   return (
-    <div className="grid grid-cols-3 gap-2 sm:grid-cols-5" style={{ gridTemplateColumns: `repeat(${entries.length}, minmax(0, 1fr))` }}>
+    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
       {entries.map((entry, index) => (
-        <div
+        <button
           key={`${entry.audioType}-${entry.voiceLabel ?? "all"}-${index}`}
+          type="button"
+          disabled={!entry.owned}
           className={cn(
-            "flex flex-col items-center justify-between rounded-xl border px-3 py-4 text-center transition-colors",
+            "flex w-full items-center gap-3 rounded-sm border px-3 py-2 text-left transition-colors",
             entry.owned
-              ? "border-border"
-              : "border-border/60 bg-muted/30 opacity-70",
+              ? "border-border hover:bg-accent"
+              : "cursor-not-allowed border-border/60 bg-muted/30 opacity-70",
           )}
         >
-          {/* Icône en haut */}
-          <div className="flex flex-1 items-center justify-center">
-            {entry.owned ? (
-              <Download
-                className="size-6 text-primary"
-                aria-hidden="true"
-              />
-            ) : (
-              <LockKeyhole
-                className="size-6 text-muted-foreground"
-                aria-hidden="true"
-              />
-            )}
-          </div>
+          <Music2
+            className="size-4 shrink-0 text-muted-foreground"
+            aria-hidden="true"
+          />
 
-          {/* Texte principal */}
-          <div className="mt-2 w-full min-w-0 space-y-0.5">
+          <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium leading-tight">
               {entry.voiceLabel ? `${entry.voiceLabel} - ` : ""}
               {t(`audioType.${entry.audioType}`)}
@@ -55,7 +45,19 @@ async function DownloadFileGrid({ entries }: { entries: DownloadFileEntry[] }) {
               )}
             </p>
           </div>
-        </div>
+
+          {entry.owned ? (
+            <Download
+              className="size-4 shrink-0 text-primary"
+              aria-hidden="true"
+            />
+          ) : (
+            <LockKeyhole
+              className="size-4 shrink-0 text-muted-foreground"
+              aria-hidden="true"
+            />
+          )}
+        </button>
       ))}
     </div>
   );

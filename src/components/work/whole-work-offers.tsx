@@ -40,6 +40,7 @@ async function WholeWorkOffers({
           offer={offer}
           bullets={singleVoiceBullets}
           addToCartLabel={tCard("addToCart")}
+          byItNowLabel={tCard("byItNow")}
           alreadyOwned={offer.alreadyOwned}
           alreadyOwnedBadge={t("extendAccessAlreadyOwnedBadge")}
         />
@@ -49,6 +50,7 @@ async function WholeWorkOffers({
           offer={allVoicesCard}
           bullets={allVoicesBullets}
           addToCartLabel={tCard("addToCart")}
+          byItNowLabel={tCard("byItNow")}
           featured
           featuredBadge={t("extendAccessFeaturedBadge")}
           unlocksLabel={

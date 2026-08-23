@@ -6,6 +6,7 @@
     "viewWork": "View work",
     "viewWorkShort": "View",
     "addToCart": "Add to cart",
+    "byItNow": "Buy now",
     "discover": "Discover",
     "movementsCount": "{count, plural, one {# movement} other {# movements}}"
   },

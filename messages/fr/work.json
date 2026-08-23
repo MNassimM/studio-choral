@@ -6,6 +6,7 @@
     "viewWork": "Voir l'œuvre",
     "viewWorkShort": "Voir",
     "addToCart": "Ajouter au panier",
+    "byItNow": "Acheter maintenant",
     "discover": "Découvrir",
     "movementsCount": "{count, plural, one {# mouvement} other {# mouvements}}"
   },

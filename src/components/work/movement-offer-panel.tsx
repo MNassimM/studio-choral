@@ -29,6 +29,7 @@ async function MovementOfferPanel({ offers }: { offers: OwnedOfferView[] }) {
           offer={offer}
           bullets={bullets}
           addToCartLabel={tCard("addToCart")}
+          byItNowLabel={tCard("byItNow")}
           alreadyOwned={offer.alreadyOwned}
           alreadyOwnedBadge={t("extendAccessAlreadyOwnedBadge")}
           size="sm"
