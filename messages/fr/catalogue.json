@@ -19,7 +19,6 @@
   "tableVoicing": "Effectif",
   "tableMovements": "Mouvements",
   "tablePrice": "Prix",
-  "tableActions": "Actions",
   "resultsCount": "{count, plural, one {# œuvre affichée} other {# œuvres affichées}}",
   "paginationPreviousAriaLabel": "Page précédente",
   "paginationNextAriaLabel": "Page suivante",

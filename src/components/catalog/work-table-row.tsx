@@ -1,17 +1,15 @@
 import { getTranslations, getFormatter } from "next-intl/server";
-import { Music2, ShoppingCart } from "lucide-react";
+import { Music2 } from "lucide-react";
 
 import type { WorkCardData } from "@/lib/catalog/work-card-data";
-import { Button, buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
-import { cn } from "@/lib/utils";
 
 async function WorkTableRow({ work }: { work: WorkCardData }) {
   const t = await getTranslations("work.card");
   const format = await getFormatter();
 
   return (
-    <tr className="border-b border-border last:border-b-0">
+    <tr className="relative border-b border-border transition-colors last:border-b-0 hover:bg-secondary/40 focus-within:bg-secondary/40">
       <td className="py-3 pr-4 pl-4">
         <div
           className="flex size-12 items-center justify-center rounded-md bg-secondary text-primary"
@@ -20,7 +18,17 @@ async function WorkTableRow({ work }: { work: WorkCardData }) {
           <Music2 className="size-5" />
         </div>
       </td>
-      <td className="py-3 pr-4 font-medium">{work.title}</td>
+      <td className="py-3 pr-4 font-medium">
+        {/* Lien étiré sur toute la ligne : tr est le bloc englobant (position
+            relative), td reste statique - inset-0 se cale donc sur la ligne
+            entière, pas seulement cette cellule. */}
+        <Link
+          href={{ pathname: "/works/[slug]", params: { slug: work.slug } }}
+          className="absolute inset-0 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
+          aria-label={`${t("viewWork")} ${work.title}`}
+        />
+        {work.title}
+      </td>
       <td className="py-3 pr-4 text-muted-foreground">{work.composer}</td>
       <td className="py-3 pr-4 text-muted-foreground">{work.voicing ?? "-"}</td>
       <td className="py-3 pr-4 text-muted-foreground">
@@ -30,29 +38,6 @@ async function WorkTableRow({ work }: { work: WorkCardData }) {
         {work.fromPriceCents !== null
           ? `${t("fromPrice")} ${format.number(work.fromPriceCents / 100, { style: "currency", currency: work.currency })}`
           : "-"}
-      </td>
-      <td className="py-3 pr-4">
-        <div className="flex items-center gap-2">
-          <Link
-            href={{ pathname: "/works/[slug]", params: { slug: work.slug } }}
-            className={cn(
-              buttonVariants({ variant: "outline", size: "sm" }),
-              "rounded-full",
-            )}
-          >
-            {t("viewWorkShort")}
-          </Link>
-          {/* TODO : panier non implémenté */}
-          <Button
-            disabled
-            size="icon"
-            variant="ghost"
-            aria-label={t("addToCart")}
-            className="rounded-full"
-          >
-            <ShoppingCart className="size-4" />
-          </Button>
-        </div>
       </td>
     </tr>
   );

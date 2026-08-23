@@ -485,9 +485,6 @@ export default async function CataloguePage(
                       {t("tableMovements")}
                     </th>
                     <th className="py-3 pr-4 font-medium">{t("tablePrice")}</th>
-                    <th className="py-3 pr-4 font-medium">
-                      {t("tableActions")}
-                    </th>
                   </tr>
                 </thead>
                 <tbody>

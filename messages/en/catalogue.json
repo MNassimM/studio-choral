@@ -19,7 +19,6 @@
   "tableVoicing": "Voicing",
   "tableMovements": "Movements",
   "tablePrice": "Price",
-  "tableActions": "Actions",
   "resultsCount": "{count, plural, one {# work shown} other {# works shown}}",
   "paginationPreviousAriaLabel": "Previous page",
   "paginationNextAriaLabel": "Next page",

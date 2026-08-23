@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { Download, LockKeyhole, Music2 } from "lucide-react";
+import { Download, LockKeyhole, Music2, FileHeadphone } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { formatAudioFormatLabel, formatFileSize } from "@/lib/format/file-size";
@@ -28,7 +28,7 @@ async function DownloadFileGrid({ entries }: { entries: DownloadFileEntry[] }) {
               : "cursor-not-allowed border-border/60 bg-muted/30 opacity-70",
           )}
         >
-          <Music2
+          <FileHeadphone
             className="size-4 shrink-0 text-muted-foreground"
             aria-hidden="true"
           />

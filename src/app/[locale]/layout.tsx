@@ -50,7 +50,7 @@ export default async function RootLayout({
       lang={locale}
       className={`${geistSans.variable} ${geistMono.variable}`}
     >
-      <body>
+      <body className="dark">
         <NextIntlClientProvider>
           <DynamicRouteAlternatesProvider>
             <Header />
