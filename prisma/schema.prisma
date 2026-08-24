@@ -190,21 +190,90 @@ model Product {
   @@map("products")
 }
 
-// Volontairement minimal : pas de mot de passe, pas de session, pas de champ
-// emailVerified. L'authentification (magic link via Auth.js) viendra bien
-// plus tard et générera ses propres tables via son adaptateur - ne pas les
-// anticiper ici, le format serait de toute façon à refaire.
+// Étendu pour l'adaptateur Prisma d'Auth.js v5 (@auth/prisma-adapter) :
+// emailVerified/image sont les champs qu'il exige sur AdapterUser, accounts/
+// sessions les relations qu'il requête par leur nom Prisma généré. Champs et
+// contraintes vérifiés contre le schéma officiel de l'adaptateur (voir le
+// rapport de migration) - pas de configuration Auth.js ni de code
+// d'authentification ajoutés ici, seulement le schéma.
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  role      UserRole @default(USER)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id            String    @id @default(cuid())
+  email         String    @unique
+  /// Date de vérification de l'email (magic link / OAuth), NULL tant que non
+  /// vérifié. Exigé par AdapterUser - jamais renseigné par la seed de démo.
+  emailVerified DateTime? @map("email_verified")
+  name          String?
+  image         String?
+  role          UserRole  @default(USER)
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
 
+  accounts     Account[]
+  sessions     Session[]
   libraryItems LibraryItem[]
 
   @@map("users")
+}
+
+/// Table de l'adaptateur Prisma d'Auth.js (@auth/prisma-adapter) - un lien
+/// OAuth par (provider, providerAccountId). Les champs OAuth
+/// (refresh_token, access_token, expires_at, token_type, scope, id_token,
+/// session_state) restent en snake_case SANS @map : c'est le nom Prisma
+/// littéral que l'adaptateur lit/écrit directement (type AdapterAccount de
+/// @auth/core), pas une convention de mapping de colonne - les renommer en
+/// camelCase casserait l'adaptateur silencieusement.
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Nom composite généré par Prisma : provider_providerAccountId - c'est
+  // exactement la clé que PrismaAdapter().getUserByAccount()/unlinkAccount()
+  // interrogent (where: { provider_providerAccountId }). Ne pas inverser
+  // l'ordre des deux champs, le nom généré en dépend.
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+/// Table de l'adaptateur Prisma d'Auth.js - une session active par
+/// sessionToken. sessionToken doit rester un champ scalaire @unique (pas
+/// composite) : l'adaptateur interroge where: { sessionToken } tel quel.
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+/// Table de l'adaptateur Prisma d'Auth.js - jetons de vérification (magic
+/// link, vérification d'email). @@unique([identifier, token]) génère le nom
+/// composite identifier_token, exactement la clé que
+/// useVerificationToken() interroge en suppression. `id` est superflu pour
+/// l'adaptateur (qui le retire lui-même du résultat s'il est présent) mais
+/// cohérent avec la convention id + contrainte unique du reste du schéma.
+model VerificationToken {
+  id         String   @id @default(cuid())
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
 }
 
 /// Le droit qu'un utilisateur détient sur une œuvre - contrepartie d'une
