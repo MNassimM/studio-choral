@@ -38,6 +38,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
   providers: [magicLinkProvider],
 
+  pages: {
+    /**
+     * Les pages d'Auth.js n'acceptent qu'un chemin statique, alors que les
+     * routes du site sont localisées. Le chemin de la locale par défaut est
+     * donc utilisé, sans préfixe.
+     *
+     * Les erreurs sont volontairement renvoyées sur la page de connexion
+     * plutôt que sur une page dédiée. Un lien expiré ou déjà utilisé n'appelle
+     * qu'une seule action de la part de l'utilisateur, en redemander un, et le
+     * formulaire se trouve précisément là.
+     */
+    signIn: "/connexion",
+    error: "/connexion",
+  },
+
   session: {
     /**
      * Stratégie « database » choisie plutôt que « jwt » parce qu'elle permet la révocation immédiate d'un accès (supprimer la ligne)

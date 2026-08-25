@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Menu, ShoppingBag, UserRound, X } from "lucide-react";
+import { Menu, ShoppingBag, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -17,9 +17,13 @@ import { LanguageSwitcher } from "@/components/layout/language-switcher";
  * Le bouton bascule un panneau déroulant contenant les liens principaux, le
  * panier, le compte et le sélecteur de langue. Chaque lien referme le panneau.
  *
+ * L'emplacement compte est reçu en prop plutôt que monté ici, parce qu'il lit
+ * la session et doit donc rester un composant serveur.
+ *
+ * @param accountSlot - Lien de connexion ou menu du compte, rendu côté serveur.
  * @returns Le menu mobile rendu.
  */
-function MobileNav() {
+function MobileNav({ accountSlot }: { accountSlot: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const t = useTranslations("navigation");
 
@@ -58,14 +62,7 @@ function MobileNav() {
               <ShoppingBag className="size-4" />
               {t("mobileNav.cart")}
             </Link>
-            <Link
-              href="/compte"
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-foreground/85 transition-colors hover:bg-muted hover:text-primary"
-            >
-              <UserRound className="size-4" />
-              {t("myAccount")}
-            </Link>
+            <div className="px-3 py-2">{accountSlot}</div>
             <Separator className="my-2" />
             <div className="px-3 py-2">
               <LanguageSwitcher />

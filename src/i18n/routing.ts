@@ -39,6 +39,14 @@ export const routing = defineRouting({
       fr: "/compte",
       en: "/account",
     },
+    "/connexion": {
+      fr: "/connexion",
+      en: "/sign-in",
+    },
+    "/verification": {
+      fr: "/verification",
+      en: "/check-email",
+    },
     "/bibliotheque": {
       fr: "/bibliotheque",
       en: "/library",
