@@ -7,6 +7,16 @@ import { cn } from "@/lib/utils";
 
 // Sans ce fichier DANS le segment [locale], une 404 en anglais afficherait le
 // texte français du not-found.tsx par défaut de la racine de l'app.
+/**
+ * Page 404 d'une locale.
+ *
+ * @remarks
+ * Sa présence dans le segment de locale est ce qui permet d'afficher le texte
+ * traduit. Sans elle, une 404 en anglais reprendrait le texte de la page 404
+ * racine.
+ *
+ * @returns La page rendue.
+ */
 export default async function LocaleNotFound() {
   const t = await getTranslations("errors.notFound");
 

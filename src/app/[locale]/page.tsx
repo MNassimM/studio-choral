@@ -31,6 +31,11 @@ const steps = [
   { icon: Music2, key: "stepSing" },
 ] as const;
 
+/**
+ * Bandeau d'accroche de la page d'accueil.
+ *
+ * @returns Le bandeau rendu, avec ses deux appels à l'action.
+ */
 async function Hero() {
   const t = await getTranslations("home");
   const tNav = await getTranslations("navigation");
@@ -71,6 +76,15 @@ async function Hero() {
   );
 }
 
+/**
+ * Champ de recherche de la page d'accueil.
+ *
+ * @remarks
+ * Formulaire en GET vers le catalogue, sans JavaScript.
+ *
+ * @param locale - Locale active, qui détermine le chemin d'action.
+ * @returns Le champ rendu.
+ */
 async function SearchBar({ locale }: { locale: AppLocale }) {
   const t = await getTranslations("home");
   const tCommon = await getTranslations("common");
@@ -103,6 +117,11 @@ async function SearchBar({ locale }: { locale: AppLocale }) {
   );
 }
 
+/**
+ * Résumé du parcours en trois étapes.
+ *
+ * @returns La section rendue, avec son lien vers la page détaillée.
+ */
 async function HowItWorksSection() {
   const t = await getTranslations("home");
   const tCommon = await getTranslations("common");
@@ -157,6 +176,12 @@ async function HowItWorksSection() {
   );
 }
 
+/**
+ * Grille des œuvres mises en avant.
+ *
+ * @param works - Œuvres à présenter.
+ * @returns La section rendue, ou null si aucune œuvre n'est publiée.
+ */
 async function FeaturedWorksSection({
   works,
 }: {
@@ -187,6 +212,15 @@ async function FeaturedWorksSection({
   );
 }
 
+/**
+ * Page d'accueil du site.
+ *
+ * @remarks
+ * Charge les trois œuvres les plus anciennes du catalogue publié, puis empile
+ * accroche, recherche, parcours et sélection.
+ *
+ * @returns La page rendue.
+ */
 export default async function Home() {
   const locale = ((await rootLocale()) ?? routing.defaultLocale) as AppLocale;
 

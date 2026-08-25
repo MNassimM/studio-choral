@@ -43,16 +43,19 @@ const playfairDisplay = Playfair_Display({
 });
 
 /**
- * Résout le slug d'URL vers une Work : cherche d'abord une WorkTranslation
- * pour la locale courante (le cas normal en anglais, et le cas des incipits
- * qui déclarent une traduction avec le même slug), retombe sur Work.slug
- * sinon (le cas normal en français, langue de référence sans ligne
- * WorkTranslation). N'inclut JAMAIS storageKey : ce champ n'est même pas
- * sélectionné, impossible de le laisser fuiter par erreur plus loin.
+ * Résout un slug d'URL vers une œuvre publiée.
  *
- * Enveloppée dans React `cache()` : generateMetadata() et la page elle-même
- * appellent cette fonction avec les mêmes arguments dans la même requête -
- * sans ce cache, ce serait deux allers-retours base de données identiques.
+ * @remarks
+ * Cherche d'abord une traduction pour la locale courante, puis retombe sur le
+ * slug de référence. La clé de stockage des fichiers audio n'est jamais
+ * sélectionnée, elle ne peut donc pas fuiter plus loin.
+ *
+ * L'appel est mémoïsé pour la durée de la requête, les métadonnées et la page
+ * partageant ainsi un seul aller retour vers la base.
+ *
+ * @param slug - Slug demandé dans l'URL.
+ * @param locale - Locale d'interface active.
+ * @returns L'œuvre et ses relations, ou null si elle est introuvable ou non publiée.
  */
 const findPublishedWorkBySlug = cache(
   async (slug: string, locale: AppLocale) => {
@@ -100,6 +103,17 @@ type WorkWithDetail = NonNullable<
 >;
 
 // generateMetadata (canonical + hreflang) est inchangée par cette passe de mise en page.
+/**
+ * Construit les métadonnées de la page œuvre.
+ *
+ * @remarks
+ * Les liens alternatifs utilisent le slug traduit de chaque locale. La
+ * description reprend le résumé de l'œuvre, ou un texte de repli composé à
+ * partir du titre et du compositeur.
+ *
+ * @param props - Paramètres de route, dont le slug demandé.
+ * @returns Les métadonnées, ou un objet vide si l'œuvre est introuvable.
+ */
 export async function generateMetadata(
   props: PageProps<"/[locale]/works/[slug]">,
 ): Promise<Metadata> {
@@ -166,6 +180,18 @@ export async function generateMetadata(
 
 // ─── Page ───────────────────────────────────────────────────────────────────
 
+/**
+ * Page d'une œuvre.
+ *
+ * @remarks
+ * Résout l'œuvre depuis son slug, charge l'utilisateur courant et ses droits,
+ * puis construit le view model qui alimente l'en tête, le panneau d'accès, les
+ * téléchargements et les offres. Bascule en 404 si l'œuvre est introuvable ou
+ * non publiée.
+ *
+ * @param props - Paramètres de route, dont le slug demandé.
+ * @returns La page rendue.
+ */
 export default async function WorkPage(
   props: PageProps<"/[locale]/works/[slug]">,
 ) {
@@ -241,9 +267,8 @@ export default async function WorkPage(
     return isKnownVoiceCode(code) ? t(`voice.${code}`) : code;
   }
 
-  // Fonction fléchée (pas `function` hoisté) : TypeScript ne peut affiner
-  // `work` en non-null à travers une déclaration hoistée, seulement à travers
-  // une expression définie après le contrôle `if (!work) notFound()`.
+  // Fonction fléchée et non déclaration hoistée : TypeScript n'affine work en
+  // non nul qu'à travers une expression définie après le contrôle ci dessus.
   const buildCandidate = (
     product: WorkWithDetail["products"][number],
   ): Grant => ({

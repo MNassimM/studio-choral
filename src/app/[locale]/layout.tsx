@@ -21,10 +21,20 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+/**
+ * Déclare les locales à prérendre.
+ *
+ * @returns Un paramètre de route par locale supportée.
+ */
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
+/**
+ * Construit les métadonnées communes à toutes les pages d'une locale.
+ *
+ * @returns Le titre, la description et l'URL de base du site.
+ */
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("common");
 
@@ -37,6 +47,17 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+/**
+ * Enveloppe commune à toutes les pages d'une locale.
+ *
+ * @remarks
+ * Valide la locale demandée et bascule en 404 si elle est inconnue. Monte
+ * ensuite les fournisseurs de traduction et de segments traduits, puis
+ * l'en tête et le pied de page autour du contenu.
+ *
+ * @param children - Page rendue à l'intérieur du gabarit.
+ * @returns Le document complet de la locale.
+ */
 export default async function RootLayout({
   children,
 }: LayoutProps<"/[locale]">) {

@@ -28,16 +28,20 @@ import { Link, getPathname } from "@/i18n/navigation";
 import { routing, type AppLocale } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
-// Police serif locale à cette page, pour les grands titres éditoriaux - le
-// reste du site (Header, Footer, composants partagés) reste en Geist.
+// Police serif propre à cette page, pour ses grands titres éditoriaux. Le
+// reste du site garde Geist.
 const playfairDisplay = Playfair_Display({
   subsets: ["latin"],
   weight: ["500", "600"],
 });
 
-// Union explicite (pas juste `string`) : nécessaire pour que
-// `${messageKey}Title`/`${messageKey}Description` restent des littéraux de
-// type vérifiables par next-intl plutôt qu'un `string` générique élargi.
+/**
+ * Clés de message des blocs illustrés de la page.
+ *
+ * @remarks
+ * Union explicite plutôt qu'une chaîne libre, pour que les clés composées en
+ * Title et en Description restent vérifiables par next-intl.
+ */
 type FeatureMessageKey =
   | "browseCatalog"
   | "listenExtracts"
@@ -55,10 +59,15 @@ type FeatureMessageKey =
   | "updatesIncluded"
   | "needHelp";
 
+/**
+ * Bloc illustré de la page, associant une icône à ses clés de message.
+ *
+ * @remarks
+ * Le champ est nommé messageKey et non key, un champ key étant intercepté par
+ * React au lieu d'être transmis comme prop lors de la diffusion en JSX.
+ */
 type FeatureItem = {
   icon: LucideIcon;
-  // Nommé messageKey (pas "key") : un champ "key" serait intercepté par React
-  // à la place d'être transmis comme prop lors du spread {...item} en JSX.
   messageKey: FeatureMessageKey;
 };
 
@@ -89,6 +98,11 @@ const TRUST_ITEMS: FeatureItem[] = [
   { icon: Headset, messageKey: "needHelp" },
 ];
 
+/**
+ * Construit les métadonnées de la page de présentation.
+ *
+ * @returns Le titre, la description et les liens alternatifs par locale.
+ */
 export async function generateMetadata(): Promise<Metadata> {
   const locale = ((await rootLocale()) ?? routing.defaultLocale) as AppLocale;
   const t = await getTranslations("howItWorks");
@@ -118,12 +132,24 @@ export async function generateMetadata(): Promise<Metadata> {
 // spécificité qu'un override d'instance (ex. w-12), donc une largeur réduite
 // ne le bat jamais de façon fiable. Purement ornemental ici (pas de rôle
 // separator ARIA à porter), donc aria-hidden.
+/**
+ * Trait décoratif court, purement ornemental.
+ *
+ * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
+ * @returns Le trait rendu.
+ */
 function OrnamentalRule({ className }: { className?: string }) {
   return (
     <div aria-hidden="true" className={cn("h-px w-12 bg-border", className)} />
   );
 }
 
+/**
+ * Titre de section, souligné de son trait décoratif.
+ *
+ * @param children - Intitulé de la section.
+ * @returns Le titre rendu.
+ */
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-col items-center gap-3 text-center">
@@ -139,6 +165,14 @@ type HowItWorksTranslator = Awaited<
   ReturnType<typeof getTranslations<"howItWorks">>
 >;
 
+/**
+ * Étape du parcours d'achat, avec son icône en pastille ronde.
+ *
+ * @param icon - Icône de l'étape.
+ * @param messageKey - Clé de traduction du titre et de la description.
+ * @param t - Fonction de traduction du namespace howItWorks.
+ * @returns L'étape rendue.
+ */
 function StepCircleItem({
   icon: Icon,
   messageKey,
@@ -157,6 +191,11 @@ function StepCircleItem({
   );
 }
 
+/**
+ * Section du parcours d'achat, en quatre étapes chaînées.
+ *
+ * @returns La section rendue.
+ */
 async function ChooseWorkSection() {
   const t = await getTranslations("howItWorks");
 
@@ -182,6 +221,14 @@ async function ChooseWorkSection() {
   );
 }
 
+/**
+ * Ligne décrivant une possibilité de la bibliothèque.
+ *
+ * @param icon - Icône de la possibilité.
+ * @param messageKey - Clé de traduction du titre et de la description.
+ * @param t - Fonction de traduction du namespace howItWorks.
+ * @returns La ligne rendue.
+ */
 function LibraryFeatureRow({
   icon: Icon,
   messageKey,
@@ -202,6 +249,11 @@ function LibraryFeatureRow({
   );
 }
 
+/**
+ * Section présentant la bibliothèque personnelle.
+ *
+ * @returns La section rendue.
+ */
 async function LibrarySection() {
   const t = await getTranslations("howItWorks");
 
@@ -232,6 +284,14 @@ async function LibrarySection() {
   );
 }
 
+/**
+ * Élément décrivant un usage du studio de répétition.
+ *
+ * @param icon - Icône de l'usage.
+ * @param messageKey - Clé de traduction du titre et de la description.
+ * @param t - Fonction de traduction du namespace howItWorks.
+ * @returns L'élément rendu.
+ */
 function PracticeFeatureItem({
   icon: Icon,
   messageKey,
@@ -248,6 +308,11 @@ function PracticeFeatureItem({
   );
 }
 
+/**
+ * Section présentant le travail au studio.
+ *
+ * @returns La section rendue.
+ */
 async function PracticeSection() {
   const t = await getTranslations("howItWorks");
 
@@ -265,6 +330,14 @@ async function PracticeSection() {
   );
 }
 
+/**
+ * Élément de réassurance, en format compact.
+ *
+ * @param icon - Icône de l'élément.
+ * @param messageKey - Clé de traduction du titre et de la description.
+ * @param t - Fonction de traduction du namespace howItWorks.
+ * @returns L'élément rendu.
+ */
 function TrustItem({
   icon: Icon,
   messageKey,
@@ -285,6 +358,11 @@ function TrustItem({
   );
 }
 
+/**
+ * Bandeau des garanties offertes aux acheteurs.
+ *
+ * @returns La section rendue.
+ */
 async function TrustSection() {
   const t = await getTranslations("howItWorks");
 
@@ -301,6 +379,11 @@ async function TrustSection() {
   );
 }
 
+/**
+ * Encart d'appel à l'action vers le catalogue.
+ *
+ * @returns La section rendue.
+ */
 async function CtaSection() {
   const t = await getTranslations("howItWorks");
 
@@ -335,6 +418,15 @@ async function CtaSection() {
   );
 }
 
+/**
+ * Page expliquant le fonctionnement du service.
+ *
+ * @remarks
+ * Page éditoriale sans accès à la base. Tout son contenu vient du namespace
+ * de traduction howItWorks.
+ *
+ * @returns La page rendue.
+ */
 export default async function CommentCaMarchePage() {
   const t = await getTranslations("howItWorks");
   const tCommon = await getTranslations("common");

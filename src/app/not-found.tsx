@@ -3,8 +3,17 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import "./globals.css";
 
-// Sans ce fichier DANS le segment [locale], une 404 en anglais afficherait le
-// texte français du not-found.tsx par défaut de la racine de l'app.
+/**
+ * Page 404 racine, hors de tout segment de locale.
+ *
+ * @remarks
+ * Sert de repli pour les URL qui n'atteignent jamais le segment de locale, par
+ * exemple un préfixe de langue inconnu. Son texte est en français et n'est pas
+ * traduit, aucun contexte de langue n'étant disponible à ce niveau. Les 404
+ * survenant à l'intérieur d'une locale passent par la page 404 localisée.
+ *
+ * @returns La page rendue.
+ */
 export default async function LocaleNotFound() {
 
   return (

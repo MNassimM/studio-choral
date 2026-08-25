@@ -59,6 +59,11 @@ const playfairDisplay = Playfair_Display({
   weight: ["500", "600"],
 });
 
+/**
+ * Construit les métadonnées du catalogue.
+ *
+ * @returns Le titre, la description et les liens alternatifs par locale.
+ */
 export async function generateMetadata(): Promise<Metadata> {
   const locale = ((await rootLocale()) ?? routing.defaultLocale) as AppLocale;
   const t = await getTranslations("catalogue");
@@ -84,19 +89,37 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 // Type guards pour valider les searchParams côté serveur
+/**
+ * Vérifie qu'une valeur d'URL correspond à un tri connu.
+ *
+ * @param value - Valeur brute lue dans l'URL.
+ * @returns Vrai si le tri est supporté.
+ */
 function isSortValue(value: string): value is SortValue {
   return SORT_OPTIONS.some((option) => option === value);
 }
 
+/**
+ * Vérifie qu'une valeur d'URL correspond à une période connue.
+ *
+ * @param value - Valeur brute lue dans l'URL.
+ * @returns Vrai si la période est supportée.
+ */
 function isPeriodValue(value: string): value is PeriodValue {
   return PERIOD_OPTIONS.some((option) => option === value);
 }
 
 /**
- * Parse un paramètre multi-valeur au format "A,B,C". Chaque valeur est
- * validée indépendamment via `isValid` ; une valeur inconnue est ignorée
- * silencieusement (jamais d'erreur) - une URL entièrement invalide retombe
- * simplement sur "aucun filtre de cette catégorie".
+ * Lit un paramètre d'URL multivalué au format séparé par des virgules.
+ *
+ * @remarks
+ * Chaque valeur est validée indépendamment. Une valeur inconnue est ignorée
+ * sans erreur, et une URL entièrement invalide revient à aucun filtre de
+ * cette catégorie.
+ *
+ * @param raw - Valeur brute du paramètre.
+ * @param isValid - Garde de type appliquée à chaque valeur.
+ * @returns Les valeurs valides, dédupliquées et dans leur ordre d'apparition.
  */
 function parseMultiValueParam<T extends string>(
   raw: unknown,
@@ -115,6 +138,14 @@ function parseMultiValueParam<T extends string>(
   return values;
 }
 
+/**
+ * Encart d'une statistique du catalogue.
+ *
+ * @param icon - Icône illustrant la statistique.
+ * @param value - Valeur affichée.
+ * @param label - Intitulé de la statistique.
+ * @returns L'encart rendu.
+ */
 function StatBox({
   icon: Icon,
   value,
@@ -137,6 +168,17 @@ function StatBox({
   );
 }
 
+/**
+ * Page catalogue, filtrable et triable.
+ *
+ * @remarks
+ * Charge les œuvres publiées et les valeurs de filtre réellement présentes en
+ * base, puis applique recherche, filtres et tri en mémoire. Tout l'état vit
+ * dans l'URL, la vue grille ou tableau comprise.
+ *
+ * @param props - Paramètres de route et paramètres de recherche.
+ * @returns La page rendue.
+ */
 export default async function CataloguePage(
   props: PageProps<"/[locale]/catalogue">,
 ) {
