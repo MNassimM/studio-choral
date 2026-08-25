@@ -16,12 +16,20 @@ type CatalogSearchFormProps = {
 };
 
 /**
- * Recherche réelle (contrairement à celle de la page d'accueil) : un simple
- * formulaire GET, sans JavaScript. Les autres filtres actifs sont reportés
- * en champs cachés (format virgule, cohérent avec le panneau de filtres) pour
- * ne pas être perdus lors d'une recherche. `action` doit pointer vers le
- * chemin /catalogue déjà traduit de la locale active (getPathname), pas vers
- * la clé canonique "/catalogue" telle quelle.
+ * Formulaire de recherche du catalogue, en GET simple.
+ *
+ * @remarks
+ * Les filtres actifs sont reportés en champs cachés pour ne pas être perdus
+ * lors d'une recherche.
+ *
+ * @param q - Terme recherché, prérempli dans le champ.
+ * @param sort - Tri actif, reporté en champ caché s'il n'est pas celui par défaut.
+ * @param periods - Périodes filtrées, reportées en champ caché.
+ * @param voicings - Formations filtrées, reportées en champ caché.
+ * @param languages - Langues filtrées, reportées en champ caché.
+ * @param view - Vue active, reportée en champ caché si ce n'est pas la grille.
+ * @param locale - Locale active, qui détermine le chemin d'action du formulaire.
+ * @returns Le formulaire rendu.
  */
 async function CatalogSearchForm({
   q,

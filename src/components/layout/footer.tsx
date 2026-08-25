@@ -23,6 +23,12 @@ const footerInfoItems = [
   { messageKey: "linkPrivacy", href: "/confidentialite" },
 ] as const;
 
+/**
+ * Icône Facebook en SVG inline.
+ *
+ * @param className - Classes appliquées au SVG.
+ * @returns L'icône rendue.
+ */
 function FacebookIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -40,6 +46,12 @@ function FacebookIcon({ className }: { className?: string }) {
   );
 }
 
+/**
+ * Icône Instagram en SVG inline.
+ *
+ * @param className - Classes appliquées au SVG.
+ * @returns L'icône rendue.
+ */
 function InstagramIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -59,6 +71,12 @@ function InstagramIcon({ className }: { className?: string }) {
   );
 }
 
+/**
+ * Icône YouTube en SVG inline.
+ *
+ * @param className - Classes appliquées au SVG.
+ * @returns L'icône rendue.
+ */
 function YoutubeIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -90,6 +108,15 @@ const socialLinks = [
   },
 ];
 
+/**
+ * Pied de page du site.
+ *
+ * @remarks
+ * Quatre colonnes : identité, navigation, liens d'information et réseaux
+ * sociaux, suivies de la ligne de copyright.
+ *
+ * @returns Le pied de page rendu.
+ */
 async function Footer() {
   const tCommon = await getTranslations("common");
   const t = await getTranslations("navigation");

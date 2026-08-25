@@ -5,17 +5,10 @@ import { createContext, useContext, useEffect, useState } from "react";
 import type { AppLocale } from "@/i18n/routing";
 
 /**
- * Pont entre une page à segment dynamique (ex. /works/[slug]) et le
- * LanguageSwitcher global du header : next-intl retraduit les segments
- * STATIQUES d'un chemin en changeant de locale, jamais la VALEUR d'un
- * paramètre - le slug d'une œuvre diffère par locale (WorkTranslation.slug)
- * et n'a aucun moyen d'être connu côté client sans base de données.
+ * Correspondance entre une locale et la valeur traduite du segment dynamique.
  *
- * La page fournit donc la correspondance locale -> valeur traduite via
- * <SyncDynamicRouteAlternates>, et LanguageSwitcher (rendu dans le layout
- * racine, hors de l'arbre de la page) la lit ici. Header et page ne sont
- * PAS dans une relation ancêtre/descendant l'un de l'autre : ce Contexte doit
- * donc envelopper les deux depuis le layout, pas depuis la page elle-même.
+ * @remarks
+ * Vaut null en dehors d'une route à segment dynamique.
  */
 type DynamicRouteAlternates = Partial<Record<AppLocale, string>> | null;
 
@@ -29,6 +22,12 @@ const DynamicRouteAlternatesContext = createContext<ContextValue>({
   setAlternates: () => {},
 });
 
+/**
+ * Fournit la correspondance locale vers valeur de segment au reste de l'arbre.
+ *
+ * @param children - Sous arbre ayant accès au contexte.
+ * @returns Le fournisseur rendu.
+ */
 function DynamicRouteAlternatesProvider({
   children,
 }: {
@@ -45,16 +44,24 @@ function DynamicRouteAlternatesProvider({
   );
 }
 
+/**
+ * Lit la correspondance locale vers valeur de segment publiée par la page.
+ *
+ * @returns La correspondance courante, ou null hors d'une route dynamique.
+ */
 function useDynamicRouteAlternates(): DynamicRouteAlternates {
   return useContext(DynamicRouteAlternatesContext).alternates;
 }
 
 /**
- * À monter une fois dans une page à segment dynamique, avec la valeur
- * traduite du paramètre pour chaque locale (ex. { fr: "messe-en-sol-majeur",
- * en: "mass-in-g-major" }). Ne rend rien ; se contente de publier la
- * correspondance pour le LanguageSwitcher, et la retire au démontage pour
- * qu'une page suivante sans segment dynamique ne l'hérite pas par erreur.
+ * Publie la valeur traduite du segment dynamique pour chaque locale.
+ *
+ * @remarks
+ * Ne rend rien. Retire la correspondance au démontage pour qu'une page sans
+ * segment dynamique n'en hérite pas.
+ *
+ * @param alternates - Valeur du segment par locale.
+ * @returns Rien.
  */
 function SyncDynamicRouteAlternates({
   alternates,
@@ -62,9 +69,8 @@ function SyncDynamicRouteAlternates({
   alternates: Partial<Record<AppLocale, string>>;
 }) {
   const { setAlternates } = useContext(DynamicRouteAlternatesContext);
-  // Deux locales fixes ("fr"/"en") : on dépend des valeurs primitives plutôt
-  // que de l'objet `alternates` (une nouvelle référence à chaque rendu
-  // serveur) pour éviter de réarmer l'effet inutilement.
+  // On dépend des valeurs primitives plutôt que de l'objet lui même, qui
+  // change de référence à chaque rendu serveur.
   const fr = alternates.fr;
   const en = alternates.en;
 

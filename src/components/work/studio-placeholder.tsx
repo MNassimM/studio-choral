@@ -3,6 +3,12 @@ import { Lock, SlidersVertical } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * Encart du studio de répétition, verrouillé ou déverrouillé.
+ *
+ * @param unlocked - Vrai si au moins un mouvement est débloqué.
+ * @returns L'encart rendu.
+ */
 async function StudioPlaceholder({ unlocked }: { unlocked: boolean }) {
   const t = await getTranslations("work.workPage");
 

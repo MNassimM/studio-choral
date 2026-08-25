@@ -1,5 +1,11 @@
 import { cn } from "@/lib/utils";
 
+/**
+ * Conteneur centré qui applique la largeur et les marges latérales du site.
+ *
+ * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
+ * @returns Le conteneur rendu.
+ */
 function Container({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div

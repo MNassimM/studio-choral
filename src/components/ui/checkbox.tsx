@@ -5,6 +5,12 @@ import { Checkbox as CheckboxPrimitive } from "@base-ui/react/checkbox";
 import { cn } from "@/lib/utils";
 import { CheckIcon } from "lucide-react";
 
+/**
+ * Case à cocher, avec son indicateur de coche intégré.
+ *
+ * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
+ * @returns La case à cocher rendue.
+ */
 function Checkbox({ className, ...props }: CheckboxPrimitive.Root.Props) {
   return (
     <CheckboxPrimitive.Root

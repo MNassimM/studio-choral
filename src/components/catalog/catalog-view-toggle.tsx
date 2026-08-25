@@ -11,6 +11,13 @@ type CatalogViewToggleProps = {
   currentParams: Record<string, string | string[] | undefined>;
 };
 
+/**
+ * Construit la query string d'un lien de bascule de vue.
+ *
+ * @param currentParams - Paramètres d'URL courants, préservés.
+ * @param view - Vue visée par le lien.
+ * @returns La query string à passer au lien.
+ */
 function buildViewQuery(
   currentParams: Record<string, string | string[] | undefined>,
   view: "grid" | "list",
@@ -27,10 +34,15 @@ function buildViewQuery(
 }
 
 /**
- * Bascule grille/tableau implémentée en liens purs (searchParams `?view=`),
- * pas en état client : le choix est partageable/marque-page-able et ne
- * demande aucun JavaScript, cohérent avec le reste de la page (recherche,
- * tri, filtre reposent déjà tous sur l'URL).
+ * Bascule entre la vue grille et la vue tableau du catalogue.
+ *
+ * @remarks
+ * Implémentée en liens réels sur le paramètre view, donc partageable et
+ * fonctionnelle sans JavaScript.
+ *
+ * @param view - Vue actuellement active.
+ * @param currentParams - Paramètres d'URL courants, préservés dans les deux liens.
+ * @returns La bascule rendue.
  */
 async function CatalogViewToggle({
   view,

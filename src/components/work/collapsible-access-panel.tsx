@@ -4,11 +4,18 @@ import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 /**
- * Enveloppe client du panneau « Votre accès » : gère uniquement l'état
- * ouvert/replié (aucune logique de droits). Repliée, seul le bord gauche du
- * panneau dépasse encore de l'écran, avec la flèche pour le rouvrir ; ouverte,
- * la flèche s'inverse pour le refermer. Le contenu (AccessSidebar) est déjà
- * rendu côté serveur et simplement passé en enfant.
+ * Enveloppe repliable du panneau « Votre accès ».
+ *
+ * @remarks
+ * Gère uniquement l'état ouvert ou replié. Le panneau est collé au bord droit
+ * de la fenêtre et n'apparaît qu'à partir du point de rupture 2xl. Il s'ouvre
+ * par défaut si l'utilisateur possède déjà un pupitre.
+ *
+ * @param expandLabel - Libellé accessible du bouton d'ouverture.
+ * @param collapseLabel - Libellé accessible du bouton de fermeture.
+ * @param children - Contenu du panneau, déjà rendu côté serveur.
+ * @param movements - Mouvements et pupitres, lus pour l'état d'ouverture initial.
+ * @returns Le panneau rendu.
  */
 function CollapsibleAccessPanel({
   expandLabel,

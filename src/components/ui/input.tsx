@@ -3,6 +3,13 @@ import { Input as InputPrimitive } from "@base-ui/react/input";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * Champ de saisie de l'application, construit sur la primitive Base UI.
+ *
+ * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
+ * @param type - Type HTML du champ.
+ * @returns Le champ rendu.
+ */
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   return (
     <InputPrimitive

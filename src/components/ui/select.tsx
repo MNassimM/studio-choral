@@ -6,8 +6,17 @@ import { Select as SelectPrimitive } from "@base-ui/react/select";
 import { cn } from "@/lib/utils";
 import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from "lucide-react";
 
+/**
+ * Racine du menu déroulant, qui porte la valeur et le gestionnaire de changement.
+ */
 const Select = SelectPrimitive.Root;
 
+/**
+ * Groupe d'items à l'intérieur du popup.
+ *
+ * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
+ * @returns Le groupe rendu.
+ */
 function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
   return (
     <SelectPrimitive.Group
@@ -18,6 +27,12 @@ function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
   );
 }
 
+/**
+ * Valeur sélectionnée, affichée dans le déclencheur.
+ *
+ * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
+ * @returns La valeur rendue.
+ */
 function SelectValue({ className, ...props }: SelectPrimitive.Value.Props) {
   return (
     <SelectPrimitive.Value
@@ -28,6 +43,14 @@ function SelectValue({ className, ...props }: SelectPrimitive.Value.Props) {
   );
 }
 
+/**
+ * Bouton qui ouvre le popup et affiche la valeur courante.
+ *
+ * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
+ * @param size - Gabarit du déclencheur.
+ * @param children - Contenu du déclencheur, en pratique la valeur sélectionnée.
+ * @returns Le déclencheur rendu, chevron compris.
+ */
 function SelectTrigger({
   className,
   size = "default",
@@ -56,6 +79,18 @@ function SelectTrigger({
   );
 }
 
+/**
+ * Popup du menu déroulant, portail et positionnement compris.
+ *
+ * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
+ * @param children - Items du menu.
+ * @param side - Côté du déclencheur où ouvrir le popup.
+ * @param sideOffset - Écart entre le popup et le déclencheur.
+ * @param align - Alignement du popup sur le déclencheur.
+ * @param alignOffset - Décalage appliqué à cet alignement.
+ * @param alignItemWithTrigger - Aligne l'item sélectionné sur la valeur du déclencheur.
+ * @returns Le popup rendu, avec ses flèches de défilement.
+ */
 function SelectContent({
   className,
   children,
@@ -98,6 +133,16 @@ function SelectContent({
   );
 }
 
+/**
+ * Étiquette d'un groupe d'items dans le popup.
+ *
+ * @remarks
+ * Ce n'est pas l'étiquette du déclencheur. Pour relier un libellé visible au
+ * déclencheur, utiliser Select.Label de Base UI.
+ *
+ * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
+ * @returns L'étiquette rendue.
+ */
 function SelectLabel({
   className,
   ...props
@@ -111,6 +156,13 @@ function SelectLabel({
   );
 }
 
+/**
+ * Item sélectionnable du menu.
+ *
+ * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
+ * @param children - Libellé de l'item.
+ * @returns L'item rendu, avec sa coche de sélection.
+ */
 function SelectItem({
   className,
   children,
@@ -139,6 +191,12 @@ function SelectItem({
   );
 }
 
+/**
+ * Trait de séparation entre deux groupes d'items.
+ *
+ * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
+ * @returns Le séparateur rendu.
+ */
 function SelectSeparator({
   className,
   ...props
@@ -152,6 +210,12 @@ function SelectSeparator({
   );
 }
 
+/**
+ * Flèche de défilement vers le haut, affichée quand la liste déborde.
+ *
+ * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
+ * @returns La flèche rendue.
+ */
 function SelectScrollUpButton({
   className,
   ...props
@@ -170,6 +234,12 @@ function SelectScrollUpButton({
   );
 }
 
+/**
+ * Flèche de défilement vers le bas, affichée quand la liste déborde.
+ *
+ * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
+ * @returns La flèche rendue.
+ */
 function SelectScrollDownButton({
   className,
   ...props

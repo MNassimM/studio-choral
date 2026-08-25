@@ -4,6 +4,13 @@ import { Separator as SeparatorPrimitive } from "@base-ui/react/separator";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * Trait de séparation, horizontal ou vertical.
+ *
+ * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
+ * @param orientation - Sens du trait.
+ * @returns Le séparateur rendu.
+ */
 function Separator({
   className,
   orientation = "horizontal",

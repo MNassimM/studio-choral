@@ -4,6 +4,15 @@ import { Music2 } from "lucide-react";
 import type { WorkCardData } from "@/lib/catalog/work-card-data";
 import { Link } from "@/i18n/navigation";
 
+/**
+ * Ligne d'une œuvre dans la vue tableau du catalogue.
+ *
+ * @remarks
+ * Toute la ligne est cliquable grâce à un lien étiré sur la surface du tr.
+ *
+ * @param work - Données d'affichage de l'œuvre.
+ * @returns La ligne rendue.
+ */
 async function WorkTableRow({ work }: { work: WorkCardData }) {
   const t = await getTranslations("work.card");
   const format = await getFormatter();

@@ -1,14 +1,19 @@
 /**
- * Valeurs de tri/filtre du catalogue - données pures, sans "use client" et
- * SANS libellé : les libellés vivent dans messages/*.json ("sortOptions",
- * "periodOptions"), résolus à l'affichage via useTranslations/getTranslations
- * avec `value` comme clé. Importé à la fois par la page serveur (validation
- * des searchParams) et par les composants clients (Select) : un module
- * "use client" ne peut pas être importé pour ses simples valeurs depuis un
- * Server Component (chaque export y devient une référence client, pas la
- * valeur réelle).
+ * Valeurs de tri et de filtre du catalogue.
+ *
+ * @remarks
+ * Données pures, sans directive client et sans libellé. Les libellés vivent
+ * dans les fichiers de messages et sont résolus à l'affichage, la valeur
+ * servant de clé.
+ *
+ * Le module reste sans directive client pour pouvoir être importé aussi bien
+ * par la page serveur, qui valide les paramètres d'URL, que par les
+ * composants clients.
  */
 
+/**
+ * Tris proposés dans le catalogue.
+ */
 export const SORT_OPTIONS = [
   "featured",
   "price-asc",
@@ -17,14 +22,18 @@ export const SORT_OPTIONS = [
   "composer-asc",
 ] as const;
 
+/**
+ * Valeur de tri acceptée par le catalogue.
+ */
 export type SortValue = (typeof SORT_OPTIONS)[number];
 
 /**
- * Alignées sur l'enum Prisma MusicalPeriod (voir prisma/schema.prisma), dans
- * l'ordre chronologique - utilisé pour trier les cases à cocher du panneau de
- * filtres. Le panneau n'affiche que les valeurs réellement présentes en base
- * (voir /catalogue) : cette liste n'est qu'un ordre canonique, jamais la
- * liste montrée telle quelle à l'utilisateur.
+ * Périodes musicales, dans l'ordre chronologique.
+ *
+ * @remarks
+ * Alignées sur l'enum Prisma MusicalPeriod. Cette liste ne sert que d'ordre
+ * canonique, le panneau de filtres n'affichant que les périodes réellement
+ * présentes en base.
  */
 export const PERIOD_OPTIONS = [
   "MEDIEVAL",
@@ -36,4 +45,7 @@ export const PERIOD_OPTIONS = [
   "CONTEMPORARY",
 ] as const;
 
+/**
+ * Période acceptée comme filtre du catalogue.
+ */
 export type PeriodValue = (typeof PERIOD_OPTIONS)[number];

@@ -20,12 +20,26 @@ type CatalogActiveFiltersProps = {
   currentParams: Record<string, string | string[] | undefined>;
 };
 
+/**
+ * Ramène un paramètre d'URL à une chaîne simple.
+ *
+ * @param value - Valeur brute, éventuellement répétée dans l'URL.
+ * @returns La première valeur, ou undefined si le paramètre est absent.
+ */
 function paramAsString(
   value: string | string[] | undefined,
 ): string | undefined {
   return Array.isArray(value) ? value[0] : value;
 }
 
+/**
+ * Construit la query string obtenue en retirant une valeur de filtre.
+ *
+ * @param currentParams - Paramètres d'URL courants.
+ * @param categoryKey - Catégorie du filtre à alléger.
+ * @param valueToRemove - Valeur à retirer de cette catégorie.
+ * @returns La query string sans cette valeur.
+ */
 function buildRemoveQuery(
   currentParams: Record<string, string | string[] | undefined>,
   categoryKey: FilterCategoryKey,
@@ -45,6 +59,12 @@ function buildRemoveQuery(
   return query;
 }
 
+/**
+ * Construit la query string obtenue en retirant tous les filtres.
+ *
+ * @param currentParams - Paramètres d'URL courants.
+ * @returns La query string sans aucune catégorie de filtre.
+ */
 function buildResetQuery(
   currentParams: Record<string, string | string[] | undefined>,
 ): Record<string, string> {
@@ -59,10 +79,15 @@ function buildResetQuery(
 }
 
 /**
- * Barre des filtres actifs - rien n'est affiché si `pills` est vide (pas de
- * barre vide, pas de libellé orphelin). Pastilles et lien de réinitialisation
- * sont des <Link> réels (jamais des boutons JS) : fonctionnels sans JS,
- * ouvrables dans un nouvel onglet, indexables.
+ * Pastilles des filtres actifs, chacune retirable.
+ *
+ * @remarks
+ * Ne rend rien quand aucun filtre n'est actif. Les pastilles et la
+ * réinitialisation sont des liens réels, pas des boutons.
+ *
+ * @param pills - Filtres actifs à afficher.
+ * @param currentParams - Paramètres d'URL courants, préservés dans les liens.
+ * @returns La barre rendue, ou null si aucun filtre n'est actif.
  */
 async function CatalogActiveFilters({
   pills,

@@ -16,14 +16,13 @@ import {
 } from "@/components/catalog/catalog-options";
 
 /**
- * Met à jour un paramètre de l'URL courante et navigue (les autres
- * paramètres - recherche, autre filtre - sont conservés). Retirer le
- * paramètre plutôt que d'écrire sa valeur "par défaut" garde des URLs
- * propres.
+ * Rend une fonction qui réécrit un paramètre de l'URL courante.
  *
- * usePathname/useRouter viennent de next/navigation (pas de @/i18n/navigation)
- * : on ne fait ici que réécrire un paramètre de recherche sur la page
- * courante, jamais changer de route ni de locale.
+ * @remarks
+ * Les autres paramètres sont conservés. Écrire la valeur par défaut retire le
+ * paramètre plutôt que de l'inscrire, ce qui garde des URLs propres.
+ *
+ * @returns Une fonction qui prend la clé, la valeur et la valeur par défaut.
  */
 function useUpdateSearchParam() {
   const router = useRouter();
@@ -42,6 +41,12 @@ function useUpdateSearchParam() {
   };
 }
 
+/**
+ * Sélecteur de tri du catalogue.
+ *
+ * @param value - Tri actuellement actif.
+ * @returns Le sélecteur rendu.
+ */
 function SortSelect({ value }: { value: SortValue }) {
   const updateSearchParam = useUpdateSearchParam();
   const t = useTranslations("catalogue");

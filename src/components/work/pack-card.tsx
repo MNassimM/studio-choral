@@ -8,6 +8,29 @@ import type {
   SimpleOfferView,
 } from "@/lib/works/work-page-view-model";
 
+/**
+ * Carte d'une offre achetable.
+ *
+ * @remarks
+ * Affiche le prix remisé à côté du prix catalogue barré lorsqu'une remise est
+ * fournie. Une offre déjà possédée est grisée et perd ses boutons d'achat.
+ *
+ * @param offer - Offre à présenter.
+ * @param bullets - Avantages listés sur la carte.
+ * @param addToCartLabel - Libellé du bouton d'ajout au panier.
+ * @param byItNowLabel - Libellé du bouton d'achat immédiat.
+ * @param featured - Met la carte en avant.
+ * @param featuredBadge - Libellé de la pastille de mise en avant.
+ * @param alreadyOwned - Grise la carte et retire les boutons d'achat.
+ * @param alreadyOwnedBadge - Libellé de la pastille d'offre déjà possédée.
+ * @param unlocksLabel - Libellé introduisant les pupitres débloqués en plus.
+ * @param unlocksVoices - Pupitres débloqués en plus par cette offre.
+ * @param size - Gabarit de la carte.
+ * @param discount - Remise à afficher, ou null si le prix catalogue s'applique.
+ * @param discountBadgeLabel - Libellé de la pastille de remise, déjà interpolé.
+ * @param discountOriginalPriceSrLabel - Formulation du prix barré pour les lecteurs d'écran.
+ * @returns La carte rendue.
+ */
 function PackCard({
   offer,
   bullets,
@@ -34,14 +57,9 @@ function PackCard({
   alreadyOwnedBadge?: string;
   unlocksLabel?: string;
   unlocksVoices?: string[];
-  /** "sm" pour les cartes par mouvement — visuellement plus petites que
-   * celles de l'œuvre complète, l'offre principale. */
   size?: "default" | "sm";
-  /** Remise proportionnelle ALL_VOICES (scope WORK) - voir work-page-view-model. */
   discount?: AllVoicesDiscountView | null;
-  /** Libellé de la pastille, ex. "-17 %" - déjà interpolé par l'appelant (next-intl). */
   discountBadgeLabel?: string;
-  /** Lu par un lecteur d'écran à la place du prix catalogue barré, pour ne pas le faire passer pour le prix à payer. */
   discountOriginalPriceSrLabel?: string;
 }) {
   const isSmall = size === "sm";

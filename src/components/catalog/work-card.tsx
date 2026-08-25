@@ -22,6 +22,12 @@ const playfairDisplay = Playfair_Display({
   weight: ["500", "600"],
 });
 
+/**
+ * Visuel de remplacement affiché à la place de la pochette.
+ *
+ * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
+ * @returns Le visuel rendu.
+ */
 function WorkCoverPlaceholder({ className }: { className?: string }) {
   return (
     <div
@@ -44,6 +50,19 @@ type WorkCardProps = {
   className?: string;
 };
 
+/**
+ * Carte œuvre du catalogue et de la page d'accueil.
+ *
+ * @remarks
+ * La variante par défaut rend la carte entière cliquable vers la page de
+ * l'œuvre et affiche badges et prix. La variante compacte se limite au visuel,
+ * au résumé et à un lien de découverte.
+ *
+ * @param work - Données d'affichage de l'œuvre.
+ * @param variant - Densité de la carte.
+ * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
+ * @returns La carte rendue.
+ */
 async function WorkCard({
   work,
   variant = "default",

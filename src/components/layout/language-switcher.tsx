@@ -19,23 +19,13 @@ const FLAGS: Record<AppLocale, typeof FranceFlag> = {
 };
 
 /**
- * Bascule de langue - Client Component isolé (même catégorie d'exception au
- * minimum de JS que mobile-nav.tsx : la locale active et le pathname complet
- * de la page courante ne sont connus qu'au runtime, et ce composant est rendu
- * depuis le layout racine, au-dessus de toute page).
+ * Sélecteur de langue du site.
  *
- * Préserve la query string courante (?q=&sort=&period=...) : next-intl ne le
- * fait pas automatiquement en changeant de locale. usePathname() renvoie ici
- * la clé canonique de routing.pathnames (ex. "/catalogue"), pas le segment
- * déjà traduit affiché à l'écran - Link recalcule la version localisée pour
- * chaque langue à partir de cette même clé. Comportement inchangé par rapport
- * à la version précédente : seul l'habillage (Menu Base UI + drapeaux) change.
+ * @remarks
+ * Conserve la query string courante et, sur une route à segment dynamique,
+ * utilise la valeur traduite publiée par SyncDynamicRouteAlternates.
  *
- * LIMITE CONNUE : pour un futur segment dynamique (/works/[slug]), le SLUG
- * lui-même n'est PAS retraduit ici - next-intl retraduit les segments
- * statiques d'un chemin, jamais la valeur d'un paramètre. La future page
- * œuvre devra composer son propre lien de bascule à partir du slug résolu de
- * chaque locale (WorkTranslation.slug) plutôt que d'utiliser ce composant.
+ * @returns Le sélecteur rendu.
  */
 function LanguageSwitcher() {
   const dynamicAlternates = useDynamicRouteAlternates();

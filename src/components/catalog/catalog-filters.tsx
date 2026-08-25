@@ -29,6 +29,11 @@ type FilterCategory = {
 
 type DraftState = Record<FilterCategoryKey, Set<string>>;
 
+/**
+ * Crée un brouillon de filtres vide.
+ *
+ * @returns Un brouillon sans aucune valeur cochée.
+ */
 function emptyDraft(): DraftState {
   return { period: new Set(), voicing: new Set(), language: new Set() };
 }
@@ -41,6 +46,12 @@ type FiltersContextValue = {
 
 const FiltersContext = createContext<FiltersContextValue | null>(null);
 
+/**
+ * Accède au contexte partagé entre le panneau et son bouton.
+ *
+ * @returns L'état d'ouverture et le nombre de filtres actifs.
+ * @throws {Error} Si le bouton est monté hors du panneau.
+ */
 function useFiltersContext(): FiltersContextValue {
   const ctx = useContext(FiltersContext);
   if (!ctx) {
@@ -60,12 +71,19 @@ type CatalogFiltersPanelProps = {
 };
 
 /**
- * Fournit l'état (ouverture + cases cochées avant validation) au bouton
- * "Filtres" et au panneau, positionnés à deux endroits différents du DOM
- * (le bouton dans la barre d'outils, le panneau en pleine largeur juste en
- * dessous) - d'où le Context plutôt qu'un simple useState local au bouton.
- * `children` (recherche, tri, bascule vue) reste serveur : seul ce wrapper
- * et le bouton sont client.
+ * Panneau de filtres du catalogue, avec validation différée.
+ *
+ * @remarks
+ * Les cases cochées vivent dans un brouillon local et ne sont appliquées à
+ * l'URL qu'à la validation. Le panneau se ferme sur clic extérieur ou sur
+ * Échap.
+ *
+ * @param categories - Catégories de filtres et leurs options disponibles.
+ * @param activePeriods - Périodes déjà actives dans l'URL.
+ * @param activeVoicings - Formations déjà actives dans l'URL.
+ * @param activeLanguages - Langues déjà actives dans l'URL.
+ * @param children - Barre d'outils rendue au dessus du panneau.
+ * @returns Le panneau rendu, avec son fournisseur de contexte.
  */
 function CatalogFiltersPanel({
   categories,
@@ -206,8 +224,13 @@ function CatalogFiltersPanel({
 }
 
 /**
- * Bouton "Filtres" - doit être rendu dans les `children` de
- * `CatalogFiltersPanel` pour accéder au Context.
+ * Bouton d'ouverture du panneau de filtres.
+ *
+ * @remarks
+ * Doit être rendu dans les enfants de CatalogFiltersPanel pour accéder au
+ * contexte.
+ *
+ * @returns Le bouton rendu.
  */
 function CatalogFiltersButton() {
   const { open, setOpen, activeCount } = useFiltersContext();

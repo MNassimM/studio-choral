@@ -11,6 +11,12 @@ export const mainNavItems = [
   { key: "howItWorks", href: "/comment-ca-marche" },
 ] as const;
 
+/**
+ * Navigation principale, affichée à partir du point de rupture md.
+ *
+ * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
+ * @returns La navigation rendue.
+ */
 async function MainNav({ className }: { className?: string }) {
   const t = await getTranslations("navigation");
 

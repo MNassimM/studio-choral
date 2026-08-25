@@ -6,10 +6,15 @@ import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
- * Section repliable de « Étendre votre accès » (par mouvement / par œuvre) :
- * tout le bandeau (titre + flèche) est cliquable et bascule l'affichage des
- * cartes en dessous, pour libérer de la place. Les cartes restent montées
- * (juste masquées en CSS), même logique que MovementPanelSwitcher.
+ * Section repliable des offres, par mouvement ou par œuvre.
+ *
+ * @remarks
+ * Le bandeau entier bascule l'affichage. Les cartes restent montées et sont
+ * simplement masquées en CSS.
+ *
+ * @param heading - Titre affiché sur le bandeau.
+ * @param children - Cartes d'offres de la section.
+ * @returns La section rendue.
  */
 function CollapsibleOfferSection({
   heading,

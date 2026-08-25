@@ -3,6 +3,14 @@ import { CheckCircle2, Lock } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * Pastille d'un pupitre, possédé ou verrouillé.
+ *
+ * @param label - Libellé traduit du pupitre.
+ * @param owned - Vrai si l'utilisateur possède ce pupitre.
+ * @param t - Fonction de traduction du namespace work.workPage.
+ * @returns La pastille rendue, avec son état repris pour les lecteurs d'écran.
+ */
 function VoicePill({
   label,
   owned,
@@ -41,6 +49,18 @@ type MovementVoiceAccess = {
   voices: { code: string; label: string; owned: boolean }[];
 };
 
+/**
+ * Panneau « Votre accès », mouvement par mouvement.
+ *
+ * @remarks
+ * Liste les pupitres de chaque mouvement avec leur état, puis rappelle ce que
+ * l'accès débloque lorsque l'utilisateur possède au moins un pupitre.
+ *
+ * @param movements - Mouvements et leurs pupitres, avec l'état de possession.
+ * @param hasTuttiDownload - Vrai si le téléchargement du tutti est accessible.
+ * @param hasAccompanimentDownload - Vrai si l'accompagnement est téléchargeable.
+ * @returns Le panneau rendu.
+ */
 async function AccessSidebar({
   movements,
   hasTuttiDownload,

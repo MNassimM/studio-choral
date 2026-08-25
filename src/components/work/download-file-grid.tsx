@@ -5,6 +5,16 @@ import { cn } from "@/lib/utils";
 import { formatAudioFormatLabel, formatFileSize } from "@/lib/format/file-size";
 import type { DownloadFileEntry } from "@/lib/works/work-page-view-model";
 
+/**
+ * Grille des pistes téléchargeables d'un mouvement.
+ *
+ * @remarks
+ * Les pistes verrouillées restent affichées, grisées et désactivées, pour
+ * montrer ce qu'un achat débloquerait.
+ *
+ * @param entries - Pistes du mouvement, avec leur état de possession.
+ * @returns La grille rendue, ou un message si aucune piste n'est disponible.
+ */
 async function DownloadFileGrid({ entries }: { entries: DownloadFileEntry[] }) {
   const t = await getTranslations("work.workPage");
 

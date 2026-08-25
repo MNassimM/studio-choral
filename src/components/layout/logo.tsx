@@ -2,6 +2,12 @@ import { Link } from "@/i18n/navigation";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * Marque graphique du studio, en SVG inline.
+ *
+ * @param className - Classes appliquées au SVG.
+ * @returns La marque rendue.
+ */
 function ButterflyMark({ className }: { className?: string }) {
   return (
     <svg
@@ -23,6 +29,13 @@ M377 82L378 83H380L385 88L387 92V94L388 95V107L387 108L386 116L385 117V119L384 1
   );
 }
 
+/**
+ * Logo du site, cliquable vers l'accueil.
+ *
+ * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
+ * @param variant - Mise en forme du nom, sur une ligne ou sur deux.
+ * @returns Le logo rendu.
+ */
 function Logo({
   className,
   variant = "default",

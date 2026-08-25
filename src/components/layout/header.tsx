@@ -10,6 +10,15 @@ import { Link } from "@/i18n/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+/**
+ * En tête du site, fixé en haut de page.
+ *
+ * @remarks
+ * Regroupe le menu mobile, le logo, la navigation principale, le sélecteur de
+ * langue et les accès au compte et au panier.
+ *
+ * @returns L'en tête rendu.
+ */
 async function Header() {
   const t = await getTranslations("navigation");
 

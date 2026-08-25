@@ -2,6 +2,13 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * Conteneur de carte, racine des sous composants ci dessous.
+ *
+ * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
+ * @param size - Densité de la carte, qui pilote son espacement interne.
+ * @returns La carte rendue.
+ */
 function Card({
   className,
   size = "default",
@@ -20,6 +27,12 @@ function Card({
   );
 }
 
+/**
+ * En tête de carte, qui accueille titre, description et action.
+ *
+ * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
+ * @returns L'en tête rendu.
+ */
 function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -33,6 +46,12 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
+/**
+ * Titre de la carte.
+ *
+ * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
+ * @returns Le titre rendu.
+ */
 function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -46,6 +65,12 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
+/**
+ * Texte secondaire placé sous le titre.
+ *
+ * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
+ * @returns La description rendue.
+ */
 function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -56,6 +81,12 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
+/**
+ * Zone d'action de l'en tête, alignée à droite du titre.
+ *
+ * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
+ * @returns L'action rendue.
+ */
 function CardAction({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -69,6 +100,12 @@ function CardAction({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
+/**
+ * Corps de la carte.
+ *
+ * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
+ * @returns Le contenu rendu.
+ */
 function CardContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -79,6 +116,12 @@ function CardContent({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
+/**
+ * Pied de carte, détaché du corps par une bordure.
+ *
+ * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
+ * @returns Le pied rendu.
+ */
 function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div

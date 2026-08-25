@@ -3,6 +3,12 @@ import { getTranslations } from "next-intl/server";
 import { PackCard } from "@/components/work/pack-card";
 import type { OwnedOfferView } from "@/lib/works/work-page-view-model";
 
+/**
+ * Grille des offres d'un mouvement.
+ *
+ * @param offers - Offres du mouvement, remise éventuelle comprise.
+ * @returns La grille rendue, ou un message si le mouvement est déjà possédé.
+ */
 async function MovementOfferPanel({ offers }: { offers: OwnedOfferView[] }) {
   const t = await getTranslations("work.workPage");
   const tCard = await getTranslations("work.card");

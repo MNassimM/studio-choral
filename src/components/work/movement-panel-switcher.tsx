@@ -20,16 +20,17 @@ type MovementSwitcherOption = {
 };
 
 /**
- * Sélecteur de mouvement générique, réutilisé indépendamment par les
- * téléchargements et par les offres « par mouvement » : chaque montage a son
- * propre état (deux instances sur la page = deux sélections indépendantes,
- * jamais synchronisées entre elles).
+ * Sélecteur de mouvement, avec bascule du panneau affiché.
  *
- * Ne reçoit que des panneaux DÉJÀ RENDUS côté serveur (droits déjà résolus) -
- * bascule laquelle est visible, ne calcule jamais quoi que ce soit à partir
- * des droits. Toutes les pistes/offres de tous les mouvements sont déjà dans
- * le DOM (comme la grille de téléchargements elle-même, qui affiche aussi les
- * fichiers verrouillés) ; seul l'affichage est basculé, pas la donnée.
+ * @remarks
+ * Chaque montage garde son propre état, deux instances sur une même page sont
+ * donc indépendantes. Tous les panneaux restent dans le DOM, seul l'affichage
+ * bascule.
+ *
+ * @param movements - Mouvements proposés, chacun avec son panneau déjà rendu.
+ * @param defaultMovementId - Mouvement sélectionné au premier rendu.
+ * @param selectorLabel - Libellé du sélecteur.
+ * @returns Le sélecteur et le panneau actif.
  */
 function MovementPanelSwitcher({
   movements,

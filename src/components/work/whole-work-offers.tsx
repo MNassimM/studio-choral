@@ -6,6 +6,19 @@ import type {
   WorkAllVoicesOfferView,
 } from "@/lib/works/work-page-view-model";
 
+/**
+ * Offres de portée œuvre entière.
+ *
+ * @remarks
+ * Une carte par pupitre, puis la carte toutes voix mise en avant, avec sa
+ * remise éventuelle et le rappel de ce qu'elle débloque en plus.
+ *
+ * @param singleVoiceCards - Offres portant sur un seul pupitre.
+ * @param allVoicesCard - Offre toutes voix, ou null si le produit n'existe pas.
+ * @param ownsAnything - Vrai si l'utilisateur possède déjà quelque chose sur l'œuvre.
+ * @param unlocksVoices - Pupitres encore verrouillés, listés sur la carte toutes voix.
+ * @returns La grille rendue.
+ */
 async function WholeWorkOffers({
   singleVoiceCards,
   allVoicesCard,

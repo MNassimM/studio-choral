@@ -10,6 +10,15 @@ import { Link } from "@/i18n/navigation";
 import { mainNavItems } from "@/components/layout/main-nav";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 
+/**
+ * Menu de navigation mobile, affiché en dessous du point de rupture md.
+ *
+ * @remarks
+ * Le bouton bascule un panneau déroulant contenant les liens principaux, le
+ * panier, le compte et le sélecteur de langue. Chaque lien referme le panneau.
+ *
+ * @returns Le menu mobile rendu.
+ */
 function MobileNav() {
   const [open, setOpen] = useState(false);
   const t = useTranslations("navigation");
