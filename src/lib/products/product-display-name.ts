@@ -1,24 +1,31 @@
 /**
- * Product.name n'est PAS traduit en base (pas de WorkTranslation-like table
- * pour les ~50 produits par langue) : il ne sert plus que de libellé de
- * secours et de trace figée dans l'historique de commande (un nom qui ne
- * change pas rétroactivement si les traductions évoluent). Le nom affiché à
- * l'utilisateur est COMPOSÉ à l'affichage à partir de la voix (ou "toutes les
- * voix") et de la cible (mouvement ou œuvre), via messages/*.json
- * ("product.allVoices", "product.nameTemplate").
+ * Compose le nom affiché d'un produit à partir de sa voix et de sa cible.
  *
- * Pas encore appelée par une page (aucune page œuvre n'existe encore) -
- * préparée à l'avance comme la route /works/[slug], pour ne pas avoir à
- * reprendre le modèle de nommage plus tard.
+ * @remarks
+ * Product.name n'est PAS traduit en base : il n'existe pas de table de
+ * traductions pour la cinquantaine de produits, par langue. Le nom stocké ne
+ * sert donc plus que de libellé de secours et de trace figée dans
+ * l'historique de commande, une valeur qui ne doit pas changer
+ * rétroactivement si les traductions évoluent.
+ *
+ * Le nom réellement montré à l'utilisateur est composé au moment de
+ * l'affichage, à partir du pupitre (ou de la mention toutes les voix) et de
+ * la cible, mouvement ou œuvre.
+ *
+ * La fonction de traduction est injectée plutôt qu'importée, pour que ce
+ * module reste pur et ne tire pas next-intl.
+ *
+ * @param voiceLabel - Libellé du pupitre déjà résolu, ou null pour un produit couvrant toutes les voix.
+ * @param targetTitle - Titre du mouvement, ou titre résolu de l'œuvre.
+ * @param t - Fonction de traduction limitée aux deux clés du namespace product.
+ * @returns Le nom prêt à afficher.
  */
 export function composeProductDisplayName({
   voiceLabel,
   targetTitle,
   t,
 }: {
-  /** Libellé de voix déjà résolu (ex. via messages "voiceLabels.SOPRANO"), ou null pour un produit couvrant toutes les voix. */
   voiceLabel: string | null;
-  /** Titre du mouvement (jamais traduit) ou titre résolu de l'œuvre (voir resolve-translation.ts). */
   targetTitle: string;
   t: (
     key: "allVoices" | "nameTemplate",

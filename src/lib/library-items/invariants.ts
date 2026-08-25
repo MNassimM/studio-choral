@@ -1,31 +1,32 @@
-/**
- * Invariants du modèle de droit d'accès (LibraryItem) que la base de données
- * ne peut pas exprimer nativement (pas de CHECK constraint conditionnelle
- * ici) - exactement les mêmes règles croisées que Product (voir
- * src/lib/products/invariants.ts), le droit étant la contrepartie d'une
- * offre :
- *
- *   scope = WORK            ⇒ movementId IS NULL
- *   scope = MOVEMENT        ⇒ movementId NOT NULL
- *   coverage = ALL_VOICES   ⇒ voiceId IS NULL
- *   coverage = SINGLE_VOICE ⇒ voiceId NOT NULL
- *
- * TOUTE création de droit (seed, octroi manuel, futur webhook Stripe) doit
- * passer par `libraryItemInputSchema` avant insertion en base.
- *
- * Ne traite PAS la déduplication sémantique (« Alto - œuvre entière » rend
- * « Alto - Kyrie » redondant) : c'est une question de droits EFFECTIFS,
- * hors de portée d'une validation de forme à l'insertion - elle relève de
- * la prochaine étape (lib/access).
- */
-
 import { z } from "zod";
 
 import { accessScopeSchema, voiceCoverageSchema } from "@/lib/products/invariants";
 
+/**
+ * Invariants du modèle de droit d'accès (LibraryItem).
+ *
+ * @remarks
+ * Exactement les mêmes règles croisées que Product, ce qui est logique
+ * puisqu'un droit est la contrepartie d'une offre achetée :
+ * une portée WORK impose movementId nul, une portée MOVEMENT impose
+ * movementId renseigné, une couverture ALL_VOICES impose voiceId nul, et une
+ * couverture SINGLE_VOICE impose voiceId renseigné.
+ *
+ * TOUTE création de droit (seed, octroi manuel, futur webhook Stripe) doit
+ * passer par libraryItemInputSchema avant insertion en base.
+ *
+ * Ce module ne traite PAS la déduplication sémantique, c'est à dire le fait
+ * que posséder « Alto, œuvre entière » rende « Alto, Kyrie » redondant. C'est
+ * une question de droits effectifs, hors de portée d'une validation de forme
+ * à l'insertion, et elle relève de src/lib/access/grants.ts.
+ */
+
 export const grantSourceSchema = z.enum(["PURCHASE", "MANUAL_GRANT", "PROMO"]);
 export type GrantSource = z.infer<typeof grantSourceSchema>;
 
+/**
+ * Forme générale d'un droit, avant application des règles croisées.
+ */
 const libraryItemShapeSchema = z.object({
   userId: z.string().min(1, "userId requis"),
   workId: z.string().min(1, "workId requis"),
@@ -38,10 +39,12 @@ const libraryItemShapeSchema = z.object({
 });
 
 /**
- * Schéma complet d'un droit, avec les quatre règles de cohérence
- * scope/coverage <-> movementId/voiceId appliquées comme raffinements -
- * identiques à `productInputSchema`, dupliquées ici (pas réutilisées via
- * `.refine`) car les deux schémas de base portent des champs différents.
+ * Schéma complet d'un droit, règles de cohérence comprises.
+ *
+ * @remarks
+ * Les quatre raffinements sont dupliqués depuis productInputSchema plutôt que
+ * réutilisés, parce que les deux schémas de base ne portent pas les mêmes
+ * champs et qu'un refine ne se transpose pas d'un objet à l'autre.
  */
 export const libraryItemInputSchema = libraryItemShapeSchema
   .refine((item) => item.scope !== "WORK" || item.movementId === null, {
@@ -67,10 +70,16 @@ export const libraryItemInputSchema = libraryItemShapeSchema
 export type LibraryItemInput = z.infer<typeof libraryItemInputSchema>;
 
 /**
- * Valide `input` et lève une erreur explicite (avec le userId/workId
- * fautifs) à la première violation, plutôt que de retourner un résultat à
- * vérifier soi-même. Pratique pour les appelants (seed, octroi manuel) qui
- * veulent échouer bruyamment.
+ * Valide un droit d'accès et échoue bruyamment si quelque chose cloche.
+ *
+ * @remarks
+ * Même parti pris que assertValidProduct : on lève à la première violation
+ * plutôt que de rendre un résultat à vérifier. Le couple userId et workId est
+ * repris dans le message pour identifier la ligne fautive tout de suite.
+ *
+ * @param input - Droit candidat, de forme encore inconnue.
+ * @returns Le droit validé et typé.
+ * @throws {Error} Si la forme ou une des règles croisées n'est pas respectée.
  */
 export function assertValidLibraryItem(input: unknown): LibraryItemInput {
   const result = libraryItemInputSchema.safeParse(input);

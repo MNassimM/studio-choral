@@ -330,6 +330,19 @@ export type DemoAudioTrack = {
   previewStartSec: number | null;
 };
 
+/**
+ * Construit la clé de stockage d'un fichier audio.
+ *
+ * @remarks
+ * La clé suit toujours la même arborescence œuvre puis mouvement puis nom de
+ * fichier. Ce n'est jamais une URL : en production les fichiers vivront dans
+ * un bucket privé, servi par URL signée après vérification des droits.
+ *
+ * @param workSlug - Slug de l'œuvre.
+ * @param movementSlug - Slug du mouvement.
+ * @param fileName - Nom du fichier, extension comprise.
+ * @returns La clé de stockage relative.
+ */
 function buildStorageKey(
   workSlug: string,
   movementSlug: string,
@@ -339,9 +352,18 @@ function buildStorageKey(
 }
 
 /**
- * Calcule la liste complète des pistes audio de démonstration attendues :
- * 1 TUTTI + 4 PREDOMINANT + 4 SOLO + 4 PREVIEW par mouvement, plus 1
- * ACCOMPANIMENT pour les mouvements marqués `hasAccompaniment`.
+ * Calcule la liste complète des pistes audio de démonstration attendues.
+ *
+ * @remarks
+ * Pour chaque mouvement : un tutti, quatre voix prédominantes, quatre voix
+ * seules et quatre extraits, soit un par pupitre SATB. Un accompagnement
+ * s'ajoute uniquement aux mouvements marqués hasAccompaniment.
+ *
+ * La liste est calculée plutôt qu'écrite à la main pour que le générateur de
+ * WAV et la seed partagent exactement la même vérité. Ajouter un mouvement au
+ * catalogue suffit à faire apparaître ses pistes des deux côtés.
+ *
+ * @returns Toutes les pistes attendues par le catalogue de démonstration.
  */
 export function buildDemoAudioTracks(): DemoAudioTrack[] {
   const tracks: DemoAudioTrack[] = [];
@@ -452,9 +474,18 @@ export type DemoProduct = {
 };
 
 /**
- * Résout le prix final d'un sku : la surcharge ponctuelle de l'œuvre
- * (`priceOverrides`) l'emporte si elle existe, sinon le montant de base issu
- * de `pricing`. Ne calcule jamais un prix à partir d'un autre.
+ * Résout le prix final d'un produit de démonstration.
+ *
+ * @remarks
+ * La surcharge ponctuelle déclarée par l'œuvre l'emporte quand elle existe,
+ * sinon on prend le montant de base issu de sa grille pricing. Aucun prix
+ * n'est jamais calculé à partir d'un autre : pas de pourcentage, pas de
+ * dérivation. Chaque montant reste une décision explicite.
+ *
+ * @param work - Œuvre à laquelle appartient le produit.
+ * @param sku - Identifiant du produit, éventuellement surchargé.
+ * @param basePriceCents - Montant de base issu de la grille, ou null.
+ * @returns Le prix retenu en centimes, ou null si rien n'est défini.
  */
 function resolvePriceCents(
   work: DemoWork,
@@ -465,6 +496,19 @@ function resolvePriceCents(
   return override ?? basePriceCents;
 }
 
+/**
+ * Garantit qu'un prix a bien été résolu, et échoue sinon.
+ *
+ * @remarks
+ * Aucune valeur de repli n'est inventée : un prix manquant est une erreur de
+ * configuration du catalogue, pas quelque chose à combler silencieusement
+ * avec un montant arbitraire.
+ *
+ * @param sku - Identifiant du produit concerné, repris dans l'erreur.
+ * @param priceCents - Prix résolu, éventuellement null.
+ * @returns Le prix, garanti non nul.
+ * @throws {Error} Si aucun prix n'a pu être résolu pour ce sku.
+ */
 function requirePriceCents(sku: string, priceCents: number | null): number {
   if (priceCents === null) {
     throw new Error(
@@ -475,20 +519,39 @@ function requirePriceCents(sku: string, priceCents: number | null): number {
 }
 
 /**
- * Calcule la liste complète des produits de démonstration attendus, à partir
- * du `pricing` (et de l'éventuel `priceOverrides`) propre à chaque œuvre de
- * `DEMO_CATALOG`. Pour chaque œuvre :
- *   - un produit MOVEMENT + SINGLE_VOICE par (mouvement, pupitre SATB) et un
- *     produit MOVEMENT + ALL_VOICES par mouvement, uniquement si les prix
- *     "movement*" de l'œuvre sont renseignés (jamais pour une œuvre à un seul
- *     mouvement, dont les prix movement* valent null) ;
- *   - toujours un produit WORK + SINGLE_VOICE par pupitre SATB et un produit
- *     WORK + ALL_VOICES pour l'œuvre entière.
+ * Calcule la liste complète des produits de démonstration attendus.
+ *
+ * @remarks
+ * Tout part de la grille pricing propre à chaque œuvre, et de son éventuelle
+ * table de surcharges.
+ *
+ * Les offres de portée mouvement (un pupitre, puis toutes les voix) ne sont
+ * générées que si les prix « movement » de l'œuvre sont renseignés. Pour une
+ * œuvre à mouvement unique ils valent null, ce qui évite de créer des offres
+ * de mouvement strictement identiques aux offres d'œuvre entière, et donc
+ * concurrentes en prix pour exactement le même contenu.
+ *
+ * Les offres de portée œuvre, elles, sont toujours générées : un produit par
+ * pupitre SATB, plus le pack toutes voix.
+ *
+ * @returns Tous les produits attendus par le catalogue de démonstration.
+ * @throws {Error} Si un prix manque, ou si deux produits partagent un sku.
  */
 export function buildDemoProducts(): DemoProduct[] {
   const products: DemoProduct[] = [];
   const seenSkus = new Set<string>();
 
+  /**
+   * Ajoute un produit en refusant les sku en double.
+   *
+   * @remarks
+   * Le sku est unique en base, un doublon échouerait de toute façon à
+   * l'insertion. Échouer ici donne un message bien plus lisible que la
+   * violation de contrainte Postgres.
+   *
+   * @param product - Produit à ajouter à la liste.
+   * @throws {Error} Si ce sku a déjà été ajouté.
+   */
   function addProduct(product: DemoProduct) {
     if (seenSkus.has(product.sku)) {
       throw new Error(`buildDemoProducts: sku en double : "${product.sku}"`);

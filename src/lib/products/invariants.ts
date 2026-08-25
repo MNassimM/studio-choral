@@ -1,20 +1,19 @@
-/**
- * Invariants du modèle commercial (Product) que la base de données ne peut
- * pas exprimer nativement (elle n'a pas de CHECK constraint conditionnelle
- * ici) :
- *
- *   scope = WORK            ⇒ movementId IS NULL
- *   scope = MOVEMENT        ⇒ movementId NOT NULL
- *   coverage = ALL_VOICES   ⇒ voiceId IS NULL
- *   coverage = SINGLE_VOICE ⇒ voiceId NOT NULL
- *
- * TOUTE création de produit (seed, back-office, import futur) doit passer
- * par `productInputSchema` avant insertion en base. Le schéma valide aussi
- * la forme générale d'un produit (types, sku non vide, prix strictement
- * positif) en plus de ces quatre règles croisées.
- */
-
 import { z } from "zod";
+
+/**
+ * Invariants du modèle commercial (Product) que la base ne sait pas exprimer.
+ *
+ * @remarks
+ * Postgres n'a pas de contrainte CHECK conditionnelle utilisable ici, ces
+ * quatre règles croisées vivent donc dans le code :
+ * une portée WORK impose movementId nul, une portée MOVEMENT impose
+ * movementId renseigné, une couverture ALL_VOICES impose voiceId nul, et une
+ * couverture SINGLE_VOICE impose voiceId renseigné.
+ *
+ * TOUTE création de produit (seed, back office, futur import) doit passer par
+ * productInputSchema avant insertion. Le schéma valide aussi la forme
+ * générale : sku non vide, prix entier strictement positif.
+ */
 
 export const accessScopeSchema = z.enum(["MOVEMENT", "WORK"]);
 export type AccessScope = z.infer<typeof accessScopeSchema>;
@@ -22,6 +21,9 @@ export type AccessScope = z.infer<typeof accessScopeSchema>;
 export const voiceCoverageSchema = z.enum(["SINGLE_VOICE", "ALL_VOICES"]);
 export type VoiceCoverage = z.infer<typeof voiceCoverageSchema>;
 
+/**
+ * Forme générale d'un produit, avant application des règles croisées.
+ */
 const productShapeSchema = z.object({
   sku: z.string().min(1, "sku requis"),
   name: z.string().min(1, "name requis"),
@@ -40,9 +42,11 @@ const productShapeSchema = z.object({
 });
 
 /**
- * Schéma complet d'un produit, avec les quatre règles de cohérence
- * scope/coverage <-> movementId/voiceId appliquées comme raffinements.
- * Chaque message d'erreur inclut le sku fautif pour un diagnostic immédiat.
+ * Schéma complet d'un produit, règles de cohérence comprises.
+ *
+ * @remarks
+ * Chaque raffinement porte son propre message et son propre chemin, pour que
+ * l'erreur désigne précisément le champ fautif plutôt qu'un rejet global.
  */
 export const productInputSchema = productShapeSchema
   .refine((p) => p.scope !== "WORK" || p.movementId === null, {
@@ -65,9 +69,19 @@ export const productInputSchema = productShapeSchema
 export type ProductInput = z.infer<typeof productInputSchema>;
 
 /**
- * Valide `input` et lève une erreur explicite (avec le sku fautif) à la
- * première violation, plutôt que de retourner un résultat à vérifier soi-même.
- * Pratique pour les appelants (seed, admin) qui veulent échouer bruyamment.
+ * Valide un produit et échoue bruyamment si quelque chose cloche.
+ *
+ * @remarks
+ * Lève une erreur plutôt que de rendre un résultat à vérifier soi même. Les
+ * appelants concernés (seed, admin) veulent s'arrêter net sur une donnée
+ * incohérente, pas continuer avec un produit à moitié valide.
+ *
+ * Le sku fautif est repris dans le message, sinon retrouver la ligne
+ * responsable au milieu d'une cinquantaine de produits devient pénible.
+ *
+ * @param input - Produit candidat, de forme encore inconnue.
+ * @returns Le produit validé et typé.
+ * @throws {Error} Si la forme ou une des règles croisées n'est pas respectée.
  */
 export function assertValidProduct(input: unknown): ProductInput {
   const result = productInputSchema.safeParse(input);
