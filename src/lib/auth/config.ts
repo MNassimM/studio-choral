@@ -10,6 +10,7 @@ import {
   SESSION_UPDATE_AGE_SECONDS,
 } from "@/lib/auth/env";
 import { magicLinkProvider } from "@/lib/auth/magic-link-provider";
+import { checkSignInRateLimit } from "@/lib/auth/sign-in-rate-limit";
 
 /**
  * Configuration serveur d'Auth.js v5 pour l'authentification de l'application.
@@ -68,6 +69,42 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
 
   callbacks: {
+    /**
+     * Applique la limitation de débit avant toute demande de lien.
+     *
+     * @remarks
+     * Ce callback est le dernier point traversé avant qu'Auth.js ne génère le
+     * jeton et ne déclenche l'envoi. Refuser ici évite donc de laisser derrière
+     * soi un jeton de vérification créé pour un message jamais parti, ce qui
+     * arriverait si le refus avait lieu plus tard dans la chaîne.
+     *
+     * Le contrôle porte sur la demande d'envoi et ignore complètement
+     * l'existence d'un compte. Une adresse connue et une adresse inconnue sont
+     * donc traitées exactement de la même façon, limitation comprise.
+     *
+     * Les connexions qui ne passent pas par une demande de lien ne sont pas
+     * concernées, seul le formulaire de connexion étant visé.
+     *
+     * @param email - Présent et marqué comme demande de vérification lorsqu'il
+     * s'agit d'un envoi de lien.
+     * @param user - Utilisateur candidat, dont l'adresse sert de clé de comptage.
+     * @returns Vrai si la demande peut être honorée.
+     */
+    async signIn({ user, email }) {
+      const isMagicLinkRequest = Boolean(email?.verificationRequest);
+      if (!isMagicLinkRequest) {
+        return true;
+      }
+
+      const address = user?.email;
+      if (!address) {
+        return true;
+      }
+
+      const verdict = await checkSignInRateLimit(address);
+      return verdict.allowed;
+    },
+
     /**
      * Ajoute l'identifiant de l'utilisateur à l'objet de session.
      *

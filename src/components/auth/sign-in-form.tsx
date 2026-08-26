@@ -92,9 +92,19 @@ function SignInForm({
       });
 
       if (result?.error) {
-        // Une panne d'envoi est signalée, contrairement à une adresse inconnue
-        // qui n'en est pas une et mène à la confirmation comme les autres.
-        setError(t("errorSendFailed"));
+        // Auth.js signale un refus du callback de connexion sous le code
+        // AccessDenied. C'est aujourd'hui la seule chose qui puisse le
+        // produire ici, la limitation de débit étant le seul motif de refus.
+        //
+        // Le message reste identique quelle que soit l'adresse saisie : une
+        // adresse connue et une adresse inconnue sont limitées de la même
+        // façon, la limite ne portant pas sur l'existence d'un compte.
+        const isRateLimited =
+          result.error === "AccessDenied" || result.code === "AccessDenied";
+
+        setError(
+          isRateLimited ? t("errorTooManyRequests") : t("errorSendFailed"),
+        );
         setIsSubmitting(false);
         return;
       }

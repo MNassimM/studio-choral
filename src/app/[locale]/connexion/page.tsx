@@ -47,20 +47,27 @@ export async function generateMetadata(): Promise<Metadata> {
  * Traduit un code d'erreur d'Auth.js en clé de message.
  *
  * @remarks
- * Auth.js renvoie l'utilisateur ici avec un paramètre d'erreur lorsqu'un lien
- * ne peut pas être honoré. Seul le cas d'un jeton refusé mérite une
- * formulation propre, puisque c'est le seul que l'utilisateur peut corriger
- * lui même en redemandant un lien. Tout le reste partage un message générique,
- * détailler des causes internes n'aidant personne et renseignant un attaquant.
+ * Auth.js renvoie l'utilisateur ici avec un paramètre d'erreur lorsqu'une
+ * demande ne peut pas être honorée. Deux cas méritent une formulation propre,
+ * le lien devenu invalide et la limitation de débit, parce que ce sont les
+ * deux que l'utilisateur peut résoudre lui même. Tout le reste partage un
+ * message générique, détailler des causes internes n'aidant personne et
+ * renseignant un attaquant.
  *
  * @param error - Valeur brute du paramètre d'erreur.
  * @returns La clé de message à afficher, ou null si aucune erreur n'est signalée.
  */
 function resolveErrorKey(
   error: string | undefined,
-): "errorExpiredLink" | "errorGeneric" | null {
+): "errorExpiredLink" | "errorTooManyRequests" | "errorGeneric" | null {
   if (!error) return null;
-  return error === "Verification" ? "errorExpiredLink" : "errorGeneric";
+  if (error === "Verification") return "errorExpiredLink";
+  // Auth.js signale sous ce code le refus du callback de connexion, dont la
+  // limitation de débit est aujourd'hui le seul motif. Le traduire permet à
+  // quelqu'un qui atteint la route sans JavaScript de lire la vraie raison
+  // plutôt qu'un message générique.
+  if (error === "AccessDenied") return "errorTooManyRequests";
+  return "errorGeneric";
 }
 
 /**

@@ -72,3 +72,29 @@ export const SESSION_UPDATE_AGE_SECONDS = 24 * 60 * 60;
  * Durée de validité du LIEN de connexion
  */
 export const MAGIC_LINK_MAX_AGE_SECONDS = 60 * 60;
+
+/**
+ * Nombre de demandes de lien tolérées pour une même adresse, et durée de la
+ * fenêtre correspondante en secondes.
+ */
+export const SIGN_IN_EMAIL_MAX_ATTEMPTS = 3;
+export const SIGN_IN_EMAIL_WINDOW_SECONDS = 15 * 60;
+
+/**
+ * Nombre de demandes tolérées depuis une même adresse IP, et durée de la
+ * fenêtre correspondante en secondes.
+ */
+export const SIGN_IN_IP_MAX_ATTEMPTS = 15;
+export const SIGN_IN_IP_WINDOW_SECONDS = 60 * 60;
+
+/**
+ * Durée de conservation des traces de tentative, en secondes.
+ */
+export const SIGN_IN_ATTEMPT_RETENTION_SECONDS = 2 * 60 * 60;
+
+/**
+ * Indique si la limitation de débit est désactivée.
+ */
+export const isSignInRateLimitDisabled =
+  process.env.NODE_ENV !== "production" &&
+  process.env.AUTH_RATE_LIMIT_DISABLED === "true";

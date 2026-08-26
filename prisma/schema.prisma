@@ -328,3 +328,34 @@ model LibraryItem {
   @@index([userId])
   @@map("library_items")
 }
+
+/// Trace d'une demande de lien de connexion, servant uniquement à la
+/// limitation de débit du formulaire.
+///
+/// Une ligne par tentative plutôt qu'un compteur incrémenté : compter des
+/// lignes sur une fenêtre glissante évite la lecture suivie d'une écriture que
+/// deux requêtes concurrentes pourraient entrelacer, et donne une fenêtre qui
+/// glisse réellement au lieu de se réinitialiser d'un coup.
+///
+/// L'adresse e-mail n'est jamais stockée en clair. Seule une empreinte salée
+/// est conservée, ce qui suffit à compter les tentatives d'une même adresse
+/// sans constituer un registre des adresses ayant tenté de se connecter.
+model SignInAttempt {
+  id String @id @default(cuid())
+
+  /// Nature de la clé comptée, "email" ou "ip", les deux limites étant
+  /// indépendantes l'une de l'autre.
+  scope String
+
+  /// Empreinte SHA-256 de la clé, salée avec le secret d'authentification.
+  keyHash String @map("key_hash")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Index de comptage : il porte les trois colonnes de la requête de fenêtre
+  // glissante, dans l'ordre où elles sont filtrées.
+  @@index([scope, keyHash, createdAt])
+  // Index de purge, utilisé par la suppression des lignes expirées.
+  @@index([createdAt])
+  @@map("sign_in_attempts")
+}
