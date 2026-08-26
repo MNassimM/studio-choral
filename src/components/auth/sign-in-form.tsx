@@ -41,9 +41,18 @@ function looksLikeEmail(value: string): boolean {
  *
  * @param initialError - Message d'erreur à afficher au premier rendu, transmis
  * par la page lorsqu'Auth.js a rejeté un lien.
+ * @param nextTarget - Chemin interne où ramener l'utilisateur une fois connecté,
+ * déjà validé par la page. Il est confié à Auth.js, qui l'inscrit dans le lien
+ * magique, de sorte que la destination survive au passage par la boîte mail.
  * @returns Le formulaire rendu.
  */
-function SignInForm({ initialError }: { initialError?: string }) {
+function SignInForm({
+  initialError,
+  nextTarget,
+}: {
+  initialError?: string;
+  nextTarget?: string;
+}) {
   const t = useTranslations("auth.signIn");
   const router = useRouter();
   const emailFieldId = useId();
@@ -76,6 +85,10 @@ function SignInForm({ initialError }: { initialError?: string }) {
       const result = await signIn("magic-link", {
         email: trimmed,
         redirect: false,
+        // Transmis à Auth.js plutôt que conservé ici : le clic sur le lien a
+        // lieu bien plus tard, souvent depuis un autre onglet, et l'état de
+        // ce composant aura disparu depuis longtemps.
+        ...(nextTarget && nextTarget !== "/" ? { redirectTo: nextTarget } : {}),
       });
 
       if (result?.error) {

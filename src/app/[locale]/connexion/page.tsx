@@ -5,7 +5,10 @@ import { locale as rootLocale } from "next/root-params";
 import { Container } from "@/components/layout/container";
 import { SignInForm } from "@/components/auth/sign-in-form";
 import { getCurrentUser } from "@/lib/auth/current-user";
-import { getPathname, redirect } from "@/i18n/navigation";
+import { safeRedirectTarget } from "@/lib/auth/redirect-target";
+import { redirect as redirectToPath } from "next/navigation";
+
+import { getPathname } from "@/i18n/navigation";
 import { routing, type AppLocale } from "@/i18n/routing";
 
 /**
@@ -76,15 +79,27 @@ function resolveErrorKey(
 export default async function SignInPage(
   props: PageProps<"/[locale]/connexion">,
 ) {
-  const locale = ((await rootLocale()) ?? routing.defaultLocale) as AppLocale;
+  const searchParams = await props.searchParams;
+  // La destination est validée avant toute utilisation. Une valeur refusée
+  // retombe sur la racine, un lien forgé perdant ainsi tout effet.
+  const nextTarget = safeRedirectTarget(
+    typeof searchParams.next === "string" ? searchParams.next : undefined,
+  );
 
   const user = await getCurrentUser();
   if (user) {
-    redirect({ href: "/", locale });
+    // Un utilisateur déjà connecté qui arrive ici avec une destination est
+    // renvoyé dessus, ce qui couvre le cas d'un retour en arrière après
+    // connexion.
+    //
+    // La redirection passe par celle de Next et non par celle de next-intl,
+    // parce que la destination est un chemin concret déjà localisé et non une
+    // clé de route à composer. La faire passer par next-intl reviendrait à lui
+    // demander de traduire un chemin qui l'est déjà.
+    redirectToPath(nextTarget);
   }
 
   const t = await getTranslations("auth.signIn");
-  const searchParams = await props.searchParams;
   const rawError =
     typeof searchParams.error === "string" ? searchParams.error : undefined;
   const errorKey = resolveErrorKey(rawError);
@@ -112,7 +127,7 @@ export default async function SignInPage(
             </div>
           ) : null}
 
-          <SignInForm />
+          <SignInForm nextTarget={nextTarget} />
         </div>
       </Container>
     </section>
