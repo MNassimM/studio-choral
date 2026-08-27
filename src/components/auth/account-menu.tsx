@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Menu } from "@base-ui/react/menu";
 import { signOut } from "next-auth/react";
 import { ChevronDown, Loader2, LogOut, UserRound } from "lucide-react";
+import {Link} from "@/i18n/navigation";
 
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -28,6 +29,7 @@ import { cn } from "@/lib/utils";
  */
 function AccountMenu({ name, email }: { name: string; email: string }) {
   const t = useTranslations("auth.account");
+  const tLinks = useTranslations("navigation");
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   async function handleSignOut() {
@@ -46,7 +48,7 @@ function AccountMenu({ name, email }: { name: string; email: string }) {
         )}
       >
         <UserRound className="size-4" aria-hidden="true" />
-        <span className="hidden max-w-32 truncate sm:inline">{name || email}</span>
+        <span className="hidden max-w-32 truncate sm:inline">{t("mySpace")}</span>
         <ChevronDown className="size-3.5 text-muted-foreground" aria-hidden="true" />
       </Menu.Trigger>
       <Menu.Portal>
@@ -62,8 +64,23 @@ function AccountMenu({ name, email }: { name: string; email: string }) {
               <span className="text-xs text-muted-foreground">
                 {t("signedInAs")}
               </span>
-              <span className="truncate text-sm font-medium">{email}</span>
+              <span className="truncate text-sm font-medium">{name}</span>
             </div>
+            <div aria-hidden="true" className="my-1 h-px bg-border" />
+             <Menu.Item
+              render={<Link href="/compte" />}
+              className="flex w-full items-center rounded-lg px-2.5 py-2 text-sm outline-none select-none data-highlighted:bg-accent"
+            >
+              {tLinks("myAccount")}
+            </Menu.Item>
+
+            <Menu.Item
+              render={<Link href="/bibliotheque" />}
+              className="flex w-full items-center rounded-lg px-2.5 py-2 text-sm outline-none select-none data-highlighted:bg-accent"
+            >
+              {tLinks("footer.linkLibrary")}
+            </Menu.Item>
+
             <div aria-hidden="true" className="my-1 h-px bg-border" />
             <Menu.Item
               closeOnClick={false}

@@ -42,7 +42,7 @@ async function Header() {
           <div className="hidden sm:block">
             <AccountSlot />
           </div>
-          <div className="hidden sm:block">
+          <div className="sm:hidden">
             <AccountSlot compact />
           </div>
           <Link
