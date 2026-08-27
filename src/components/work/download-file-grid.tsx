@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { Download, LockKeyhole, Music2, FileHeadphone } from "lucide-react";
+import { Download, LockKeyhole, FileHeadphone } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { formatAudioFormatLabel, formatFileSize } from "@/lib/format/file-size";

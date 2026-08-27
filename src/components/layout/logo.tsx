@@ -58,8 +58,13 @@ function Logo({
         )}
       />
       {variant === "large" ? (
-        <span className="text-sm font-semibold whitespace-nowrap tracking-[0.15em]">
-          BUTTERFLY STUDIO CHORAL
+        <span className="flex flex-col leading-tight">
+          <span className="text-sm font-semibold tracking-[0.2em]">
+            BUTTERFLY
+          </span>
+          <span className="text-[0.65rem] font-medium tracking-[0.28em] text-muted-foreground">
+            STUDIO CHORAL
+          </span>
         </span>
       ) : (
         <span className="flex flex-col leading-tight">

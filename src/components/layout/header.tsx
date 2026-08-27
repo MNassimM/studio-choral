@@ -25,7 +25,7 @@ async function Header() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background">
-      <Container className="grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-4">
+      <Container className="grid h-16 grid-cols-[1fr_auto_1fr] items-center">
         <div className="flex items-center gap-4 justify-self-start">
           <MobileNav accountSlot={<AccountSlot />} />
           <Logo variant="large" />

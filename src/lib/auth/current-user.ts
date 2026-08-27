@@ -29,7 +29,7 @@ import type { User } from "@/generated/prisma/client";
  *
  * @returns Le compte de démonstration désigné, ou null si le raccourci ne
  * s'applique pas.
- */
+
 async function resolveImpersonatedUser(): Promise<User | null> {
   if (process.env.NODE_ENV === "production") {
     return null;
@@ -50,6 +50,7 @@ async function resolveImpersonatedUser(): Promise<User | null> {
   }
   return user;
 }
+*/
 
 /**
  * Lit la session Auth.js et rend l'utilisateur courant.

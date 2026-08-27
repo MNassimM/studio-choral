@@ -2,6 +2,7 @@ import { Container } from "@/components/layout/container";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import "./globals.css";
+import { Link } from "@/i18n/navigation";
 
 /**
  * Page 404 racine, hors de tout segment de locale.
@@ -23,14 +24,14 @@ export default async function LocaleNotFound() {
           Page introuvable
         </h1>
         <p className="max-w-md text-muted-foreground">
-          La page que vous cherchez n'existe pas ou a été déplacée.
+          La page que vous cherchez n&apos;existe pas ou a été déplacée.
         </p>
-        <a
+        <Link
           href="/"
           className={cn(buttonVariants({ size: "lg" }), "rounded-full px-6")}
         >
-            Retour à l'accueil
-        </a>
+            Retour à l&apos;accueil
+        </Link>
       </Container>
     </section>
   );
