@@ -6,9 +6,11 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/db/prisma";
 import {
   authEnv,
+  isGoogleSignInEnabled,
   SESSION_MAX_AGE_SECONDS,
   SESSION_UPDATE_AGE_SECONDS,
 } from "@/lib/auth/env";
+import { buildGoogleProvider } from "@/lib/auth/google-provider";
 import { magicLinkProvider } from "@/lib/auth/magic-link-provider";
 import { checkSignInRateLimit } from "@/lib/auth/sign-in-rate-limit";
 
@@ -37,7 +39,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
    */
   secret: authEnv.AUTH_SECRET,
 
-  providers: [magicLinkProvider],
+  /**
+   * Le lien magique est toujours présent, Google ne s'ajoute que si ses
+   * identifiants sont configurés. Déclarer un provider sans identifiants
+   * produirait un bouton qui échoue au clic, alors qu'un provider absent
+   * retire simplement ce bouton de la page.
+   */
+  providers: isGoogleSignInEnabled
+    ? [magicLinkProvider, buildGoogleProvider()]
+    : [magicLinkProvider],
 
   pages: {
     /**

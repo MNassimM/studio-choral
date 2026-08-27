@@ -22,6 +22,22 @@ const authEnvSchema = z.object({
       "AUTH_SECRET doit faire au moins 32 caractères (générer avec `npx auth secret`)",
     ),
   AUTH_URL: z.url("AUTH_URL doit être une URL absolue").optional(),
+
+  /**
+   * Identifiants du client OAuth Google.
+   *
+   * @remarks
+   * Optionnels, et volontairement. Exiger un projet Google Cloud pour lancer
+   * le site rendrait impossible de développer sur tout le reste sans passer
+   * par la console d'un fournisseur tiers. Le provider n'est ajouté à la
+   * configuration que lorsque les deux valeurs sont présentes, et le bouton
+   * disparaît de la page de connexion dans le cas contraire.
+   *
+   * Même parti pris que la clé Resend, qui n'est exigée que si le transport
+   * correspondant est effectivement choisi.
+   */
+  AUTH_GOOGLE_ID: z.string().min(1).optional(),
+  AUTH_GOOGLE_SECRET: z.string().min(1).optional(),
 });
 
 /**
@@ -39,6 +55,8 @@ function parseAuthEnv(): AuthEnv {
   const result = authEnvSchema.safeParse({
     AUTH_SECRET: process.env.AUTH_SECRET,
     AUTH_URL: process.env.AUTH_URL,
+    AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
+    AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,
   });
 
   if (!result.success) {
@@ -98,3 +116,19 @@ export const SIGN_IN_ATTEMPT_RETENTION_SECONDS = 2 * 60 * 60;
 export const isSignInRateLimitDisabled =
   process.env.NODE_ENV !== "production" &&
   process.env.AUTH_RATE_LIMIT_DISABLED === "true";
+
+/**
+ * Indique si la connexion Google est utilisable.
+ *
+ * @remarks
+ * Les deux identifiants sont exigés ensemble. N'en avoir qu'un donnerait un
+ * provider à moitié configuré, qui échouerait au moment du clic plutôt qu'au
+ * démarrage, c'est à dire au pire moment.
+ *
+ * Cette valeur pilote aussi bien l'ajout du provider à la configuration que
+ * l'affichage du bouton, pour qu'aucun bouton ne puisse mener à un provider
+ * absent.
+ */
+export const isGoogleSignInEnabled = Boolean(
+  authEnv.AUTH_GOOGLE_ID && authEnv.AUTH_GOOGLE_SECRET,
+);

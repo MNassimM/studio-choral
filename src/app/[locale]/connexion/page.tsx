@@ -4,7 +4,9 @@ import { locale as rootLocale } from "next/root-params";
 
 import { Container } from "@/components/layout/container";
 import { SignInForm } from "@/components/auth/sign-in-form";
+import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 import { getCurrentUser } from "@/lib/auth/current-user";
+import { isGoogleSignInEnabled } from "@/lib/auth/env";
 import { safeRedirectTarget } from "@/lib/auth/redirect-target";
 import { redirect as redirectToPath } from "next/navigation";
 
@@ -135,6 +137,23 @@ export default async function SignInPage(
           ) : null}
 
           <SignInForm nextTarget={nextTarget} />
+
+          {/* Google s'ajoute sous le formulaire sans en modifier
+              l'organisation, le lien magique restant le chemin par défaut. Le
+              bloc disparaît entièrement si les identifiants ne sont pas
+              configurés, pour qu'aucun bouton ne mène à un provider absent. */}
+          {isGoogleSignInEnabled ? (
+            <>
+              <div className="flex items-center gap-3" aria-hidden="true">
+                <span className="h-px flex-1 bg-border" />
+                <span className="text-xs text-muted-foreground">
+                  {t("separator")}
+                </span>
+                <span className="h-px flex-1 bg-border" />
+              </div>
+              <GoogleSignInButton nextTarget={nextTarget} />
+            </>
+          ) : null}
         </div>
       </Container>
     </section>
