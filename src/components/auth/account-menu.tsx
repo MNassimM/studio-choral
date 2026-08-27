@@ -37,7 +37,7 @@ function AccountMenu({ name, email }: { name: string; email: string }) {
   }
 
   return (
-    <Menu.Root>
+    <Menu.Root modal={false}>
       <Menu.Trigger
         aria-label={t("menuAriaLabel")}
         className={cn(

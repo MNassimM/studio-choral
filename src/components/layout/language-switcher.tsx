@@ -38,7 +38,7 @@ function LanguageSwitcher() {
   const ActiveFlag = FLAGS[activeLocale];
 
   return (
-    <Menu.Root>
+    <Menu.Root modal={false}>
       <Menu.Trigger
         aria-label={t("languageSwitcher.triggerAriaLabel", {
           language: t(`languageSwitcher.${activeLocale}`),

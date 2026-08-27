@@ -8,8 +8,17 @@ import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from "lucide-react";
 
 /**
  * Racine du menu déroulant, qui porte la valeur et le gestionnaire de changement.
+ *
+ * @param modal - Verrouille le défilement et neutralise les interactions
+ * extérieures. Faux par défaut, contrairement à Base UI.
+ * @returns La racine rendue.
  */
-const Select = SelectPrimitive.Root;
+function Select<Value, Multiple extends boolean | undefined = false>({
+  modal = false,
+  ...props
+}: SelectPrimitive.Root.Props<Value, Multiple>) {
+  return <SelectPrimitive.Root modal={modal} {...props} />;
+}
 
 /**
  * Groupe d'items à l'intérieur du popup.
@@ -82,6 +91,16 @@ function SelectTrigger({
 /**
  * Popup du menu déroulant, portail et positionnement compris.
  *
+ * @remarks
+ * L'alignement sur le déclencheur est désactivé par défaut, alors que Base UI
+ * l'active. Ce mode fait recouvrir le déclencheur par le popup, à la manière
+ * d'un menu déroulant natif, mais il fige la position du popup et impose donc
+ * le verrouillage du défilement, indépendamment du réglage `modal` de la
+ * racine. C'est le second des deux réglages nécessaires pour que la page reste
+ * défilable, voir le commentaire de `Select` ci dessus.
+ *
+ * Le popup s'ouvre donc sous le déclencheur et le suit pendant le défilement.
+ *
  * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
  * @param children - Items du menu.
  * @param side - Côté du déclencheur où ouvrir le popup.
@@ -98,7 +117,7 @@ function SelectContent({
   sideOffset = 4,
   align = "center",
   alignOffset = 0,
-  alignItemWithTrigger = true,
+  alignItemWithTrigger = false,
   ...props
 }: SelectPrimitive.Popup.Props &
   Pick<
