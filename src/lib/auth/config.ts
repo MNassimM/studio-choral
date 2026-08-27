@@ -13,6 +13,7 @@ import {
 import { buildGoogleProvider } from "@/lib/auth/google-provider";
 import { magicLinkProvider } from "@/lib/auth/magic-link-provider";
 import { checkSignInRateLimit } from "@/lib/auth/sign-in-rate-limit";
+import { syncGoogleName } from "@/lib/auth/sync-google-name";
 
 /**
  * Configuration serveur d'Auth.js v5 pour l'authentification de l'application.
@@ -130,6 +131,43 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     session({ session, user }) {
       session.user.id = user.id;
       return session;
+    },
+  },
+
+  events: {
+    /**
+     * Complète le nom du compte après une connexion Google.
+     *
+     * @remarks
+     * Auth.js n'écrit le nom publié par Google qu'au moment où il crée
+     * l'utilisateur. Un compte ouvert par lien magique, puis rattaché à Google,
+     * resterait donc sans nom, et l'en tête continuerait d'afficher l'adresse.
+     *
+     * L'évènement est le bon endroit : il reçoit l'utilisateur tel qu'il existe
+     * en base, identifiant compris, ce que le callback de connexion ne garantit
+     * pas dans le cas d'un rattachement. Il s'exécute par ailleurs une fois la
+     * session ouverte, un échec d'écriture n'ayant ainsi aucun effet sur la
+     * connexion.
+     *
+     * Le profil transmis ici est celui que Google publie, avant la traduction
+     * opérée par mapGoogleProfile. Son nom est donc lu tel quel, et la fonction
+     * appelée décide seule s'il y a lieu de l'enregistrer.
+     *
+     * @param user - Utilisateur connecté, tel qu'il figure en base.
+     * @param account - Compte ayant servi à la connexion.
+     * @param profile - Profil brut publié par le fournisseur, absent hors OAuth.
+     * @returns Rien.
+     */
+    async signIn({ user, account, profile }) {
+      if (account?.provider !== "google" || !user.id) {
+        return;
+      }
+
+      await syncGoogleName({
+        userId: user.id,
+        storedName: user.name,
+        googleName: typeof profile?.name === "string" ? profile.name : null,
+      });
     },
   },
 });

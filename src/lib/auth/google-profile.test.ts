@@ -1,7 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { mapGoogleProfile } from "@/lib/auth/google-profile";
+import {
+  mapGoogleProfile,
+  resolveNameToStore,
+} from "@/lib/auth/google-profile";
 
 test("une adresse déjà en minuscules est laissée telle quelle", () => {
   const user = mapGoogleProfile({
@@ -49,4 +52,29 @@ test("le sous adressage est conservé", () => {
   const user = mapGoogleProfile({ sub: "1", email: "Jean+Choral@Gmail.com" });
 
   assert.equal(user.email, "jean+choral@gmail.com");
+});
+
+test("un compte sans nom recoit celui de Google", () => {
+  assert.equal(resolveNameToStore(null, "Jean Dupont"), "Jean Dupont");
+});
+
+test("un nom deja enregistre n'est jamais remplace", () => {
+  // Le but est de combler une absence, pas de suivre Google a chaque connexion.
+  assert.equal(resolveNameToStore("Jean D.", "Jean Dupont"), null);
+});
+
+test("un nom Google absent ne declenche aucune ecriture", () => {
+  assert.equal(resolveNameToStore(null, null), null);
+  assert.equal(resolveNameToStore(null, undefined), null);
+});
+
+test("un nom reduit a des espaces est traite comme absent des deux cotes", () => {
+  // Stocker des espaces afficherait un menu de compte vide ; les lire comme une
+  // valeur presente empecherait la prochaine occasion de combler le nom.
+  assert.equal(resolveNameToStore("   ", "Jean Dupont"), "Jean Dupont");
+  assert.equal(resolveNameToStore(null, "   "), null);
+});
+
+test("les espaces en bordure du nom Google sont retires", () => {
+  assert.equal(resolveNameToStore(null, "  Jean Dupont  "), "Jean Dupont");
 });

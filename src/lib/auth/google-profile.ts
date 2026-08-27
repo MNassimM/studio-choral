@@ -48,3 +48,39 @@ export function mapGoogleProfile(profile: GoogleProfile) {
     image: profile.picture ?? null,
   };
 }
+
+/**
+ * Détermine le nom à enregistrer pour un compte qui n'en a pas encore.
+ *
+ * @remarks
+ * Cette fonction existe parce qu'Auth.js n'écrit le nom publié par Google qu'au
+ * moment où il CRÉE l'utilisateur. Quelqu'un dont le compte a été ouvert par
+ * lien magique n'a pas de nom, et se connecter ensuite par Google ne lui en
+ * donne pas : Auth.js se contente de rattacher la connexion au compte existant.
+ * Le même constat vaut pour les connexions Google suivantes, qui ne repassent
+ * jamais par la création.
+ *
+ * Un nom déjà enregistré n'est jamais remplacé. Le seul but est de combler une
+ * absence, pas de suivre les changements d'état civil chez Google. Écraser
+ * reviendrait à défaire, à chaque connexion, un nom que l'utilisateur pourrait
+ * un jour choisir lui même.
+ *
+ * Un nom réduit à des espaces est traité comme absent, des deux côtés : le
+ * stocker afficherait un menu de compte vide, et le lire comme une valeur
+ * présente empêcherait la prochaine occasion de le combler.
+ *
+ * @param storedName - Nom actuellement en base pour ce compte.
+ * @param googleName - Nom tel que Google le publie.
+ * @returns Le nom à écrire, ou null s'il n'y a rien à faire.
+ */
+export function resolveNameToStore(
+  storedName: string | null | undefined,
+  googleName: string | null | undefined,
+): string | null {
+  if (storedName && storedName.trim()) {
+    return null;
+  }
+
+  const candidate = googleName?.trim();
+  return candidate ? candidate : null;
+}
