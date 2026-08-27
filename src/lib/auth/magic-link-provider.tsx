@@ -6,6 +6,9 @@ import type { EmailConfig } from "@auth/core/providers/email";
 
 import { MAGIC_LINK_MAX_AGE_SECONDS } from "@/lib/auth/env";
 import { sendEmail } from "@/lib/email/send-email";
+import { MagicLinkEmail } from "@/emails/magic-link";
+import { renderEmail } from "@/emails/render";
+import { SITE_NAME } from "@/emails/theme";
 import { routing, type AppLocale } from "@/i18n/routing";
 
 /**
@@ -22,9 +25,6 @@ import { routing, type AppLocale } from "@/i18n/routing";
  * Ce fichier n'importe donc NI nodemailer NI resend - seulement notre
  * interface.
  */
-
-const SITE_NAME = "Butterfly Studio Choral";
-
 
 /**
  * Détermine la locale à utiliser pour l'e-mail de lien magique.
@@ -99,6 +99,16 @@ export const magicLinkProvider: EmailConfig = {
    * L'e-mail est envoyé exclusivement via sendEmail(). Ce provider ne communique donc directement avec aucun fournisseur d'e-mails.
    * Le contenu du message est traduit dans la locale déterminée par resolveLocale().
    *
+   * Les chaînes sont traduites ici puis transmises au gabarit, qui reste une
+   * pure présentation sans dépendance à next-intl. Ce découpage permet de
+   * relire un gabarit sans monter de contexte de requête, et il évite qu'un
+   * futur message ait à réapprendre comment retrouver la langue du
+   * destinataire.
+   *
+   * La durée affichée est calculée depuis MAGIC_LINK_MAX_AGE_SECONDS, la même
+   * constante qui fixe l'expiration réelle du jeton. Annoncer une durée saisie
+   * à la main finirait par contredire le comportement du lien.
+   *
    * @param identifier - Adresse e-mail à laquelle envoyer le lien.
    * @param url - URL complète du lien magique généré par Auth.js.
    * @param request - Requête ayant déclenché la demande de connexion.
@@ -110,23 +120,27 @@ export const magicLinkProvider: EmailConfig = {
 
     const minutes = Math.round(MAGIC_LINK_MAX_AGE_SECONDS / 60);
 
-    const text = [
-      t("greeting"),
-      "",
-      t("instruction", { siteName: SITE_NAME }),
-      url,
-      "",
-      t("expiry", { minutes }),
-      "",
-      t("ignore"),
-      "",
-      t("signature", { siteName: SITE_NAME }),
-    ].join("\n");
+    const { html, text } = await renderEmail(
+      <MagicLinkEmail
+        locale={locale}
+        url={url}
+        preview={t("preview", { minutes })}
+        heading={t("heading", { siteName: SITE_NAME })}
+        greeting={t("greeting")}
+        instruction={t("instruction", { siteName: SITE_NAME })}
+        buttonLabel={t("buttonLabel")}
+        fallbackNotice={t("fallbackNotice")}
+        expiry={t("expiry", { minutes })}
+        ignore={t("ignore")}
+        signature={t("signature", { siteName: SITE_NAME })}
+      />,
+    );
 
     const result = await sendEmail({
       to: identifier,
       subject: t("subject", { siteName: SITE_NAME }),
       text,
+      html,
     });
 
     if (!result.ok) {
