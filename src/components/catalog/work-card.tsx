@@ -2,6 +2,8 @@ import { getTranslations, getFormatter } from "next-intl/server";
 import { Playfair_Display } from "next/font/google";
 import { ChevronRight, Headphones, Music2 } from "lucide-react";
 
+import { isKnownWorkLanguageCode } from "@/lib/works/work-language";
+
 import type { WorkCardData } from "@/lib/catalog/work-card-data";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -108,6 +110,10 @@ async function WorkCard({
     );
   }
 
+  function translateWorkLanguage(code: string): string {
+    return isKnownWorkLanguageCode(code) ? t(`language.${code}`) : code;
+  }
+
   return (
     <Link
       href={workHref}
@@ -141,7 +147,7 @@ async function WorkCard({
               </Badge>
             ) : null}
             {work.language ? (
-              <Badge variant="secondary">{work.language.toUpperCase()}</Badge>
+              <Badge variant="secondary">{translateWorkLanguage(work.language)}</Badge>
             ) : null}
           </div>
 
