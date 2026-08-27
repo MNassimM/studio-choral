@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { locale as rootLocale } from "next/root-params";
+import { cookies } from "next/headers";
 import { Playfair_Display } from "next/font/google";
 import {
   BookOpen,
@@ -27,6 +28,12 @@ import {
   type FilterCategory,
 } from "@/components/catalog/catalog-filters";
 import { SortSelect } from "@/components/catalog/catalog-controls";
+import {
+  CATALOG_VIEW_COOKIE,
+  DEFAULT_CATALOG_VIEW,
+  parseCatalogView,
+  type CatalogView,
+} from "@/lib/catalog/view-preference";
 import {
   PERIOD_OPTIONS,
   type PeriodValue,
@@ -197,8 +204,14 @@ export default async function CataloguePage(
     isSortValue(rawSearchParams.sort)
       ? rawSearchParams.sort
       : "featured";
-  const view: "grid" | "list" =
-    rawSearchParams.view === "list" ? "list" : "grid";
+  // Le mode d'affichage ne vient pas de l'URL mais du cookie posé par la
+  // bascule. C'est une préférence de la personne et non une propriété du
+  // document, deux visiteurs ouvrant le même lien voient donc chacun le
+  // catalogue comme ils ont l'habitude de le voir.
+  const cookieStore = await cookies();
+  const view: CatalogView =
+    parseCatalogView(cookieStore.get(CATALOG_VIEW_COOKIE)?.value) ??
+    DEFAULT_CATALOG_VIEW;
 
   // Œuvres publiées, compositeurs distincts (stat "Compositeurs") et valeurs
   // distinctes de period/voicing/language (options du panneau de filtres) -
@@ -476,7 +489,6 @@ export default async function CataloguePage(
                   periods={periods}
                   voicings={voicings}
                   languages={languages}
-                  view={view}
                   locale={locale}
                 />
                 <div className="flex flex-wrap items-center gap-2">
@@ -484,10 +496,7 @@ export default async function CataloguePage(
                   {filterCategories.length > 0 ? (
                     <CatalogFiltersButton />
                   ) : null}
-                  <CatalogViewToggle
-                    view={view}
-                    currentParams={rawSearchParams}
-                  />
+                  <CatalogViewToggle view={view} />
                 </div>
               </div>
             </CatalogFiltersPanel>

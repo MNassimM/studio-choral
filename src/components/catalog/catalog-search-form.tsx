@@ -11,7 +11,6 @@ type CatalogSearchFormProps = {
   periods: string[];
   voicings: string[];
   languages: string[];
-  view: string;
   locale: (typeof routing.locales)[number];
 };
 
@@ -27,7 +26,6 @@ type CatalogSearchFormProps = {
  * @param periods - Périodes filtrées, reportées en champ caché.
  * @param voicings - Formations filtrées, reportées en champ caché.
  * @param languages - Langues filtrées, reportées en champ caché.
- * @param view - Vue active, reportée en champ caché si ce n'est pas la grille.
  * @param locale - Locale active, qui détermine le chemin d'action du formulaire.
  * @returns Le formulaire rendu.
  */
@@ -37,7 +35,6 @@ async function CatalogSearchForm({
   periods,
   voicings,
   languages,
-  view,
   locale,
 }: CatalogSearchFormProps) {
   const t = await getTranslations("catalogue");
@@ -71,9 +68,6 @@ async function CatalogSearchForm({
       ) : null}
       {languages.length > 0 ? (
         <input type="hidden" name="language" value={languages.join(",")} />
-      ) : null}
-      {view !== "grid" ? (
-        <input type="hidden" name="view" value={view} />
       ) : null}
     </form>
   );
