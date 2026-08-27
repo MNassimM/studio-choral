@@ -2,30 +2,33 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Menu, ShoppingBag, X } from "lucide-react";
+import { LogIn, Menu, ShoppingBag, UserRound, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { SignOutButton } from "@/components/auth/sign-out-button";
 import { Link } from "@/i18n/navigation";
 import { mainNavItems } from "@/components/layout/main-nav";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 
 /**
- * Menu de navigation mobile, affiché en dessous du point de rupture md.
+ * Habillage commun à toutes les entrées du panneau..
+ */
+const ITEM_CLASS =
+  "flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-foreground/85 transition-colors hover:bg-muted hover:text-primary";
+
+/**
+ * Menu de navigation mobile, affiché en dessous de md.
  *
- * @remarks
- * Le bouton bascule un panneau déroulant contenant les liens principaux, le
- * panier, le compte et le sélecteur de langue. Chaque lien referme le panneau.
- *
- * L'emplacement compte est reçu en prop plutôt que monté ici, parce qu'il lit
- * la session et doit donc rester un composant serveur.
- *
- * @param accountSlot - Lien de connexion ou menu du compte, rendu côté serveur.
+ * @param isSignedIn - Vrai lorsqu'une session est ouverte.
  * @returns Le menu mobile rendu.
  */
-function MobileNav({ accountSlot }: { accountSlot: React.ReactNode }) {
+function MobileNav({ isSignedIn }: { isSignedIn: boolean }) {
   const [open, setOpen] = useState(false);
   const t = useTranslations("navigation");
+  const tAccount = useTranslations("auth.account");
+
+  const close = () => setOpen(false);
 
   return (
     <div className="md:hidden">
@@ -47,26 +50,41 @@ function MobileNav({ accountSlot }: { accountSlot: React.ReactNode }) {
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={() => setOpen(false)}
-                className="rounded-md px-3 py-2.5 text-sm font-medium text-foreground/85 transition-colors hover:bg-muted hover:text-primary"
+                onClick={close}
+                className={ITEM_CLASS}
               >
                 {t(`links.${item.key}`)}
               </Link>
             ))}
-            <Separator className="my-2" />
-            <Link
-              href="/panier"
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-foreground/85 transition-colors hover:bg-muted hover:text-primary"
-            >
-              <ShoppingBag className="size-4" />
+
+            <Link href="/panier" onClick={close} className={ITEM_CLASS}>
+              <ShoppingBag className="size-4" aria-hidden="true" />
               {t("mobileNav.cart")}
             </Link>
-            <div className="px-3 py-2">{accountSlot}</div>
+
             <Separator className="my-2" />
-            <div className="px-3 py-2">
-              <LanguageSwitcher />
-            </div>
+
+            {isSignedIn ? (
+              <>
+                <Link href="/compte" onClick={close} className={ITEM_CLASS}>
+                  <UserRound className="size-4" aria-hidden="true" />
+                  {t("myAccount")}
+                </Link>
+                <SignOutButton onSignOutStart={close} />
+              </>
+            ) : (
+              <Link href="/connexion" onClick={close} className={ITEM_CLASS}>
+                <LogIn className="size-4" aria-hidden="true" />
+                {tAccount("signIn")}
+              </Link>
+            )}
+
+            <Separator className="my-2" />
+            <LanguageSwitcher
+              showLanguageName
+              onSelect={close}
+              triggerClassName={`group/lang-trigger ${ITEM_CLASS} outline-none focus-visible:ring-3 focus-visible:ring-ring/50 data-[popup-open]:bg-muted`}
+            />
           </nav>
         </div>
       ) : null}

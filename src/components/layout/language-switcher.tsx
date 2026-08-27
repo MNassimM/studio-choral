@@ -21,13 +21,26 @@ const FLAGS: Record<AppLocale, typeof FranceFlag> = {
 /**
  * Sélecteur de langue du site.
  *
- * @remarks
- * Conserve la query string courante et, sur une route à segment dynamique,
- * utilise la valeur traduite publiée par SyncDynamicRouteAlternates.
- *
+ * @param showLanguageName - Affiche le nom complet de la langue plutôt que son
+ * code à deux lettres. Le code convient à une pastille d'en tête, où la place
+ * est comptée, alors qu'une entrée de menu dispose de toute la largeur.
+ * @param onSelect - Appelé lorsqu'une langue est choisie. Le changement de
+ * langue provoque une navigation, mais rien ne garantit que le conteneur du
+ * sélecteur soit démonté au passage, il doit donc pouvoir se refermer lui même.
+ * @param triggerClassName - Remplace l'habillage du déclencheur. Le menu mobile
+ * s'en sert pour donner à la ligne de langue la même largeur et la même
+ * typographie qu'à ses autres entrées, le popup restant inchangé.
  * @returns Le sélecteur rendu.
  */
-function LanguageSwitcher() {
+function LanguageSwitcher({
+  showLanguageName = false,
+  onSelect,
+  triggerClassName,
+}: {
+  showLanguageName?: boolean;
+  onSelect?: () => void;
+  triggerClassName?: string;
+} = {}) {
   const dynamicAlternates = useDynamicRouteAlternates();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -43,12 +56,19 @@ function LanguageSwitcher() {
         aria-label={t("languageSwitcher.triggerAriaLabel", {
           language: t(`languageSwitcher.${activeLocale}`),
         })}
-        className="group/lang-trigger inline-flex items-center gap-1.5 rounded-full border border-border bg-background py-1 pr-2.5 pl-1 text-xs font-medium transition-colors outline-none hover:bg-secondary/60 focus-visible:ring-3 focus-visible:ring-ring/50 data-[popup-open]:bg-secondary/60"
+        className={
+          triggerClassName ??
+          "group/lang-trigger inline-flex items-center gap-1.5 rounded-full border border-border bg-background py-1 pr-2.5 pl-1 text-xs font-medium transition-colors outline-none hover:bg-secondary/60 focus-visible:ring-3 focus-visible:ring-ring/50 data-[popup-open]:bg-secondary/60"
+        }
       >
         <ActiveFlag />
-        <span className="uppercase">{activeLocale}</span>
+        <span className={showLanguageName ? undefined : "uppercase"}>
+          {showLanguageName
+            ? t(`languageSwitcher.${activeLocale}`)
+            : activeLocale}
+        </span>
         <ChevronDown
-          className="size-3.5 text-muted-foreground transition-transform duration-200 group-data-[popup-open]/lang-trigger:rotate-180"
+          className="size-3.5 text-muted-foreground transition-transform duration-200 group-data-[popup-open]/lang-trigger:rotate-180 ms-auto"
           aria-hidden="true"
         />
       </Menu.Trigger>
@@ -95,6 +115,7 @@ function LanguageSwitcher() {
                               } as React.ComponentProps<typeof Link>["href"])
                         }
                         locale={loc}
+                        onClick={onSelect}
                       />
                     }
                   >
