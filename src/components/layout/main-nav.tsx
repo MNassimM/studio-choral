@@ -3,16 +3,13 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
-// Href = clé canonique de routing.pathnames (jamais le segment traduit en
-// dur) ; le libellé est résolu séparément par chaque consommateur (ici et
-// mobile-nav.tsx) via son propre appel de traduction, serveur ou client.
 export const mainNavItems = [
   { key: "catalogue", href: "/catalogue" },
   { key: "howItWorks", href: "/comment-ca-marche" },
 ] as const;
 
 /**
- * Navigation principale, affichée à partir du point de rupture md.
+ * Navigation principale, affichée à partir du point de rupture md (pour les mobiles).
  *
  * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
  * @returns La navigation rendue.

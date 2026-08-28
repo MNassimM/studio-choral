@@ -19,8 +19,8 @@ import {
  * Rend une fonction qui réécrit un paramètre de l'URL courante.
  *
  * @remarks
- * Les autres paramètres sont conservés. Écrire la valeur par défaut retire le
- * paramètre plutôt que de l'inscrire, ce qui garde des URLs propres.
+ * Les autres paramètres sont conservés. Écrire la valeur par défaut retire le paramètre plutôt que d'ajouter une valeur
+ * sinon URL longue pour rien.
  *
  * @returns Une fonction qui prend la clé, la valeur et la valeur par défaut.
  */

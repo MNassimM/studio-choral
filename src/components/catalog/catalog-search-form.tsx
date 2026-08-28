@@ -18,8 +18,7 @@ type CatalogSearchFormProps = {
  * Formulaire de recherche du catalogue, en GET simple.
  *
  * @remarks
- * Les filtres actifs sont reportés en champs cachés pour ne pas être perdus
- * lors d'une recherche.
+ * Les filtres actifs sont reportés en champs cachés pour ne pas être perdus lors d'une recherche.
  *
  * @param q - Terme recherché, prérempli dans le champ.
  * @param sort - Tri actif, reporté en champ caché s'il n'est pas celui par défaut.

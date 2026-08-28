@@ -2,10 +2,6 @@
  * Valeurs de tri et de filtre du catalogue.
  *
  * @remarks
- * Données pures, sans directive client et sans libellé. Les libellés vivent
- * dans les fichiers de messages et sont résolus à l'affichage, la valeur
- * servant de clé.
- *
  * Le module reste sans directive client pour pouvoir être importé aussi bien
  * par la page serveur, qui valide les paramètres d'URL, que par les
  * composants clients.
@@ -31,9 +27,8 @@ export type SortValue = (typeof SORT_OPTIONS)[number];
  * Périodes musicales, dans l'ordre chronologique.
  *
  * @remarks
- * Alignées sur l'enum Prisma MusicalPeriod. Cette liste ne sert que d'ordre
- * canonique, le panneau de filtres n'affichant que les périodes réellement
- * présentes en base.
+ * Alignées sur l'enum Prisma MusicalPeriod. Cette liste ne sert que d'ordenancement,
+ * le panneau de filtres n'affichant que les périodes réellement présentes en base.
  */
 export const PERIOD_OPTIONS = [
   "MEDIEVAL",

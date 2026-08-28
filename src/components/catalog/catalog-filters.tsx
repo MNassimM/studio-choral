@@ -71,12 +71,11 @@ type CatalogFiltersPanelProps = {
 };
 
 /**
- * Panneau de filtres du catalogue, avec validation différée.
+ * Panneau de filtres du catalogue.
  *
  * @remarks
- * Les cases cochées vivent dans un brouillon local et ne sont appliquées à
- * l'URL qu'à la validation. Le panneau se ferme sur clic extérieur ou sur
- * Échap.
+ * Les cases cochées ne sont appliquées à l'URL qu'à la validation. 
+ * Le panneau se ferme sur clic extérieur ou sur Échap.
  *
  * @param categories - Catégories de filtres et leurs options disponibles.
  * @param activePeriods - Périodes déjà actives dans l'URL.
@@ -227,8 +226,7 @@ function CatalogFiltersPanel({
  * Bouton d'ouverture du panneau de filtres.
  *
  * @remarks
- * Doit être rendu dans les enfants de CatalogFiltersPanel pour accéder au
- * contexte.
+ * Doit être rendu dans les enfants de CatalogFiltersPanel pour accéder au contexte. (On le fait dans la page.tsx du catalogue)
  *
  * @returns Le bouton rendu.
  */

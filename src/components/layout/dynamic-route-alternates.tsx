@@ -69,8 +69,7 @@ function SyncDynamicRouteAlternates({
   alternates: Partial<Record<AppLocale, string>>;
 }) {
   const { setAlternates } = useContext(DynamicRouteAlternatesContext);
-  // On dépend des valeurs primitives plutôt que de l'objet lui même, qui
-  // change de référence à chaque rendu serveur.
+  // On dépend des valeurs primitives plutôt que de l'objet lui même, qui change de référence à chaque rendu serveur.
   const fr = alternates.fr;
   const en = alternates.en;
 

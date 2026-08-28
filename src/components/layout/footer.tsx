@@ -7,10 +7,6 @@ import { Separator } from "@/components/ui/separator";
 import { Link } from "@/i18n/navigation";
 import { mainNavItems } from "@/components/layout/main-nav";
 
-// footer.linkLibrary : seul lien du footer qui n'est pas déjà dans
-// mainNavItems (catalogue/comment ça marche) - d'où sa clé "library" propre,
-// pendant que les deux autres réutilisent nav.* pour ne pas dupliquer un
-// libellé identique dans deux namespaces.
 const footerNavItems = [
   ...mainNavItems,
   { key: "library", href: "/bibliotheque" },
@@ -95,8 +91,6 @@ function YoutubeIcon({ className }: { className?: string }) {
   );
 }
 
-// Noms de marque/plateformes : identiques quelle que soit la langue de
-// l'interface, jamais traduits (comme le nom du studio dans logo.tsx).
 const socialLinks = [
   { label: "Facebook", href: "#", Icon: FacebookIcon },
   { label: "Instagram", href: "#", Icon: InstagramIcon },
@@ -110,10 +104,6 @@ const socialLinks = [
 
 /**
  * Pied de page du site.
- *
- * @remarks
- * Quatre colonnes : identité, navigation, liens d'information et réseaux
- * sociaux, suivies de la ligne de copyright.
  *
  * @returns Le pied de page rendu.
  */

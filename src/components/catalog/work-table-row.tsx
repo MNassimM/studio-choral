@@ -7,9 +7,6 @@ import { Link } from "@/i18n/navigation";
 /**
  * Ligne d'une œuvre dans la vue tableau du catalogue.
  *
- * @remarks
- * Toute la ligne est cliquable grâce à un lien étiré sur la surface du tr.
- *
  * @param work - Données d'affichage de l'œuvre.
  * @returns La ligne rendue.
  */
@@ -28,9 +25,7 @@ async function WorkTableRow({ work }: { work: WorkCardData }) {
         </div>
       </td>
       <td className="py-3 pr-4 font-medium">
-        {/* Lien étiré sur toute la ligne : tr est le bloc englobant (position
-            relative), td reste statique - inset-0 se cale donc sur la ligne
-            entière, pas seulement cette cellule. */}
+        {/* Pour faire un lien étirer sur toute la ligne */}
         <Link
           href={{ pathname: "/works/[slug]", params: { slug: work.slug } }}
           className="absolute inset-0 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"

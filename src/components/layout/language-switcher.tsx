@@ -21,15 +21,9 @@ const FLAGS: Record<AppLocale, typeof FranceFlag> = {
 /**
  * Sélecteur de langue du site.
  *
- * @param showLanguageName - Affiche le nom complet de la langue plutôt que son
- * code à deux lettres. Le code convient à une pastille d'en tête, où la place
- * est comptée, alors qu'une entrée de menu dispose de toute la largeur.
- * @param onSelect - Appelé lorsqu'une langue est choisie. Le changement de
- * langue provoque une navigation, mais rien ne garantit que le conteneur du
- * sélecteur soit démonté au passage, il doit donc pouvoir se refermer lui même.
- * @param triggerClassName - Remplace l'habillage du déclencheur. Le menu mobile
- * s'en sert pour donner à la ligne de langue la même largeur et la même
- * typographie qu'à ses autres entrées, le popup restant inchangé.
+ * @param showLanguageName - Affiche le nom complet de la langue plutôt que son code à deux lettres. 
+ * @param onSelect - Appelé lorsqu'une langue est choisie.
+ * @param triggerClassName - Remplace l'habillage du déclencheur. (surtout pour menu Mobile)
  * @returns Le sélecteur rendu.
  */
 function LanguageSwitcher({

@@ -91,16 +91,6 @@ function SelectTrigger({
 /**
  * Popup du menu déroulant, portail et positionnement compris.
  *
- * @remarks
- * L'alignement sur le déclencheur est désactivé par défaut, alors que Base UI
- * l'active. Ce mode fait recouvrir le déclencheur par le popup, à la manière
- * d'un menu déroulant natif, mais il fige la position du popup et impose donc
- * le verrouillage du défilement, indépendamment du réglage `modal` de la
- * racine. C'est le second des deux réglages nécessaires pour que la page reste
- * défilable, voir le commentaire de `Select` ci dessus.
- *
- * Le popup s'ouvre donc sous le déclencheur et le suit pendant le défilement.
- *
  * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
  * @param children - Items du menu.
  * @param side - Côté du déclencheur où ouvrir le popup.
@@ -154,10 +144,6 @@ function SelectContent({
 
 /**
  * Étiquette d'un groupe d'items dans le popup.
- *
- * @remarks
- * Ce n'est pas l'étiquette du déclencheur. Pour relier un libellé visible au
- * déclencheur, utiliser Select.Label de Base UI.
  *
  * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
  * @returns L'étiquette rendue.

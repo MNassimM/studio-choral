@@ -16,16 +16,13 @@ import {
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
-// Police serif locale à ce composant, pour les titres d'œuvre - cohérente
-// avec le grand titre serif de la page d'accueil (next/font dédup le fichier
-// de police réellement chargé même si l'appel a lieu à plusieurs endroits).
 const playfairDisplay = Playfair_Display({
   subsets: ["latin"],
   weight: ["500", "600"],
 });
 
 /**
- * Visuel de remplacement affiché à la place de la pochette.
+ * [PLACEHOLDER]Visuel de remplacement affiché à la place de la pochette.
  *
  * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
  * @returns Le visuel rendu.
@@ -38,7 +35,7 @@ function WorkCoverPlaceholder({ className }: { className?: string }) {
         className,
       )}
     >
-      {/* coverImageKey est vide pour l'instant : emplacement réservé au bon
+      {/* TODO coverImageKey est vide pour l'instant : emplacement réservé au bon
           ratio, sans référencer de fichier inexistant. Le jour où une image
           existe, ce bloc devient un next/image pointant vers l'URL signée. */}
       <Music2 className="size-8" aria-hidden="true" />
@@ -56,9 +53,8 @@ type WorkCardProps = {
  * Carte œuvre du catalogue et de la page d'accueil.
  *
  * @remarks
- * La variante par défaut rend la carte entière cliquable vers la page de
- * l'œuvre et affiche badges et prix. La variante compacte se limite au visuel,
- * au résumé et à un lien de découverte.
+ * La variante par défaut est celle du catalogue (affiche badges et prix). 
+ * La variante compacte se limite au visuel, au résumé et à un lien de découverte.
  *
  * @param work - Données d'affichage de l'œuvre.
  * @param variant - Densité de la carte.

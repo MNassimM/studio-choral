@@ -12,7 +12,7 @@ import { mainNavItems } from "@/components/layout/main-nav";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 
 /**
- * Habillage commun à toutes les entrées du panneau..
+ * Css commun à toutes les entrées du panneau..
  */
 const ITEM_CLASS =
   "flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-foreground/85 transition-colors hover:bg-muted hover:text-primary";
