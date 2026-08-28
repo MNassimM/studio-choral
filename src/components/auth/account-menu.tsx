@@ -86,7 +86,7 @@ function AccountMenu({ name, email }: { name: string; email: string }) {
               closeOnClick={false}
               disabled={isSigningOut}
               onClick={handleSignOut}
-              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-sm outline-none select-none data-highlighted:bg-accent data-disabled:opacity-50"
+              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-sm outline-none select-none data-highlighted:bg-accent data-disabled:opacity-50 cursor-pointer"
             >
               {isSigningOut ? (
                 <>
