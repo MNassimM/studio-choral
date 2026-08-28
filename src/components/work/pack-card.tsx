@@ -11,10 +11,6 @@ import type {
 /**
  * Carte d'une offre achetable.
  *
- * @remarks
- * Affiche le prix remisé à côté du prix catalogue barré lorsqu'une remise est
- * fournie. Une offre déjà possédée est grisée et perd ses boutons d'achat.
- *
  * @param offer - Offre à présenter.
  * @param bullets - Avantages listés sur la carte.
  * @param addToCartLabel - Libellé du bouton d'ajout au panier.

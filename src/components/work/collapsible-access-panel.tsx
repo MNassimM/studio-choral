@@ -4,12 +4,10 @@ import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 /**
- * Enveloppe repliable du panneau « Votre accès ».
+ * Etat repliable du panneau « Votre accès ».
  *
  * @remarks
- * Gère uniquement l'état ouvert ou replié. Le panneau est collé au bord droit
- * de la fenêtre et n'apparaît qu'à partir du point de rupture 2xl. Il s'ouvre
- * par défaut si l'utilisateur possède déjà un pupitre.
+ * Il s'ouvre par défaut si l'utilisateur possède déjà un pupitre.
  *
  * @param expandLabel - Libellé accessible du bouton d'ouverture.
  * @param collapseLabel - Libellé accessible du bouton de fermeture.

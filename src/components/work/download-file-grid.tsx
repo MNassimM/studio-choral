@@ -6,11 +6,7 @@ import { formatAudioFormatLabel, formatFileSize } from "@/lib/format/file-size";
 import type { DownloadFileEntry } from "@/lib/works/work-page-view-model";
 
 /**
- * Grille des pistes téléchargeables d'un mouvement.
- *
- * @remarks
- * Les pistes verrouillées restent affichées, grisées et désactivées, pour
- * montrer ce qu'un achat débloquerait.
+ * Grille des Fichiers téléchargeable d'un mouvement.
  *
  * @param entries - Pistes du mouvement, avec leur état de possession.
  * @returns La grille rendue, ou un message si aucune piste n'est disponible.

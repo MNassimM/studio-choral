@@ -10,13 +10,6 @@ import { Button } from "@/components/ui/button";
 /**
  * Logo Google, en SVG inline.
  *
- * @remarks
- * Dessiné dans le composant plutôt que chargé comme image, pour la même raison
- * que les drapeaux du sélecteur de langue : une icône qui ne dépend d'aucune
- * requête ne peut pas manquer à l'affichage.
- *
- * Le logo est purement décoratif, le bouton portant déjà son libellé en texte.
- *
  * @param className - Classes appliquées au SVG.
  * @returns Le logo rendu.
  */
@@ -46,14 +39,6 @@ function GoogleMark({ className }: { className?: string }) {
 /**
  * Bouton de connexion par Google.
  *
- * @remarks
- * Contrairement au formulaire de lien magique, la redirection est laissée à
- * Auth.js. Une connexion OAuth se déroule sur le site du fournisseur, il n'y a
- * donc rien à maîtriser côté navigation avant le retour.
- *
- * La destination de retour est transmise telle quelle, ayant déjà été validée
- * par la page de connexion.
- *
  * @param nextTarget - Chemin interne où ramener l'utilisateur une fois connecté.
  * @returns Le bouton rendu.
  */
@@ -62,8 +47,7 @@ function GoogleSignInButton({ nextTarget }: { nextTarget?: string }) {
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   async function handleClick() {
-    // Le clic est ignoré pendant la redirection, une seconde tentative
-    // n'apportant rien tant que le navigateur quitte déjà la page.
+    // Le clic est ignoré pendant la redirection
     if (isRedirecting) return;
     setIsRedirecting(true);
     await signIn("google", {

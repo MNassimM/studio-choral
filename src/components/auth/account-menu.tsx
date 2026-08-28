@@ -14,14 +14,7 @@ import { cn } from "@/lib/utils";
  * Menu du compte d'un utilisateur connecté.
  *
  * @remarks
- * Composant client parce que la déconnexion et l'ouverture du menu sont des
- * interactions navigateur. Il ne lit jamais la session lui même, celle ci lui
- * étant transmise par le composant serveur qui le monte, ce qui évite
- * d'ajouter un fournisseur de session au gabarit racine.
- *
- * La déconnexion repose sur une redirection vers l'accueil plutôt que sur un
- * rafraîchissement en place, afin de ne pas laisser l'utilisateur sur une page
- * dont le contenu dépendait de droits qu'il vient de perdre.
+ * Composant client, il ne lit jamais la session lui même, transmis par le composant serveur au dessus.
  *
  * @param email - Adresse du compte connecté, affichée en tête du menu.
  * @param name - Nom du compte connecté, affiché dans le menu.

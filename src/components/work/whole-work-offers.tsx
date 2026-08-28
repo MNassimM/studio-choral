@@ -7,11 +7,7 @@ import type {
 } from "@/lib/works/work-page-view-model";
 
 /**
- * Offres de portée œuvre entière.
- *
- * @remarks
- * Une carte par pupitre, puis la carte toutes voix mise en avant, avec sa
- * remise éventuelle et le rappel de ce qu'elle débloque en plus.
+ * Offres de l'oeuvre entiere.
  *
  * @param singleVoiceCards - Offres portant sur un seul pupitre.
  * @param allVoicesCard - Offre toutes voix, ou null si le produit n'existe pas.

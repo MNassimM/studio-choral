@@ -11,16 +11,9 @@ import { cn } from "@/lib/utils";
  * Emplacement compte de l'en tête, dont le contenu dépend de la session.
  *
  * @remarks
- * La lecture de session a lieu ici, dans un composant serveur, et seul le
- * menu d'un utilisateur connecté descend côté client. C'est ce qui évite
- * d'ajouter un fournisseur de session au gabarit racine pour un besoin aussi
- * limité.
+ * La lecture de session a lieu ici, dans un composant serveur
  *
- * Un visiteur reçoit un lien direct vers la connexion plutôt qu'un menu, un
- * menu à une seule entrée n'étant qu'un clic supplémentaire pour rien.
- *
- * @param compact - Réduit le lien de connexion à sa seule icône, pour les
- * largeurs où le libellé ne tient pas.
+ * @param compact - Réduit le lien de connexion à un icone.
  * @returns L'emplacement rendu.
  */
 async function AccountSlot({ compact = false }: { compact?: boolean }) {

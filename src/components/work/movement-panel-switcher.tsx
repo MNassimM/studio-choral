@@ -15,17 +15,11 @@ import { cn } from "@/lib/utils";
 type MovementSwitcherOption = {
   id: string;
   label: string;
-  /** Contenu déjà résolu côté serveur (droits déjà appliqués) - ce composant ne fait que choisir lequel afficher, jamais de logique de droits. */
   panel: React.ReactNode;
 };
 
 /**
- * Sélecteur de mouvement, avec bascule du panneau affiché.
- *
- * @remarks
- * Chaque montage garde son propre état, deux instances sur une même page sont
- * donc indépendantes. Tous les panneaux restent dans le DOM, seul l'affichage
- * bascule.
+ * Sélecteur de mouvement, avec affichage du panneau correspondant.
  *
  * @param movements - Mouvements proposés, chacun avec son panneau déjà rendu.
  * @param defaultMovementId - Mouvement sélectionné au premier rendu.
@@ -54,10 +48,6 @@ function MovementPanelSwitcher({
             if (value) setSelectedId(value);
           }}
         >
-          {/* SelectPrimitive.Label (pas le SelectLabel du wrapper ui/select,
-              qui est en réalité un GroupLabel destiné à l'intérieur du popup) :
-              seul ce composant relie un libellé visible au déclencheur Base UI
-              - un <label htmlFor> natif n'a pas prise sur un bouton Base UI. */}
           <SelectPrimitive.Label className="text-muted-foreground">
             {selectorLabel}
           </SelectPrimitive.Label>

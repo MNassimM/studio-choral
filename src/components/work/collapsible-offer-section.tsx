@@ -6,11 +6,7 @@ import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
- * Section repliable des offres, par mouvement ou par œuvre.
- *
- * @remarks
- * Le bandeau entier bascule l'affichage. Les cartes restent montées et sont
- * simplement masquées en CSS.
+ * Section repliable des offres, par mouvement ou par oeuvre.
  *
  * @param heading - Titre affiché sur le bandeau.
  * @param children - Cartes d'offres de la section.
