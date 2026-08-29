@@ -28,6 +28,7 @@ import { buildWorkPageViewModel } from "@/lib/works/work-page-view-model";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { getUserGrants } from "@/lib/catalog/access-grants";
 import { buildWorkAccessInput } from "@/lib/catalog/work-access-input";
+import { productToGrant } from "@/lib/catalog/product-grant";
 import { absorbs } from "@/lib/access/grants";
 import { resolveWorkAccess } from "@/lib/access/rules";
 import { composeProductDisplayName } from "@/lib/products/product-display-name";
@@ -267,21 +268,13 @@ export default async function WorkPage(
     return isKnownVoiceCode(code) ? t(`voice.${code}`) : code;
   }
 
-  // Fonction fléchée et non déclaration hoistée : TypeScript n'affine work en
-  // non nul qu'à travers une expression définie après le contrôle ci dessus.
-  const buildCandidate = (
-    product: WorkWithDetail["products"][number],
-  ): Grant => ({
-    workId: work.id,
-    movementId: product.movementId,
-    voiceCode: product.voice?.code ?? null,
-    scope: product.scope,
-    coverage: product.coverage,
-  });
+  // Capturé dans une constante parce que TypeScript n'affine pas work en non
+  // nul à l'intérieur d'une déclaration de fonction hoistée.
+  const workId = work.id;
 
   // Savoir si  l'utilisateur possède déjà le produit (pupitre ou œuvre complète) : si un Grant existant absorbe le produit.
   function isAbsorbed(product: WorkWithDetail["products"][number]): boolean {
-    const candidate = buildCandidate(product);
+    const candidate = productToGrant(workId, product);
     return grants.some((grant) => absorbs(grant, candidate));
   }
 
@@ -318,6 +311,7 @@ export default async function WorkPage(
     hasSingleMovement,
   } = buildWorkPageViewModel({
     access,
+    workId,
     voices,
     movements: work.movements,
     products: work.products,

@@ -5,7 +5,9 @@
     "howItWorks": "How it works"
   },
   "header": {
-    "cartAriaLabel": "View cart"
+    "cartAriaLabel": "View cart",
+    "cartWithCountAriaLabel": "View cart, {count, plural, one {# item} other {# items}}",
+    "cartCountLabel": "{count, plural, one {# item} other {# items}}"
   },
   "mobileNav": {
     "openMenu": "Open menu",

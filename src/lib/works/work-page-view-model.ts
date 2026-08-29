@@ -1,6 +1,8 @@
 import type { AccessScope, AudioType, VoiceCoverage, WorkAccess } from "@/types/domain";
 import { canDownload } from "@/lib/access/rules";
+import { productToGrant } from "@/lib/catalog/product-grant";
 import { computeAllVoicesDiscount } from "@/lib/pricing/all-voices-discount";
+import type { CartItemInput } from "@/lib/cart/types";
 
 /**
  * Types de vue de la page oeuvre.
@@ -31,8 +33,13 @@ export type MovementDownloadGroup = {
   entries: DownloadFileEntry[];
 };
 
-/** Offre affichée sur une carte de pack, dans sa forme la plus simple. */
-export type SimpleOfferView = { sku: string; name: string; priceLabel: string };
+/**
+ * Offre affichée sur une card de pack, dans sa forme la plus simple.
+ */
+export type SimpleOfferView = CartItemInput & {
+  name: string;
+  priceLabel: string;
+};
 
 /**
  * Remise proportionnelle sur un produit couvrant toutes les voix.
@@ -112,6 +119,8 @@ export type WorkPageViewModelParams<TProduct extends ViewModelProduct> = {
   movements: ViewModelMovement[];
   products: TProduct[];
   workTitle: string;
+  /** Identifiant de l'œuvre, reporté dans les coordonnées de chaque offre. */
+  workId: string;
   /** Rend le libellé traduit d'un pupitre, ou le code brut si la traduction manque. */
   getVoiceLabel: (code: string) => string;
   /** Rend un prix déjà formaté dans la devise et la locale courantes. */
@@ -150,6 +159,7 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
   voices,
   movements,
   products,
+  workId,
   workTitle,
   getVoiceLabel,
   getPriceLabel,
@@ -330,6 +340,21 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
     return { ownedUnits, totalUnits };
   }
 
+  /**
+   * Construit la partie commune d'une vue d'offre.
+   *
+   * @param product - Produit à représenter.
+   * @returns La référence, les coordonnées d'accès et l'affichage.
+   */
+  function buildSimpleOffer(product: TProduct): SimpleOfferView {
+    return {
+      sku: product.sku,
+      ...productToGrant(workId, product),
+      name: composeName(product),
+      priceLabel: getPriceLabel(product.priceCents, product.currency),
+    };
+  }
+
   // Toutes les offres du mouvement, y compris celles déjà possédées qui s'affichent grisées avec un bandeau. 
   const movementOfferGroups: MovementOfferGroup[] = movements.map((movement) => ({
     movementId: movement.id,
@@ -341,9 +366,7 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
           product.scope === "MOVEMENT" && product.movementId === movement.id,
       )
       .map((product) => ({
-        sku: product.sku,
-        name: composeName(product),
-        priceLabel: getPriceLabel(product.priceCents, product.currency),
+        ...buildSimpleOffer(product),
         alreadyOwned: isAlreadyOwned(product),
         discount:
           product.coverage === "ALL_VOICES"
@@ -361,9 +384,7 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
   const workSingleVoiceCards: OwnedOfferView[] = workScopeProducts
     .filter((product) => product.coverage === "SINGLE_VOICE")
     .map((product) => ({
-      sku: product.sku,
-      name: composeName(product),
-      priceLabel: getPriceLabel(product.priceCents, product.currency),
+      ...buildSimpleOffer(product),
       alreadyOwned: isAlreadyOwned(product),
       discount: null,
     }));
@@ -372,12 +393,7 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
   );
   const workAllVoicesCard: WorkAllVoicesOfferView | null = workAllVoicesProduct
     ? {
-        sku: workAllVoicesProduct.sku,
-        name: composeName(workAllVoicesProduct),
-        priceLabel: getPriceLabel(
-          workAllVoicesProduct.priceCents,
-          workAllVoicesProduct.currency,
-        ),
+        ...buildSimpleOffer(workAllVoicesProduct),
         discount: buildAllVoicesDiscountView(workAllVoicesProduct, workCoverage()),
       }
     : null;

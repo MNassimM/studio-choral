@@ -1,6 +1,4 @@
-import { getTranslations } from "next-intl/server";
-import { ShoppingCart } from "lucide-react";
-
+import { CartIconLink } from "@/components/cart/cart-icon-link";
 import { Container } from "@/components/layout/container";
 import { Logo } from "@/components/layout/logo";
 import { MainNav } from "@/components/layout/main-nav";
@@ -8,9 +6,6 @@ import { MobileNav } from "@/components/layout/mobile-nav";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { AccountSlot } from "@/components/auth/account-slot";
 import { getCurrentUser } from "@/lib/auth/current-user";
-import { Link } from "@/i18n/navigation";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 /**
  * En tête du site, fixé en haut de page.
@@ -18,7 +13,6 @@ import { cn } from "@/lib/utils";
  * @returns L'en tête rendu.
  */
 async function Header() {
-  const t = await getTranslations("navigation");
   const user = await getCurrentUser();
 
   return (
@@ -41,13 +35,7 @@ async function Header() {
           <div className="sm:hidden">
             <AccountSlot compact />
           </div>
-          <Link
-            href="/panier"
-            aria-label={t("header.cartAriaLabel")}
-            className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
-          >
-            <ShoppingCart className="size-5" />
-          </Link>
+          <CartIconLink />
         </div>
       </Container>
     </header>

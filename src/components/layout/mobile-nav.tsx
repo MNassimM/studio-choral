@@ -7,6 +7,7 @@ import { LogIn, Menu, ShoppingBag,Library, UserRound, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SignOutButton } from "@/components/auth/sign-out-button";
+import { CartCountPill } from "@/components/cart/cart-count-pill";
 import { Link } from "@/i18n/navigation";
 import { mainNavItems } from "@/components/layout/main-nav";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
@@ -70,9 +71,16 @@ function MobileNav({ isSignedIn }: { isSignedIn: boolean }) {
                   <Library className="size-4" aria-hidden="true" />
                   {t("footer.linkLibrary")}
                 </Link>
-                <Link href="/panier" onClick={close} className={ITEM_CLASS}>
-                  <ShoppingBag className="size-4" aria-hidden="true" />
-                  {t("mobileNav.cart")}
+                <Link
+                  href="/panier"
+                  onClick={close}
+                  className={`${ITEM_CLASS} justify-between`}
+                >
+                  <span className="flex items-center gap-2">
+                    <ShoppingBag className="size-4" aria-hidden="true" />
+                    {t("mobileNav.cart")}
+                  </span>
+                  <CartCountPill />
                 </Link>
                 <SignOutButton onSignOutStart={close} />
               </>

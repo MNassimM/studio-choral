@@ -5,7 +5,9 @@
     "howItWorks": "Comment ça marche"
   },
   "header": {
-    "cartAriaLabel": "Voir le panier"
+    "cartAriaLabel": "Voir le panier",
+    "cartWithCountAriaLabel": "Voir le panier, {count, plural, one {# article} other {# articles}}",
+    "cartCountLabel": "{count, plural, one {# article} other {# articles}}"
   },
   "mobileNav": {
     "openMenu": "Ouvrir le menu",
