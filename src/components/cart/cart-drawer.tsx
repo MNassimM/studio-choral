@@ -2,56 +2,13 @@
 
 import { Dialog } from "@base-ui/react/dialog";
 import { useTranslations } from "next-intl";
-import { CheckCircle2, ShoppingCart, Trash2, X } from "lucide-react";
+import { CheckCircle2, ShoppingCart, X } from "lucide-react";
 
+import { CartLineList } from "@/components/cart/cart-line-list";
 import { useCart } from "@/components/cart/cart-provider";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
-import type { CartLine } from "@/lib/cart/types";
-
-/**
- * Une ligne du récapitulatif.
- *
- * @param line - Ligne à afficher, état d'absorption compris.
- * @returns La ligne rendue.
- */
-function CartDrawerLine({ line }: { line: CartLine }) {
-  const t = useTranslations("cart.drawer");
-  const { labelOf, remove } = useCart();
-  const absorbed = line.absorbedBy !== null;
-  const label = labelOf(line.sku) ?? t("unknownItem");
-
-  return (
-    <li className="flex items-start justify-between gap-3 border-b border-border py-3 last:border-b-0">
-      <div className="flex min-w-0 flex-col gap-1">
-        <span
-          className={cn(
-            "text-sm font-medium",
-            absorbed && "text-muted-foreground line-through",
-          )}
-        >
-          {label}
-        </span>
-        {absorbed ? (
-          <span className="text-xs text-muted-foreground">
-            {t("absorbedNotice")}
-          </span>
-        ) : null}
-      </div>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        aria-label={t("removeAriaLabel", { item: label })}
-        onClick={() => remove(line.sku)}
-        className="shrink-0 text-muted-foreground hover:text-destructive"
-      >
-        <Trash2 className="size-4" />
-      </Button>
-    </li>
-  );
-}
 
 /**
  * Tiroir latéral du panier, ouvert à chaque ajout.
@@ -59,7 +16,7 @@ function CartDrawerLine({ line }: { line: CartLine }) {
  * @returns Le tiroir rendu.
  */
 function CartDrawer() {
-  const t = useTranslations("cart.drawer");
+  const t = useTranslations("cart");
   const { lines, count, lastAddedSku, labelOf, isDrawerOpen, setDrawerOpen } =
     useCart();
 
@@ -72,11 +29,14 @@ function CartDrawer() {
         <Dialog.Popup className="fixed inset-y-0 right-0 z-50 flex w-full max-w-sm flex-col border-l border-border bg-background shadow-xl transition-transform duration-200 data-closed:translate-x-full data-open:translate-x-0">
           <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-4">
             <Dialog.Title className="flex items-center gap-2 text-base font-semibold">
-              <ShoppingCart className="size-4 text-primary" aria-hidden="true" />
-              {t("title")}
+              <ShoppingCart
+                className="size-4 text-primary"
+                aria-hidden="true"
+              />
+              {t("panel.title")}
             </Dialog.Title>
             <Dialog.Close
-              aria-label={t("closeAriaLabel")}
+              aria-label={t("panel.closeAriaLabel")}
               className={cn(
                 buttonVariants({ variant: "ghost", size: "icon" }),
                 "rounded-full",
@@ -93,32 +53,24 @@ function CartDrawer() {
                   className="mt-0.5 size-4 shrink-0 text-primary"
                   aria-hidden="true"
                 />
-                <span>{t("addedNotice", { item: lastAddedLabel })}</span>
+                <span>{t("drawer.addedNotice", { item: lastAddedLabel })}</span>
               </p>
             ) : null}
           </div>
 
           <div className="flex-1 overflow-y-auto px-5 py-2">
-            {count === 0 ? (
-              <p className="py-8 text-center text-sm text-muted-foreground">
-                {t("empty")}
-              </p>
-            ) : (
-              <>
-                <Dialog.Description className="sr-only">
-                  {t("summaryDescription", { count })}
-                </Dialog.Description>
-                <ul className="flex flex-col">
-                  {lines.map((line) => (
-                    <CartDrawerLine key={line.sku} line={line} />
-                  ))}
-                </ul>
-              </>
-            )}
+            {count > 0 ? (
+              <Dialog.Description className="sr-only">
+                {t("panel.summaryDescription", { count })}
+              </Dialog.Description>
+            ) : null}
+            <CartLineList lines={lines} />
           </div>
 
           <div className="flex flex-col gap-2 border-t border-border px-5 py-4">
-            <p className="text-xs text-muted-foreground">{t("totalNotice")}</p>
+            <p className="text-xs text-muted-foreground">
+              {t("panel.totalNotice")}
+            </p>
             <Link
               href="/panier"
               onClick={() => setDrawerOpen(false)}
@@ -127,7 +79,7 @@ function CartDrawer() {
                 "w-full rounded-full",
               )}
             >
-              {t("viewCart")}
+              {t("panel.viewCart")}
             </Link>
             <Button
               type="button"
@@ -135,7 +87,7 @@ function CartDrawer() {
               onClick={() => setDrawerOpen(false)}
               className="w-full rounded-full"
             >
-              {t("continueShopping")}
+              {t("drawer.continueShopping")}
             </Button>
           </div>
         </Dialog.Popup>

@@ -1,15 +1,19 @@
 {
-  "drawer": {
-    "title": "Your cart",
-    "closeAriaLabel": "Close cart",
-    "addedNotice": "{item} has been added to your cart.",
-    "empty": "Your cart is empty.",
+  "line": {
     "unknownItem": "Cart item",
     "absorbedNotice": "Already included in another item in your cart.",
     "removeAriaLabel": "Remove {item} from the cart",
+    "empty": "Your cart is empty."
+  },
+  "panel": {
+    "title": "Your cart",
+    "closeAriaLabel": "Close cart",
     "summaryDescription": "{count, plural, one {# item in your cart} other {# items in your cart}}",
     "totalNotice": "The total and any discounts will be calculated at checkout.",
-    "viewCart": "View cart",
+    "viewCart": "View cart"
+  },
+  "drawer": {
+    "addedNotice": "{item} has been added to your cart.",
     "continueShopping": "Continue shopping"
   }
 }

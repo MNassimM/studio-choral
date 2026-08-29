@@ -150,6 +150,10 @@ export type CartContextValue = {
   isDrawerOpen: boolean;
   /** Ouvre ou ferme le tiroir. */
   setDrawerOpen: (open: boolean) => void;
+  /** Vrai lorsque l'aperçu au survol est ouvert. */
+  isPreviewOpen: boolean;
+  /** Demande l'ouverture ou la fermeture de l'aperçu au survol. */
+  setPreviewOpen: (open: boolean) => void;
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -171,11 +175,13 @@ function CartProvider({ children }: { children: React.ReactNode }) {
 
   const [lastAddedSku, setLastAddedSku] = useState<string | null>(null);
   const [isDrawerOpen, setDrawerOpen] = useState(false);
+  const [isPreviewRequested, setPreviewOpen] = useState(false);
 
   const add = useCallback((input: CartItemInput, label?: string) => {
     if (label) labels.set(input.sku, label);
     mutate((current) => addToCart(current, input, Date.now()));
     setLastAddedSku(input.sku);
+    setPreviewOpen(false);
     setDrawerOpen(true);
   }, []);
 
@@ -201,8 +207,19 @@ function CartProvider({ children }: { children: React.ReactNode }) {
       lastAddedSku,
       isDrawerOpen,
       setDrawerOpen,
+      isPreviewOpen: isPreviewRequested && !isDrawerOpen && items.length > 0,
+      setPreviewOpen,
     }),
-    [items, hydrated, add, remove, clear, lastAddedSku, isDrawerOpen],
+    [
+      items,
+      hydrated,
+      add,
+      remove,
+      clear,
+      lastAddedSku,
+      isDrawerOpen,
+      isPreviewRequested,
+    ],
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
