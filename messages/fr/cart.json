@@ -1,1 +1,15 @@
-{}
+{
+  "drawer": {
+    "title": "Votre panier",
+    "closeAriaLabel": "Fermer le panier",
+    "addedNotice": "{item} a été ajouté à votre panier.",
+    "empty": "Votre panier est vide.",
+    "unknownItem": "Article du panier",
+    "absorbedNotice": "Déjà inclus dans un autre article de votre panier.",
+    "removeAriaLabel": "Retirer {item} du panier",
+    "summaryDescription": "{count, plural, one {# article dans votre panier} other {# articles dans votre panier}}",
+    "totalNotice": "Le total et les remises éventuelles seront calculés au moment du paiement.",
+    "viewCart": "Voir le panier",
+    "continueShopping": "Continuer mes achats"
+  }
+}

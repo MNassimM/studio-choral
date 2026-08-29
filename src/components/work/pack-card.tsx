@@ -1,5 +1,6 @@
 import { CheckCircle2, Music2 } from "lucide-react";
 
+import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -14,6 +15,7 @@ import type {
  * @param offer - Offre à présenter.
  * @param bullets - Avantages listés sur la carte.
  * @param addToCartLabel - Libellé du bouton d'ajout au panier.
+ * @param inCartLabel - Libellé du bouton lorsque l'offre est déjà au panier.
  * @param byItNowLabel - Libellé du bouton d'achat immédiat.
  * @param featured - Met la carte en avant.
  * @param featuredBadge - Libellé de la pastille de mise en avant.
@@ -31,6 +33,7 @@ function PackCard({
   offer,
   bullets,
   addToCartLabel,
+  inCartLabel,
   byItNowLabel,
   featured = false,
   featuredBadge,
@@ -46,6 +49,7 @@ function PackCard({
   offer: SimpleOfferView;
   bullets: string[];
   addToCartLabel: string;
+  inCartLabel: string;
   byItNowLabel: string;
   featured?: boolean;
   featuredBadge?: string;
@@ -166,15 +170,14 @@ function PackCard({
       </ul>
 
       {alreadyOwned ? null : (
-        // TODO : panier non implémenté
         <>
-        <Button
-          disabled
+        <AddToCartButton
+          offer={offer}
+          label={addToCartLabel}
+          inCartLabel={inCartLabel}
           size={isSmall ? "sm" : "default"}
-          className="mt-2 w-full rounded-full"
-        >
-          {addToCartLabel}
-        </Button>
+        />
+        {/* TODO : achat immédiat non implémenté */}
         <Button
           disabled
           size={isSmall ? "sm" : "default"}

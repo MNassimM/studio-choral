@@ -8,7 +8,8 @@
     "byItNow": "Buy now",
     "discover": "Discover",
     "movementsCount": "{count, plural, one {# movement} other {# movements}}",
-    "discountBadge": "-{percent}%"
+    "discountBadge": "-{percent}%",
+    "inCart": "Already in cart"
   },
   "period": {
     "MEDIEVAL": "Medieval",

@@ -58,6 +58,18 @@ function MobileNav({ isSignedIn }: { isSignedIn: boolean }) {
               </Link>
             ))}
 
+            <Link
+              href="/panier"
+              onClick={close}
+              className={`${ITEM_CLASS} justify-between`}
+            >
+              <span className="flex items-center gap-2">
+                <ShoppingBag className="size-4" aria-hidden="true" />
+                {t("mobileNav.cart")}
+              </span>
+              <CartCountPill />
+            </Link>
+
             <Separator className="my-2" />
 
             {isSignedIn ? (
@@ -67,20 +79,9 @@ function MobileNav({ isSignedIn }: { isSignedIn: boolean }) {
                   {t("myAccount")}
                 </Link>
                 
-                <Link href="/panier" onClick={close} className={ITEM_CLASS}>
+                <Link href="/bibliotheque" onClick={close} className={ITEM_CLASS}>
                   <Library className="size-4" aria-hidden="true" />
                   {t("footer.linkLibrary")}
-                </Link>
-                <Link
-                  href="/panier"
-                  onClick={close}
-                  className={`${ITEM_CLASS} justify-between`}
-                >
-                  <span className="flex items-center gap-2">
-                    <ShoppingBag className="size-4" aria-hidden="true" />
-                    {t("mobileNav.cart")}
-                  </span>
-                  <CartCountPill />
                 </Link>
                 <SignOutButton onSignOutStart={close} />
               </>

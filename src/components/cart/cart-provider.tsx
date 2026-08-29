@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useMemo,
+  useState,
   useSyncExternalStore,
 } from "react";
 
@@ -117,6 +118,11 @@ function mutate(transform: (items: CartItem[]) => CartItem[]): void {
 }
 
 /**
+ * Libellés des articles ajoutés pendant la session.
+ */
+const labels = new Map<string, string>();
+
+/**
  * Ce que le fournisseur met à disposition des composants.
  */
 export type CartContextValue = {
@@ -128,14 +134,22 @@ export type CartContextValue = {
   count: number;
   /** Faux tant que le panier conservé n'a pas été relu. */
   isHydrated: boolean;
-  /** Ajoute un produit au panier. */
-  add: (input: CartItemInput) => void;
+  /** Ajoute un produit au panier, puis ouvre le tiroir. */
+  add: (input: CartItemInput, label?: string) => void;
   /** Retire un produit du panier. */
   remove: (sku: string) => void;
   /** Vide le panier. */
   clear: () => void;
   /** Indique si une référence figure déjà dans le panier. */
   has: (sku: string) => boolean;
+  /** Rend le libellé connu d'une référence, ou null. */
+  labelOf: (sku: string) => string | null;
+  /** Référence du dernier article ajouté, ou null. */
+  lastAddedSku: string | null;
+  /** Vrai lorsque le tiroir est ouvert. */
+  isDrawerOpen: boolean;
+  /** Ouvre ou ferme le tiroir. */
+  setDrawerOpen: (open: boolean) => void;
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -155,8 +169,14 @@ function CartProvider({ children }: { children: React.ReactNode }) {
     getServerSnapshot,
   );
 
-  const add = useCallback((input: CartItemInput) => {
+  const [lastAddedSku, setLastAddedSku] = useState<string | null>(null);
+  const [isDrawerOpen, setDrawerOpen] = useState(false);
+
+  const add = useCallback((input: CartItemInput, label?: string) => {
+    if (label) labels.set(input.sku, label);
     mutate((current) => addToCart(current, input, Date.now()));
+    setLastAddedSku(input.sku);
+    setDrawerOpen(true);
   }, []);
 
   const remove = useCallback((sku: string) => {
@@ -177,8 +197,12 @@ function CartProvider({ children }: { children: React.ReactNode }) {
       remove,
       clear,
       has: (sku: string) => containsSku(items, sku),
+      labelOf: (sku: string) => labels.get(sku) ?? null,
+      lastAddedSku,
+      isDrawerOpen,
+      setDrawerOpen,
     }),
-    [items, hydrated, add, remove, clear],
+    [items, hydrated, add, remove, clear, lastAddedSku, isDrawerOpen],
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

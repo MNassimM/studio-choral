@@ -7,6 +7,7 @@ import { getTranslations } from "next-intl/server";
 import "../globals.css";
 
 import { Header } from "@/components/layout/header";
+import { CartDrawer } from "@/components/cart/cart-drawer";
 import { CartProvider } from "@/components/cart/cart-provider";
 import { Footer } from "@/components/layout/footer";
 import { routing } from "@/i18n/routing";
@@ -79,6 +80,7 @@ export default async function RootLayout({
               <Header />
               <main className="flex-1">{children}</main>
               <Footer />
+              <CartDrawer />
             </CartProvider>
           </DynamicRouteAlternatesProvider>
         </NextIntlClientProvider>
