@@ -1,22 +1,5 @@
 /**
  * MOCK / TEMPORAIRE
- *
- * Ce module est la seule source de vérité du catalogue de démonstration :
- * œuvres, mouvements, référentiel des pupitres, pistes audio de synthèse
- * (aucun enregistrement réel) et produits commerciaux (offres achetables,
- * avec leurs tarifs de démonstration - voir la section "pricing" ci-dessous).
- * Il est importé par la seed Prisma (`prisma/seed.ts`, qui ne contient plus
- * aucune donnée), par le générateur de fichiers WAV de démonstration
- * (`scripts/generate-demo-audio.ts`) et par `buildDemoProducts()`, afin que
- * ces éléments ne puissent jamais diverger. Ajouter une œuvre ou un pupitre
- * de démonstration ne demande d'éditer que ce fichier.
- *
- * Tout produit doit passer par `src/lib/products/invariants.ts` avant
- * insertion en base.
- *
- * En production, les fichiers audio vivront dans un bucket privé et seront
- * servis par URL signée après vérification des droits - `storageKey` n'est
- * jamais une URL.
  */
 
 import type { MusicalPeriod } from "@/generated/prisma/client";
@@ -34,13 +17,6 @@ export type DemoMovement = {
 
 /**
  * MOCK / TEMPORAIRE - tarifs de démonstration, à arbitrer œuvre par œuvre.
- *
- * Pas de grille commune : chaque œuvre déclare ses propres montants, à côté
- * de son propre catalogue de mouvements, dans son entrée `DEMO_CATALOG`.
- * `movementSingleVoiceCents`/`movementAllVoicesCents` valent `null` pour une
- * œuvre à un seul mouvement - cela empêche `buildDemoProducts()` de générer
- * des offres de scope MOVEMENT strictement identiques (et concurrentes en
- * prix) aux offres de scope WORK de la même œuvre.
  */
 export type DemoWorkPricing = {
   movementSingleVoiceCents: number | null;
@@ -49,11 +25,6 @@ export type DemoWorkPricing = {
   workAllVoicesCents: number;
 };
 
-/**
- * Surcharge par langue d'une œuvre (voir model WorkTranslation). `title` null
- * signifie « conserver le titre original » (cas des incipits, qui ne se
- * traduisent jamais) - jamais une traduction manquante à combler.
- */
 export type DemoWorkTranslation = {
   locale: string;
   slug: string;
@@ -69,40 +40,19 @@ export type DemoWork = {
   catalogueRef: string | null;
   shortDescription: string;
   description: string;
-  /**
-   * Année de composition, approximative pour l'ancien répertoire. `null` si
-   * aucune date fiable n'est établie - ne jamais deviner une valeur.
-   */
   composedYear: number | null;
-  /** Courant musical. `null` si l'œuvre est en cours de catalogage. */
   period: MusicalPeriod | null;
-  /**
-   * Formation vocale saisie à la main (voir src/lib/works/voicing.ts) -
-   * jamais déduite des AudioFile de l'œuvre.
-   */
   voicing: string | null;
-  /**
-   * Langue du texte chanté (code ISO 639-1, voir src/lib/works/languages.ts)
-   * - sans rapport avec la langue d'interface du site.
-   */
   language: string | null;
   isPublished: boolean;
   translations: DemoWorkTranslation[];
   movements: DemoMovement[];
   pricing: DemoWorkPricing;
-  /**
-   * Surcharge ponctuelle d'un prix pour un produit précis de cette œuvre,
-   * indexée par sku (ex. un Kyrie plus court vendu moins cher que les autres
-   * mouvements). Absente ou vide : tous les produits de l'œuvre utilisent
-   * les montants de `pricing`. N'affecte qu'un sku à la fois - ce n'est pas
-   * une seconde grille de prix.
-   */
   priceOverrides?: Record<string, number>;
 };
 
 /**
- * Catalogue complet de démonstration : chaque entrée porte l'œuvre entière
- * (métadonnées éditoriales et mouvements ensemble).
+ * Catalogue complet de démonstration
  */
 export const DEMO_CATALOG: DemoWork[] = [
   {
@@ -115,12 +65,8 @@ export const DEMO_CATALOG: DemoWork[] = [
     description:
       "Composée par Franz Schubert en 1815, cette messe fait partie de ses premières œuvres liturgiques. Écrite pour chœur mixte et orchestre, elle se distingue par un style mélodique simple et chaleureux. Ses six mouvements suivent l'ordinaire de la messe, du Kyrie à l'Agnus Dei.",
     composedYear: 1815,
-    // Schubert est à la charnière classique/romantique ; CLASSICAL retenu au
-    // vu de la date de composition (1815). Choix arbitrable - signalé à
-    // l'utilisateur en fin de tâche.
     period: "CLASSICAL",
     voicing: "SATB",
-    // Texte de l'ordinaire de la messe (Kyrie, Gloria, Credo...) : latin.
     language: "la",
     isPublished: true,
     translations: [
@@ -181,7 +127,6 @@ export const DEMO_CATALOG: DemoWork[] = [
     translations: [
       {
         locale: "en",
-        // Incipit : jamais traduit, y compris dans le slug.
         slug: "ce-mois-de-mai",
         title: null,
         shortDescription:
@@ -293,15 +238,6 @@ export type DemoVoice = {
   position: number;
 };
 
-/**
- * Référentiel des pupitres de démonstration. Pupitres SATB utilisés par les
- * œuvres du catalogue (positions 1, 3, 5, 9), plus les pupitres divisés pour
- * les effectifs autres que SATB, pas encore utilisés par aucune œuvre.
- * Position : ordre du plus aigu au plus grave. SOPRANO/SOPRANO_1 et
- * ALTO/ALTO_1 partagent la même position car un pupitre non divisé occupe le
- * même registre que le premier de ses pupitres divisés - ce ne sont pas deux
- * rangs distincts, juste deux façons d'organiser la même tessiture.
- */
 export const DEMO_VOICES: DemoVoice[] = [
   { code: "SOPRANO", label: "Soprano", position: 1 },
   { code: "SOPRANO_1", label: "Soprano 1", position: 1 },
@@ -333,12 +269,7 @@ export type DemoAudioTrack = {
 /**
  * Construit la clé de stockage d'un fichier audio.
  *
- * @remarks
- * La clé suit toujours la même arborescence œuvre puis mouvement puis nom de
- * fichier. Ce n'est jamais une URL : en production les fichiers vivront dans
- * un bucket privé, servi par URL signée après vérification des droits.
- *
- * @param workSlug - Slug de l'œuvre.
+ * @param workSlug - Slug de l'oeuvre.
  * @param movementSlug - Slug du mouvement.
  * @param fileName - Nom du fichier, extension comprise.
  * @returns La clé de stockage relative.
@@ -353,15 +284,6 @@ function buildStorageKey(
 
 /**
  * Calcule la liste complète des pistes audio de démonstration attendues.
- *
- * @remarks
- * Pour chaque mouvement : un tutti, quatre voix prédominantes, quatre voix
- * seules et quatre extraits, soit un par pupitre SATB. Un accompagnement
- * s'ajoute uniquement aux mouvements marqués hasAccompaniment.
- *
- * La liste est calculée plutôt qu'écrite à la main pour que le générateur de
- * WAV et la seed partagent exactement la même vérité. Ajouter un mouvement au
- * catalogue suffit à faire apparaître ses pistes des deux côtés.
  *
  * @returns Toutes les pistes attendues par le catalogue de démonstration.
  */
@@ -474,18 +396,7 @@ export type DemoProduct = {
 };
 
 /**
- * Résout le prix final d'un produit de démonstration.
- *
- * @remarks
- * La surcharge ponctuelle déclarée par l'œuvre l'emporte quand elle existe,
- * sinon on prend le montant de base issu de sa grille pricing. Aucun prix
- * n'est jamais calculé à partir d'un autre : pas de pourcentage, pas de
- * dérivation. Chaque montant reste une décision explicite.
- *
- * @param work - Œuvre à laquelle appartient le produit.
- * @param sku - Identifiant du produit, éventuellement surchargé.
- * @param basePriceCents - Montant de base issu de la grille, ou null.
- * @returns Le prix retenu en centimes, ou null si rien n'est défini.
+ * prix final d'un produit de démonstration.
  */
 function resolvePriceCents(
   work: DemoWork,
@@ -498,11 +409,6 @@ function resolvePriceCents(
 
 /**
  * Garantit qu'un prix a bien été résolu, et échoue sinon.
- *
- * @remarks
- * Aucune valeur de repli n'est inventée : un prix manquant est une erreur de
- * configuration du catalogue, pas quelque chose à combler silencieusement
- * avec un montant arbitraire.
  *
  * @param sku - Identifiant du produit concerné, repris dans l'erreur.
  * @param priceCents - Prix résolu, éventuellement null.
@@ -521,19 +427,6 @@ function requirePriceCents(sku: string, priceCents: number | null): number {
 /**
  * Calcule la liste complète des produits de démonstration attendus.
  *
- * @remarks
- * Tout part de la grille pricing propre à chaque œuvre, et de son éventuelle
- * table de surcharges.
- *
- * Les offres de portée mouvement (un pupitre, puis toutes les voix) ne sont
- * générées que si les prix « movement » de l'œuvre sont renseignés. Pour une
- * œuvre à mouvement unique ils valent null, ce qui évite de créer des offres
- * de mouvement strictement identiques aux offres d'œuvre entière, et donc
- * concurrentes en prix pour exactement le même contenu.
- *
- * Les offres de portée œuvre, elles, sont toujours générées : un produit par
- * pupitre SATB, plus le pack toutes voix.
- *
  * @returns Tous les produits attendus par le catalogue de démonstration.
  * @throws {Error} Si un prix manque, ou si deux produits partagent un sku.
  */
@@ -543,11 +436,6 @@ export function buildDemoProducts(): DemoProduct[] {
 
   /**
    * Ajoute un produit en refusant les sku en double.
-   *
-   * @remarks
-   * Le sku est unique en base, un doublon échouerait de toute façon à
-   * l'insertion. Échouer ici donne un message bien plus lisible que la
-   * violation de contrainte Postgres.
    *
    * @param product - Produit à ajouter à la liste.
    * @throws {Error} Si ce sku a déjà été ajouté.
@@ -670,11 +558,7 @@ export type DemoUser = {
 };
 
 /**
- * MOCK / TEMPORAIRE - quatre comptes de démonstration, chacun illustrant un
- * état différent de la page œuvre (voir DEMO_LIBRARY_ITEMS ci-dessous). Pas
- * d'authentification réelle derrière : voir src/lib/auth/current-user.ts,
- * qui bascule entre ces comptes via la variable d'environnement
- * DEMO_USER_EMAIL.
+ * MOCK / TEMPORAIRE - quatre comptes de démonstration
  */
 export const DEMO_USERS: DemoUser[] = [
   {
@@ -714,15 +598,10 @@ export type DemoLibraryItem = {
 };
 
 /**
- * MOCK / TEMPORAIRE - droits de démonstration, exprimés par slug/code (jamais
- * par id, résolus par la seed comme le reste du dataset). Tous en
- * source = MANUAL_GRANT : aucun ne provient d'un achat réel (pas de Purchase
- * à ce stade). Sept lignes au total, réparties sur trois des quatre comptes
- * ("demo-aucun-achat" n'a délibérément aucun droit).
+ * MOCK / TEMPORAIRE - droits de démonstration
  */
 export const DEMO_LIBRARY_ITEMS: DemoLibraryItem[] = [
-  // demo-alto-partiel : pupitre ALTO sur 4 des 6 mouvements de la messe -
-  // état "4/6 mouvements débloqués".
+  // demo-alto-partiel : pupitre ALTO sur 4 des 6 mouvements de la messe
   ...(["kyrie", "gloria", "credo", "sanctus"] as const).map(
     (movementSlug): DemoLibraryItem => ({
       userEmail: "demo-alto-partiel@butterfly.test",
@@ -744,7 +623,7 @@ export const DEMO_LIBRARY_ITEMS: DemoLibraryItem[] = [
     coverage: "ALL_VOICES",
     source: "MANUAL_GRANT",
   },
-  // demo-multi-oeuvres : deux œuvres différentes, pour tester la bibliothèque.
+  // demo-multi-oeuvres : deux œuvres différentes, pour tester la bibli.
   {
     userEmail: "demo-multi-oeuvres@butterfly.test",
     workSlug: "messe-en-sol-majeur",

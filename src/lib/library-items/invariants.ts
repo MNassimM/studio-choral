@@ -4,21 +4,6 @@ import { accessScopeSchema, voiceCoverageSchema } from "@/lib/products/invariant
 
 /**
  * Invariants du modèle de droit d'accès (LibraryItem).
- *
- * @remarks
- * Exactement les mêmes règles croisées que Product, ce qui est logique
- * puisqu'un droit est la contrepartie d'une offre achetée :
- * une portée WORK impose movementId nul, une portée MOVEMENT impose
- * movementId renseigné, une couverture ALL_VOICES impose voiceId nul, et une
- * couverture SINGLE_VOICE impose voiceId renseigné.
- *
- * TOUTE création de droit (seed, octroi manuel, futur webhook Stripe) doit
- * passer par libraryItemInputSchema avant insertion en base.
- *
- * Ce module ne traite PAS la déduplication sémantique, c'est à dire le fait
- * que posséder « Alto, œuvre entière » rende « Alto, Kyrie » redondant. C'est
- * une question de droits effectifs, hors de portée d'une validation de forme
- * à l'insertion, et elle relève de src/lib/access/grants.ts.
  */
 
 export const grantSourceSchema = z.enum(["PURCHASE", "MANUAL_GRANT", "PROMO"]);
@@ -40,11 +25,6 @@ const libraryItemShapeSchema = z.object({
 
 /**
  * Schéma complet d'un droit, règles de cohérence comprises.
- *
- * @remarks
- * Les quatre raffinements sont dupliqués depuis productInputSchema plutôt que
- * réutilisés, parce que les deux schémas de base ne portent pas les mêmes
- * champs et qu'un refine ne se transpose pas d'un objet à l'autre.
  */
 export const libraryItemInputSchema = libraryItemShapeSchema
   .refine((item) => item.scope !== "WORK" || item.movementId === null, {
@@ -70,12 +50,7 @@ export const libraryItemInputSchema = libraryItemShapeSchema
 export type LibraryItemInput = z.infer<typeof libraryItemInputSchema>;
 
 /**
- * Valide un droit d'accès et échoue bruyamment si quelque chose cloche.
- *
- * @remarks
- * Même parti pris que assertValidProduct : on lève à la première violation
- * plutôt que de rendre un résultat à vérifier. Le couple userId et workId est
- * repris dans le message pour identifier la ligne fautive tout de suite.
+ * Valide un droit d'accès
  *
  * @param input - Droit candidat, de forme encore inconnue.
  * @returns Le droit validé et typé.

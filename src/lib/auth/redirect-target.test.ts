@@ -24,15 +24,11 @@ test("une URL absolue vers un domaine externe est refusée", () => {
 });
 
 test("une URL sans protocole est refusée", () => {
-  // Le navigateur résout //exemple.test vers un domaine externe, alors que la
-  // valeur ressemble à un chemin interne.
   assert.equal(isSafeRedirectTarget("//exemple-malveillant.test"), false);
   assert.equal(safeRedirectTarget("//exemple-malveillant.test/x"), "/");
 });
 
 test("une barre oblique suivie d'un antislash est refusée", () => {
-  // Plusieurs navigateurs normalisent l'antislash en barre oblique, ce qui
-  // ramène au cas précédent.
   assert.equal(isSafeRedirectTarget("/\\exemple-malveillant.test"), false);
   assert.equal(safeRedirectTarget("/\\exemple-malveillant.test"), "/");
 });

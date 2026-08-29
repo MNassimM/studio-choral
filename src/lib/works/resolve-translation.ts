@@ -1,28 +1,19 @@
 import { routing } from "@/i18n/routing";
 
 /**
- * Point de résolution unique entre une œuvre et sa traduction éventuelle.
+ * Point de résolution unique entre une oeuvre et sa traduction éventuelle.
  *
  * @remarks
- * Le français est la langue de référence, portée directement par la ligne
- * Work. Les autres langues vivent dans WorkTranslation.
- *
- * Aucun composant ni aucune fonction ne doit faire de repli sur une
- * traduction ailleurs qu'ici. Le jour où une nouvelle langue arrive, seul ce
- * fichier change.
+ * Le français est la langue de référence, les autres langues sont dans WorkTranslation.
  */
 
 /**
- * Champs traduisibles d'une œuvre, pour une langue donnée.
+ * Champs traduisibles d'une oeuvre, pour une langue donnée.
  */
 export type WorkTranslationFields = {
   slug: string;
   /**
-   * Un titre nul signifie « conserver le titre original ».
-   *
-   * @remarks
-   * C'est le cas des incipits comme « Mille regretz », qui ne se traduisent
-   * jamais. Ce n'est donc pas une traduction manquante à combler un jour.
+   * Un titre nul signifie conserver le titre original.
    */
   title: string | null;
   shortDescription: string | null;
@@ -30,22 +21,18 @@ export type WorkTranslationFields = {
 };
 
 /**
- * Œuvre accompagnée de ses traductions, telle qu'attendue en entrée.
+ * Oeuvre accompagnée de ses traductions, telle qu'attendue en entrée.
  */
 export type TranslatableWork = {
   slug: string;
   title: string;
   shortDescription: string | null;
   description: string | null;
-  /**
-   * Ne doit contenir que la ligne de la locale demandée, donc zéro ou une
-   * seule. Le filtrage se fait côté requête Prisma, voir buildWorkCardInclude.
-   */
   translations: WorkTranslationFields[];
 };
 
 /**
- * Champs d'une œuvre une fois la langue résolue.
+ * Champs d'une oeuvre une fois la langue résolue.
  */
 export type ResolvedWorkFields = {
   slug: string;
@@ -55,17 +42,9 @@ export type ResolvedWorkFields = {
 };
 
 /**
- * Résout les champs d'une œuvre dans la langue d'interface demandée.
+ * Résout les champs d'une oeuvre dans la langue d'interface demandée.
  *
- * @remarks
- * En français, aucune ligne de traduction n'est cherchée : les valeurs sont
- * déjà portées par l'œuvre elle même.
- *
- * Pour les autres langues, chaque champ retombe individuellement sur la
- * valeur française s'il est absent de la traduction. Un titre traduit
- * manquant n'empêche donc pas une description traduite de s'afficher.
- *
- * @param work - Œuvre avec au plus une traduction, celle de la locale visée.
+ * @param work - Oeuvre avec au plus une traduction, celle de la locale visée.
  * @param locale - Locale d'interface active.
  * @returns Les champs prêts à afficher.
  */

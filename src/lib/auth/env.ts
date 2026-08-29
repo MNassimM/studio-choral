@@ -3,15 +3,13 @@ import "server-only";
 import { z } from "zod";
 
 /**
- * Validation des variables d'environnement d'authentification, exécutée AU
- * CHARGEMENT DU MODULE (même principe que src/lib/email/env.ts)
+ * Validation des variables d'environnement d'authentification, exécutée au chargement du module (même principe que src/lib/email/env.ts)
  *
  * AUTH_SECRET sert à signer/chiffrer les jetons Auth.js.
- * En générer un : `npx auth secret`.
+ * En générer un : "npx auth secret".
  *
  * AUTH_URL est optionnelle : Auth.js déduit l'URL de la requête entrante
- * en développement comme en production sur la plupart des hébergeurs. Elle
- * ne devient nécessaire que derrière un proxy qui réécrit l'hôte.
+ * en développement comme en production sur la plupart des hébergeurs.
  */
 
 const authEnvSchema = z.object({
@@ -25,16 +23,6 @@ const authEnvSchema = z.object({
 
   /**
    * Identifiants du client OAuth Google.
-   *
-   * @remarks
-   * Optionnels, et volontairement. Exiger un projet Google Cloud pour lancer
-   * le site rendrait impossible de développer sur tout le reste sans passer
-   * par la console d'un fournisseur tiers. Le provider n'est ajouté à la
-   * configuration que lorsque les deux valeurs sont présentes, et le bouton
-   * disparaît de la page de connexion dans le cas contraire.
-   *
-   * Même parti pris que la clé Resend, qui n'est exigée que si le transport
-   * correspondant est effectivement choisi.
    */
   AUTH_GOOGLE_ID: z.string().min(1).optional(),
   AUTH_GOOGLE_SECRET: z.string().min(1).optional(),
@@ -72,22 +60,22 @@ function parseAuthEnv(): AuthEnv {
   return result.data;
 }
 
-/** Constante de module : parsée une seule fois, au premier import. */
+/** Constante de module parsée une seule fois, au premier import. */
 export const authEnv: AuthEnv = parseAuthEnv();
 
 /**
- * Durée de vie d'une session, en secondes : 180 jours en fenêtre glissante.
+ * Durée de vie d'une session, en secondes -> 180 jours en fenêtre glissante.
  */
 export const SESSION_MAX_AGE_SECONDS = 180 * 24 * 60 * 60;
 
 /**
  * Fréquence de rafraîchissement de l'expiration en base, en secondes : 24 heures. Si l'utilisateur revient avant ce délai, 
- * la session est prolongée uniquement côté client, sans toucher à la base. 
+ * la session est prolongée uniquement côté client, sans toucher à la base (ca ferait trop de requêtes).
  */
 export const SESSION_UPDATE_AGE_SECONDS = 24 * 60 * 60;
 
 /**
- * Durée de validité du LIEN de connexion
+ * Durée de validité du lien de connexion
  */
 export const MAGIC_LINK_MAX_AGE_SECONDS = 60 * 60;
 
@@ -118,16 +106,7 @@ export const isSignInRateLimitDisabled =
   process.env.AUTH_RATE_LIMIT_DISABLED === "true";
 
 /**
- * Indique si la connexion Google est utilisable.
- *
- * @remarks
- * Les deux identifiants sont exigés ensemble. N'en avoir qu'un donnerait un
- * provider à moitié configuré, qui échouerait au moment du clic plutôt qu'au
- * démarrage, c'est à dire au pire moment.
- *
- * Cette valeur pilote aussi bien l'ajout du provider à la configuration que
- * l'affichage du bouton, pour qu'aucun bouton ne puisse mener à un provider
- * absent.
+ * Indique si la connexion Google est utilisable
  */
 export const isGoogleSignInEnabled = Boolean(
   authEnv.AUTH_GOOGLE_ID && authEnv.AUTH_GOOGLE_SECRET,

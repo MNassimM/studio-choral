@@ -25,16 +25,12 @@ test("la moitié possédée -> -50%", () => {
 });
 
 test("fraction non ronde (4/24) -> arrondi de la pastille, calcul depuis le ratio exact", () => {
-  // Œuvre de 6 mouvements x 4 voix = 24 cellules ; Alto possédé sur 4
-  // mouvements = 4 cellules = 16,67 % -> pastille "-17 %".
   const result = computeAllVoicesDiscount(
     { ownedUnits: 4, totalUnits: 24 },
     10000,
   );
 
   assert.equal(result.percentOff, 17);
-  // Calcul exact depuis le ratio (20/24), pas depuis 17 % arrondi :
-  // 10000 * 20 / 24 = 8333,33... -> arrondi à 8333, PAS 8300 (= 10000 * 0.83).
   assert.equal(result.discountedCents, 8333);
 });
 

@@ -2,10 +2,6 @@ import type { WorkAccessInput } from "@/types/domain";
 
 /**
  * Forme minimale d'une piste audio nécessaire au calcul des pupitres.
- *
- * @remarks
- * Volontairement pas le type Prisma généré, pour rester découplé. Même
- * logique que WorkCardData et WorkWithCardRelations dans work-card-data.ts.
  */
 type RawAudioTrack = {
   voiceId: string | null;
@@ -20,15 +16,7 @@ type RawMovement = {
 };
 
 /**
- * Traduit les mouvements et pistes audio d'une œuvre en WorkAccessInput.
- *
- * @remarks
- * Les pupitres d'un mouvement sont DÉDUITS de ses pistes, jamais saisis à la
- * main : une piste sans voiceId (tutti, accompagnement, extrait) ne
- * correspond à aucun pupitre et est donc ignorée.
- *
- * C'est le seul endroit du projet qui fait ce calcul. resolveWorkAccess() se
- * contente ensuite de consommer son résultat.
+ * Traduit les mouvements et pistes audio d'une oeuvre en WorkAccessInput.
  *
  * @param workId - Identifiant de l'œuvre.
  * @param movements - Mouvements de l'œuvre, avec leurs pistes audio.

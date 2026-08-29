@@ -18,21 +18,12 @@ import { syncGoogleName } from "@/lib/auth/sync-google-name";
 /**
  * Configuration serveur d'Auth.js v5 pour l'authentification de l'application.
  *
- * @remarks
- * Ce module est exclusivement destiné au serveur grâce à server-only.
- * Il utilise notamment le secret d'authentification, le client Prisma et le système d'envoi d'e-mails, 
- * tous ca ne doit jamais arriver dans un bundle client.
- *
- * L'application utilise actuellement un seul provider d'authentification : le lien magique. 
- * Aucun provider OAuth n'est configuré pour le moment, afin de conserver un seul flux d'authentification à maintenir et à déboguer.
- *
- * L'authentification utilise une stratégie de session en base de données plutôt qu'une stratégie JWT. 
- * Les sessions sont donc représentées par des lignes dans la table sessions.
- *
  * @public
  */
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  // Le client Prisma partagé du projet
+  /**
+   * Le client Prisma partagé du projet
+   */
   adapter: PrismaAdapter(prisma),
 
   /**
@@ -41,33 +32,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   secret: authEnv.AUTH_SECRET,
 
   /**
-   * Le lien magique est toujours présent, Google ne s'ajoute que si ses
-   * identifiants sont configurés. Déclarer un provider sans identifiants
-   * produirait un bouton qui échoue au clic, alors qu'un provider absent
-   * retire simplement ce bouton de la page.
+   * Le lien magique est toujours présent, Google ne s'ajoute que si ses identifiants sont configurés. 
    */
   providers: isGoogleSignInEnabled
     ? [magicLinkProvider, buildGoogleProvider()]
     : [magicLinkProvider],
 
   pages: {
-    /**
-     * Les pages d'Auth.js n'acceptent qu'un chemin statique, alors que les
-     * routes du site sont localisées. Le chemin de la locale par défaut est
-     * donc utilisé, sans préfixe.
-     *
-     * Les erreurs sont volontairement renvoyées sur la page de connexion
-     * plutôt que sur une page dédiée. Un lien expiré ou déjà utilisé n'appelle
-     * qu'une seule action de la part de l'utilisateur, en redemander un, et le
-     * formulaire se trouve précisément là.
-     */
     signIn: "/connexion",
     error: "/connexion",
   },
 
   session: {
     /**
-     * Stratégie « database » choisie plutôt que « jwt » parce qu'elle permet la révocation immédiate d'un accès (supprimer la ligne)
+     * Stratégie "database" choisie plutôt que "jwt" parce qu'elle permet la révocation immédiate d'un accès (supprimer la ligne)
      * (mieux pour un site à contenu payant askip)
      */
     strategy: "database",
@@ -82,19 +60,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     /**
      * Applique la limitation de débit avant toute demande de lien.
-     *
-     * @remarks
-     * Ce callback est le dernier point traversé avant qu'Auth.js ne génère le
-     * jeton et ne déclenche l'envoi. Refuser ici évite donc de laisser derrière
-     * soi un jeton de vérification créé pour un message jamais parti, ce qui
-     * arriverait si le refus avait lieu plus tard dans la chaîne.
-     *
-     * Le contrôle porte sur la demande d'envoi et ignore complètement
-     * l'existence d'un compte. Une adresse connue et une adresse inconnue sont
-     * donc traitées exactement de la même façon, limitation comprise.
-     *
-     * Les connexions qui ne passent pas par une demande de lien ne sont pas
-     * concernées, seul le formulaire de connexion étant visé.
      *
      * @param email - Présent et marqué comme demande de vérification lorsqu'il
      * s'agit d'un envoi de lien.
@@ -136,22 +101,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
   events: {
     /**
-     * Complète le nom du compte après une connexion Google.
-     *
-     * @remarks
-     * Auth.js n'écrit le nom publié par Google qu'au moment où il crée
-     * l'utilisateur. Un compte ouvert par lien magique, puis rattaché à Google,
-     * resterait donc sans nom, et l'en tête continuerait d'afficher l'adresse.
-     *
-     * L'évènement est le bon endroit : il reçoit l'utilisateur tel qu'il existe
-     * en base, identifiant compris, ce que le callback de connexion ne garantit
-     * pas dans le cas d'un rattachement. Il s'exécute par ailleurs une fois la
-     * session ouverte, un échec d'écriture n'ayant ainsi aucun effet sur la
-     * connexion.
-     *
-     * Le profil transmis ici est celui que Google publie, avant la traduction
-     * opérée par mapGoogleProfile. Son nom est donc lu tel quel, et la fonction
-     * appelée décide seule s'il y a lieu de l'enregistrer.
+     * Complète le nom du compte après une connexion Google
      *
      * @param user - Utilisateur connecté, tel qu'il figure en base.
      * @param account - Compte ayant servi à la connexion.

@@ -3,24 +3,14 @@ import { canDownload } from "@/lib/access/rules";
 import { computeAllVoicesDiscount } from "@/lib/pricing/all-voices-discount";
 
 /**
- * Types de vue de la page œuvre.
- *
- * @remarks
- * Déplacés tels quels depuis src/app/[locale]/works/[slug]/page.tsx, pour que
- * la page se contente d'assembler du JSX et que tout le calcul vive ici.
+ * Types de vue de la page oeuvre.
  */
 
-/** Pupitre affiché dans le panneau « Votre accès ». */
+/** Pupitre affiché dans le panneau "Votre accès". */
 export type SidebarVoiceView = { code: string; label: string };
 
 /**
  * Types de piste réellement téléchargeables.
- *
- * @remarks
- * L'extrait n'est jamais téléchargeable, voir la boucle qui construit
- * downloadGroups et qui écarte les pistes PREVIEW avant insertion. Le type
- * est resserré pour que ce soit vérifié statiquement, pas seulement promis
- * dans un commentaire.
  */
 export type DownloadableAudioType = Exclude<AudioType, "PREVIEW">;
 
@@ -46,12 +36,6 @@ export type SimpleOfferView = { sku: string; name: string; priceLabel: string };
 
 /**
  * Remise proportionnelle sur un produit couvrant toutes les voix.
- *
- * @remarks
- * Le pourcentage est un entier, à usage d'affichage uniquement, voir
- * src/lib/pricing/all-voices-discount.ts. La couverture est calculée sur
- * l'œuvre entière pour un produit de portée WORK et sur le seul mouvement
- * pour un produit de portée MOVEMENT. Même principe, périmètre différent.
  */
 export type AllVoicesDiscountView = {
   percentOff: number;
@@ -61,11 +45,6 @@ export type AllVoicesDiscountView = {
 
 /**
  * Carte du pack toutes voix de l'œuvre entière.
- *
- * @remarks
- * Type dédié plutôt qu'un SimpleOfferView aux champs optionnels : cette offre
- * est unique et affichée hors liste, elle mérite son propre type au lieu
- * d'ajouter un champ nullable à tout le monde.
  */
 export type WorkAllVoicesOfferView = SimpleOfferView & {
   /** Nul quand aucune voix n'est encore possédée, donc aucune remise à afficher. */
@@ -74,12 +53,6 @@ export type WorkAllVoicesOfferView = SimpleOfferView & {
 
 /**
  * Offre pouvant être déjà possédée, et éventuellement remisée.
- *
- * @remarks
- * Le champ discount est toujours présent mais souvent nul, pour un produit
- * SINGLE_VOICE ou pour un produit toutes voix sans couverture préalable. Ces
- * offres se mélangent dans une même liste, un champ constamment présent est
- * donc plus simple qu'un type distinct par cas.
  */
 export type OwnedOfferView = SimpleOfferView & {
   alreadyOwned: boolean;
@@ -96,10 +69,6 @@ export type MovementOfferGroup = {
 
 /**
  * Formes d'entrée minimales attendues par le view model.
- *
- * @remarks
- * Volontairement pas les types Prisma générés, pour rester découplé. Même
- * logique que work-access-input.ts.
  */
 
 export type ViewModelVoice = {
@@ -122,11 +91,6 @@ export type ViewModelMovement = {
 
 /**
  * Contrainte structurelle minimale sur un produit.
- *
- * @remarks
- * Le type réel côté Prisma est toujours plus riche. TProduct est déduit par
- * TypeScript au site d'appel, ce qui permet de ne jamais importer de type
- * Prisma ici tout en gardant le typage exact chez l'appelant.
  */
 export type ViewModelProduct = {
   sku: string;
@@ -147,7 +111,6 @@ export type WorkPageViewModelParams<TProduct extends ViewModelProduct> = {
   voices: ViewModelVoice[];
   movements: ViewModelMovement[];
   products: TProduct[];
-  /** Titre de l'œuvre déjà résolu dans la langue active, pour nommer un produit de portée WORK. */
   workTitle: string;
   /** Rend le libellé traduit d'un pupitre, ou le code brut si la traduction manque. */
   getVoiceLabel: (code: string) => string;
@@ -160,7 +123,7 @@ export type WorkPageViewModelParams<TProduct extends ViewModelProduct> = {
 };
 
 /**
- * Ensemble des vues consommées par la page œuvre.
+ * Ensemble des vues consommées par la page oeuvre.
  */
 export type WorkPageViewModel = {
   ownedVoiceViews: SidebarVoiceView[];
@@ -179,15 +142,6 @@ export type WorkPageViewModel = {
 /**
  * Construit toutes les vues affichées par la page œuvre.
  *
- * @remarks
- * Fonction pure : aucun import de React, next-intl, next ou du client Prisma.
- * Elle reçoit les données déjà chargées et les fonctions de libellé, de
- * formatage et de composition de nom dont elle a besoin. C'est ce qui la rend
- * testable sans runtime React ni base de données.
- *
- * Les callbacks sont injectés plutôt qu'importés précisément pour ça :
- * importer next-intl ici suffirait à casser cette propriété.
- *
  * @param params - Données chargées, droits résolus et fonctions de mise en forme.
  * @returns Les vues prêtes à être rendues par la page.
  */
@@ -203,10 +157,6 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
   isAlreadyOwned,
 }: WorkPageViewModelParams<TProduct>): WorkPageViewModel {
   const voiceCodeById = new Map(voices.map((voice) => [voice.id, voice.code]));
-  // Voice.label en base est en français et saisi pour l'admin, il n'est jamais
-  // affiché tel quel. On préfère la traduction work.voice.* quand le code SATB
-  // est connu, avec repli sur le libellé brut pour un pupitre divisé pas
-  // encore documenté comme SOPRANO_1.
   const voiceLabelByCode = new Map(
     voices.map((voice) => [voice.code, getVoiceLabel(voice.code)]),
   );
@@ -240,9 +190,7 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
     );
   }
 
-  // Pupitres de l'œuvre entière, pour le panneau « Votre accès ». Ils sont
-  // remis dans l'ordre SATB du référentiel plutôt que dans l'ordre de
-  // découverte au fil des mouvements.
+  // Pupitres de l'œuvre entière, pour le panneau "Votre accès"
   const allWorkVoiceCodesSet = new Set<string>();
   for (const codes of voiceCodesByMovementId.values()) {
     for (const code of codes) allWorkVoiceCodesSet.add(code);
@@ -257,9 +205,7 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
     .filter((code) => !access.ownedVoiceCodes.includes(code))
     .map((code) => ({ code, label: voiceLabelByCode.get(code) ?? code }));
 
-  // Téléchargements, dérivés exclusivement de canDownload(). Les fichiers
-  // verrouillés sont inclus volontairement : ils s'affichent grisés et sans
-  // URL, pour montrer ce qu'un achat débloquerait.
+  // Téléchargements, dérivés exclusivement de canDownload()
   const downloadGroups: MovementDownloadGroup[] = movements.map((movement) => {
     const entries: DownloadFileEntry[] = [];
     for (const track of movement.audioFiles) {
@@ -326,9 +272,8 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
    * Construit la vue de remise d'un produit couvrant toutes les voix.
    *
    * @remarks
-   * TODO webhook Stripe : au moment de facturer, le webhook devra appeler
-   * computeAllVoicesDiscount() côté serveur avec la même couverture. Tant que
-   * ce n'est pas fait, la remise affichée n'a aucune valeur contraignante.
+   * TODO webhook Stripe. Au moment de facturer, le webhook devra appeler computeAllVoicesDiscount() côté serveur 
+   * avec la même couverture. 
    *
    * @param product - Produit toutes voix concerné.
    * @param coverage - Cellules possédées et totales sur le périmètre du produit.
@@ -354,11 +299,6 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
   /**
    * Calcule la couverture possédée sur un seul mouvement.
    *
-   * @remarks
-   * L'intersection est explicite plutôt qu'un simple comptage des voix
-   * possédées : un droit pourrait porter un pupitre absent de ce mouvement,
-   * et il ne doit pas gonfler la couverture.
-   *
    * @param movementId - Mouvement à mesurer.
    * @returns Les cellules possédées et le total du mouvement.
    */
@@ -375,7 +315,7 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
   }
 
   /**
-   * Calcule la couverture possédée sur l'œuvre entière.
+   * Calcule la couverture possédée sur l'oeuvre entière.
    *
    * @returns Les cellules mouvement fois voix possédées, et le total.
    */
@@ -390,10 +330,7 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
     return { ownedUnits, totalUnits };
   }
 
-  // Toutes les offres du mouvement, y compris celles déjà possédées qui
-  // s'affichent grisées avec un bandeau. Le produit toutes voix du mouvement
-  // porte en plus la remise proportionnelle à ce qui est déjà possédé SUR CE
-  // MOUVEMENT, indépendamment du reste de l'œuvre.
+  // Toutes les offres du mouvement, y compris celles déjà possédées qui s'affichent grisées avec un bandeau. 
   const movementOfferGroups: MovementOfferGroup[] = movements.map((movement) => ({
     movementId: movement.id,
     movementTitle: movement.title,
@@ -414,15 +351,12 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
             : null,
       })),
   }));
-  // On ouvre de préférence sur un mouvement pas encore entièrement possédé,
-  // celui où l'utilisateur a quelque chose à acheter.
   const defaultOfferMovementId =
     movementOfferGroups.find((group) => !group.fullyOwned)?.movementId ??
     movementOfferGroups[0]?.movementId ??
     "";
 
-  // Offres de portée œuvre entière. Les pupitres déjà possédés restent
-  // affichés, grisés avec un bandeau, plutôt que masqués.
+  // Offres de portée oeuvre entière
   const workScopeProducts = products.filter((product) => product.scope === "WORK");
   const workSingleVoiceCards: OwnedOfferView[] = workScopeProducts
     .filter((product) => product.coverage === "SINGLE_VOICE")
@@ -431,8 +365,6 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
       name: composeName(product),
       priceLabel: getPriceLabel(product.priceCents, product.currency),
       alreadyOwned: isAlreadyOwned(product),
-      // Un pupitre seul n'est jamais remisé, la remise ne concerne que les
-      // packs toutes voix.
       discount: null,
     }));
   const workAllVoicesProduct = workScopeProducts.find(

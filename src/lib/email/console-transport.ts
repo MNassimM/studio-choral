@@ -4,7 +4,7 @@ import { formatSender } from "@/lib/email/env";
 import type { EmailMessage, EmailTransport, SendEmailResult } from "@/lib/email/types";
 
 /**
- * Transport de développement : n'envoie RIEN, écrit le message dans les logs serveur. 
+ * Transport de développement, on ecrit juste dans logs server 
  * Sert à lire un lien de connexion et à le cliquer sans attendre un e-mail réel.
  */
 
@@ -23,10 +23,6 @@ function rule(char: string): string {
 
 /**
  * Transport d'e-mail utilisé en développement.
- *
- * @remarks
- * Le transport retourne toujours { ok: true, id: null }, car aucun fournisseur n'est contacté et aucun identifiant de 
- * message n'est donc disponible.
  */
 export const consoleTransport: EmailTransport = {
   name: "console",

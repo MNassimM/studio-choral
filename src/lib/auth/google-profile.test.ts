@@ -20,8 +20,6 @@ test("une adresse déjà en minuscules est laissée telle quelle", () => {
 });
 
 test("une adresse comportant des majuscules est ramenée en minuscules", () => {
-  // C'est le cas qui, sans normalisation, créerait un second compte : Auth.js
-  // cherche par égalité stricte et ne retrouverait pas jean@gmail.com.
   const user = mapGoogleProfile({
     sub: "1234567890",
     email: "Jean@Gmail.COM",

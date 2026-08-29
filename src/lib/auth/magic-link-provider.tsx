@@ -12,18 +12,7 @@ import { SITE_NAME } from "@/emails/theme";
 import { routing, type AppLocale } from "@/i18n/routing";
 
 /**
- * Provider « lien magique » MAISON, déclaré directement au format
- * `EmailConfig` (type: "email") plutôt qu'en réutilisant les providers
- * `nodemailer`/`resend` d'Auth.js.
- *
- * Raison : ces providers importent leur propre client SMTP ou HTTP au niveau
- * module. Les utiliser tirerait une seconde voie d'envoi dans le projet, en
- * contradiction directe avec la raison d'être de src/lib/email : TOUT sortie
- * d'e-mail passe par `sendEmail()`, et le fournisseur reste interchangeable
- * derrière cette interface.
- *
- * Ce fichier n'importe donc NI nodemailer NI resend - seulement notre
- * interface.
+ * Provider "lien magique" MAISON
  */
 
 /**
@@ -31,11 +20,9 @@ import { routing, type AppLocale } from "@/i18n/routing";
  *
  * @remarks
  * Le handler Auth.js s'exécute en dehors de [locale] et ne dispose donc pas du contexte de langue de la page.
+ * On recupere donc depuis le cookie NEXT_LOCALE
  *
- * La locale est récupérée depuis le cookie `NEXT_LOCALE`, défini par le proxy next-intl. 
- *
- * TODO : quand la page de connexion existera, il sera plus fiable de lui faire porter explicitement la locale 
- * par exemple via un champ caché du formulaire ou le callbackUrl.
+ * TODO : peut etre mettre la valeur dans un callback ou attribut caché du formulaire?
  *
  * @param request - Requête HTTP ayant déclenché l'envoi du lien magique.
  * @returns La locale valide à utiliser pour traduire l'e-mail.
@@ -51,11 +38,7 @@ function resolveLocale(request: Request): AppLocale {
 }
 
 /**
- * Configuration du provider de lien magique utilisé par Auth.js.
- *
- * @remarks
- * Le provider délègue l'envoi réel du message au module sendEmail().
- * Il ne connaît donc ni le fournisseur d'e-mails utilisé, ni sa configuration.
+ * Configuration du provider de lien magique utilisé par Auth.js
  */
 export const magicLinkProvider: EmailConfig = {
   id: "magic-link",
@@ -68,10 +51,7 @@ export const magicLinkProvider: EmailConfig = {
   maxAge: MAGIC_LINK_MAX_AGE_SECONDS,
 
   /**
-   * Valeur requise par le contrat EmailConfig, mais non utilisée pour déterminer l'expéditeur réel.
-   *
-   * @remarks
-   * L'expéditeur est construit exclusivement par le module d'e-mail à partir de EMAIL_FROM_ADDRESS et EMAIL_FROM_NAME.
+   * Valeur requise par le contrat EmailConfig, mais non utilisée pour déterminer l'expéditeur réel (on utilise EMAIL_FROM_ADDRESS)
    */
   from: "(non utilisé - voir EMAIL_FROM_ADDRESS)",
 
@@ -94,20 +74,6 @@ export const magicLinkProvider: EmailConfig = {
 
   /**
    * Envoie le lien magique de connexion à l'utilisateur.
-   *
-   * @remarks
-   * L'e-mail est envoyé exclusivement via sendEmail(). Ce provider ne communique donc directement avec aucun fournisseur d'e-mails.
-   * Le contenu du message est traduit dans la locale déterminée par resolveLocale().
-   *
-   * Les chaînes sont traduites ici puis transmises au gabarit, qui reste une
-   * pure présentation sans dépendance à next-intl. Ce découpage permet de
-   * relire un gabarit sans monter de contexte de requête, et il évite qu'un
-   * futur message ait à réapprendre comment retrouver la langue du
-   * destinataire.
-   *
-   * La durée affichée est calculée depuis MAGIC_LINK_MAX_AGE_SECONDS, la même
-   * constante qui fixe l'expiration réelle du jeton. Annoncer une durée saisie
-   * à la main finirait par contredire le comportement du lien.
    *
    * @param identifier - Adresse e-mail à laquelle envoyer le lien.
    * @param url - URL complète du lien magique généré par Auth.js.

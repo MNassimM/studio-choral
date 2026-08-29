@@ -19,7 +19,7 @@ export const colors = {
  * Pile de polices pour le texte courant et les titres.
  */
 const fontFamily =
-  "Arial, 'Times New Roman', Times, serif";
+  "Helvetica Neue, Helvetica,'Arial', 'Times New Roman', Times, serif";
 
 const sansFamily =
   "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";

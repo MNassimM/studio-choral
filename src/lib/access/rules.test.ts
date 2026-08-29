@@ -13,8 +13,7 @@ import type { Grant, WorkAccessInput } from "@/types/domain";
 
 const SATB = ["SOPRANO", "ALTO", "TENOR", "BASS"];
 
-// Œuvre de test : 2 mouvements, 4 pupitres chacun - donnée construite à la
-// main, aucune base de données.
+// Œuvre de test : 2 mouvements, 4 pupitres chacun
 const messe: WorkAccessInput = {
   id: "work-messe",
   movements: [
@@ -170,8 +169,6 @@ test("un pupitre possédé permet d'écouter le tutti du mouvement", () => {
 });
 
 test("un pupitre possédé ne permet PAS de télécharger le tutti", () => {
-  // Le test le plus important du fichier : c'est la règle qui protège
-  // l'offre « toutes voix » de l'érosion par un achat de pupitre isolé.
   const access = resolveWorkAccess(messe, [
     grant({
       scope: "MOVEMENT",
@@ -260,7 +257,7 @@ test("ownsFullWork est vrai seulement si TOUS les mouvements sont débloqués", 
   assert.equal(partial.ownsFullWork, false);
 
   // Tous les mouvements sont débloqués, mais avec un seul pupitre chacun :
-  // "tous débloqués" ne suffit pas, il faut TOUTES les voix partout.
+  // "tous débloqués" ne suffit pas, il faut toutes les voix partout.
   const altoEverywhere = resolveWorkAccess(messe, [
     grant({ scope: "WORK", coverage: "SINGLE_VOICE", voiceCode: "ALTO" }),
   ]);
@@ -371,8 +368,6 @@ test("un droit portant sur une autre œuvre est ignoré", () => {
 });
 
 test("preuve que la politique commerciale est bien centralisée", () => {
-  // Sanity check du fixture lui-même : si cette valeur n'est plus `false`
-  // par défaut, le test 7 ci-dessus (le plus important du fichier) doit
-  // échouer - voir la procédure de bascule manuelle dans le résumé de tâche.
+  // Sanity check du fixture lui-même
   assert.equal(ACCESS_POLICY.ownedVoiceUnlocksTuttiDownload, false);
 });

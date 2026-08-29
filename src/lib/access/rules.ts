@@ -12,10 +12,8 @@ import type {
  * Résolution des droits d'accès du projet.
  *
  * @remarks
- * Fonctions pures : aucun import de Prisma, React ou Next ici. Elles
- * reçoivent des données déjà en forme domaine (src/types/domain.ts) et
- * rendent un verdict sérialisable. C'est ce qui les rend testables sans base
- * de données et réutilisables telles quelles côté Client Component.
+ * Fonctions purs. 
+ * Elles reçoivent des données déjà en forme domaine (src/types/domain.ts)
  */
 
 /**
@@ -32,23 +30,16 @@ function dedupeVoiceCodes(lists: string[][]): string[] {
  * Durée de l'extrait gratuit, exposée telle quelle depuis ACCESS_POLICY.
  *
  * @remarks
- * Un appelant (page, composant) ne doit jamais importer ACCESS_POLICY
- * directement, seul ce module a le droit de le lire. Ce ré-export est une
- * simple valeur, pas un point de décision : rien de plus qu'un raccourci de
- * lecture.
+ * Pour eviter de propager partout la dépendance à ACCESS_POLICY
  */
 export const PREVIEW_DURATION_SECONDS = ACCESS_POLICY.previewDurationSeconds;
 
 /**
- * Calcule ce qu'un utilisateur possède sur une œuvre donnée.
+ * Calcule ce qu'un utilisateur possède sur une oeuvre donnée.
  *
  * @remarks
- * Les droits reçus sont supposés déjà filtrés comme actifs par l'appelant,
- * voir src/lib/catalog qui écarte les lignes révoquées avant de produire ces
- * Grant.
- *
  * Règles de couverture appliquées ici :
- * un droit de portée WORK couvre TOUS les mouvements de l'œuvre, un droit de
+ * un droit de portée WORK couvre TOUS les mouvements de l'oeuvre, un droit de
  * portée MOVEMENT ne couvre que le sien, un droit ALL_VOICES couvre TOUS les
  * pupitres du mouvement, et un droit SINGLE_VOICE ne couvre que le sien.
  *
@@ -85,10 +76,6 @@ export function resolveWorkAccess(
     const unlocked = allVoicesOwned || ownedVoiceCodes.size > 0;
     const tuttiStream =
       unlocked && ACCESS_POLICY.ownedVoiceUnlocksTuttiStreaming;
-    // Posséder TOUTES les voix d'un mouvement autorise toujours le
-    // téléchargement du tutti, indépendamment de la politique : c'est
-    // littéralement ce que l'utilisateur a acheté. La politique ne
-    // s'applique qu'au cas d'un pupitre isolé (voir policy.ts).
     const tuttiDownload =
       allVoicesOwned ||
       (unlocked && ACCESS_POLICY.ownedVoiceUnlocksTuttiDownload);
@@ -138,14 +125,6 @@ export type CapabilityQuery = {
 
 /**
  * Détermine ce qu'une piste audio autorise pour un accès donné.
- *
- * @remarks
- * C'est LA fonction que devront appeler la route de streaming et la route de
- * téléchargement. Masquer un bouton dans React ne protège rien, seul un appel
- * serveur à cette fonction, via la même WorkAccess déjà résolue, fait foi.
- *
- * L'extrait est le seul cas qui court-circuite tout : il reste accessible
- * même sans aucun droit, c'est le principe de l'aperçu gratuit.
  *
  * @param access - Droits déjà résolus pour l'œuvre concernée.
  * @param query - Piste visée : mouvement, type de piste et pupitre éventuel.

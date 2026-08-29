@@ -23,31 +23,24 @@ import {
  */
 
 /**
- * Nature de la clé comptée.
+ * Quelle type de limite
  */
 type AttemptScope = "email" | "ip";
 
 /**
- * Verdict rendu à l'appelant.
+ * Type de la decision
  */
 export type RateLimitVerdict =
   | { allowed: true }
   | {
       allowed: false;
-      /** Nature de la limite atteinte, utile aux traces mais jamais affichée. */
       scope: AttemptScope;
     };
 
 /**
- * Calcule l'empreinte d'une clé de comptage.
+ * Hexadécimal d'une empreinte de clé, pour ne pas stocker de valeur brute.
  *
- * @remarks
- * L'adresse e-mail n'est jamais stockée ni journalisée en clair. Une empreinte
- * suffit à reconnaître deux tentatives d'une même adresse, sans que la table
- * ne devienne un registre des personnes ayant essayé de se connecter.
- *
- * @param scope - Nature de la clé, incluse pour qu'une adresse et une IP de
- * même valeur textuelle ne puissent pas se confondre.
+ * @param scope - Nature de la clé
  * @param value - Valeur brute à masquer.
  * @returns L'empreinte hexadécimale.
  */
@@ -59,15 +52,6 @@ function hashKey(scope: AttemptScope, value: string): string {
 
 /**
  * Lit l'adresse IP de la requête courante.
- *
- * @remarks
- *
- * La première valeur de la liste est retenue parce que les proxys ajoutent la
- * leur en fin de chaîne, la plus ancienne étant celle du client d'origine.
- *
- * C'est la limite par adresse e-mail qui protège réellement la boîte d'un
- * tiers, celle par IP ne servant qu'à freiner un balayage sur des adresses
- * variées.
  *
  * @returns L'adresse lue, ou null si aucun en tête ne la porte.
  */
@@ -108,14 +92,7 @@ async function countRecentAttempts(
 /**
  * Supprime les traces trop anciennes pour compter encore.
  *
- * @remarks
- * La purge est déclenchée au fil des tentatives plutôt que par une tâche
- * planifiée, le projet n'ayant pas d'ordonnanceur.
- *
- * Un échec est délibérément ignoré. Ne pas réussir à faire le ménage ne doit
- * jamais empêcher quelqu'un de se connecter.
- *
- * @returns Rien.
+ * @returns Rien de rien.
  */
 async function purgeExpiredAttempts(): Promise<void> {
   try {
@@ -127,27 +104,12 @@ async function purgeExpiredAttempts(): Promise<void> {
       },
     });
   } catch {
-    // Silence volontaire, voir la remarque ci dessus.
   }
 }
 
 /**
- * Vérifie qu'une demande de lien peut être honorée, et l'enregistre.
- *
- * @remarks
- * Les deux limites sont indépendantes. Celle par adresse protège la boîte d'un
- * tiers, celle par adresse IP freine un balayage portant sur des adresses
- * variées. Atteindre l'une suffit à refuser.
- *
- * La tentative n'est enregistrée que lorsqu'elle est autorisée. Compter aussi
- * les tentatives refusées prolongerait le blocage à chaque nouvel essai, ce qui
- * transformerait une limite de quinze minutes en blocage indéfini pour un
- * utilisateur qui insiste.
- *
- * En cas de panne de la base, la demande est autorisée. Un formulaire de
- * connexion rendu inutilisable par l'indisponibilité d'une table de compteurs
- * serait un dégât plus grand que le risque qu'elle couvre.
- *
+ * Vérifie qu'une demande de lien soit autorisée par les limites de débit.
+ * 
  * @param email - Adresse déjà normalisée par le provider.
  * @returns Le verdict, autorisant ou non l'envoi.
  */
@@ -166,8 +128,6 @@ export async function checkSignInRateLimit(
       SIGN_IN_EMAIL_WINDOW_SECONDS,
     );
     if (emailAttempts >= SIGN_IN_EMAIL_MAX_ATTEMPTS) {
-      // L'empreinte est tronquée dans la trace, assez pour rapprocher deux
-      // évènements liés sans jamais reconstituer l'adresse.
       console.warn(
         `[auth] Limite par adresse atteinte (empreinte ${emailHash.slice(0, 12)})`,
       );
@@ -200,8 +160,6 @@ export async function checkSignInRateLimit(
         : [{ scope: "email", keyHash: emailHash }],
     });
 
-    // La purge suit l'enregistrement plutôt que de le précéder, pour ne pas
-    // retarder le verdict rendu à l'utilisateur.
     await purgeExpiredAttempts();
 
     return { allowed: true };
