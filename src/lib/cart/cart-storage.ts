@@ -65,6 +65,5 @@ export function clearStoredCart(): void {
 
   try {
     window.localStorage.removeItem(CART_STORAGE_KEY);
-  } catch {
-  }
+  } catch {}
 }

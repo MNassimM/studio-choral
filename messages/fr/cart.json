@@ -1,19 +1,50 @@
 {
   "line": {
     "unknownItem": "Article du panier",
+    "unavailableItem": "Article indisponible",
+    "unavailableNotice": "Cet article n'est plus proposé. Retirez le pour continuer.",
     "absorbedNotice": "Déjà inclus dans un autre article de votre panier.",
+    "absorbedPriceNotice": "Non facturé, déjà inclus dans un autre article.",
+    "discountBadge": "-{percent} %",
+    "discountAnnouncement": "Remise de {percent} pour cent, prix ramené de {original} à {discounted}.",
     "removeAriaLabel": "Retirer {item} du panier",
-    "empty": "Votre panier est vide."
+    "empty": "Votre panier est vide.",
+    "wholeWork": "Œuvre entière"
   },
   "panel": {
     "title": "Votre panier",
     "closeAriaLabel": "Fermer le panier",
     "summaryDescription": "{count, plural, one {# article dans votre panier} other {# articles dans votre panier}}",
-    "totalNotice": "Le total et les remises éventuelles seront calculés au moment du paiement.",
+    "totalLabel": "Total",
+    "totalPending": "Calcul en cours",
+    "totalNotice": "Le total sera recalculé au moment du paiement.",
+    "absorbedExcluded": "{count, plural, one {# article déjà inclus, non facturé.} other {# articles déjà inclus, non facturés.}}",
+    "unavailableExcluded": "{count, plural, one {# article indisponible, non facturé.} other {# articles indisponibles, non facturés.}}",
     "viewCart": "Voir le panier"
   },
   "drawer": {
     "addedNotice": "{item} a été ajouté à votre panier.",
     "continueShopping": "Continuer mes achats"
+  },
+  "page": {
+    "title": "Votre panier",
+    "metaTitle": "Votre panier - Butterfly Studio Choral",
+    "metaDescription": "Retrouvez les pupitres et mouvements que vous avez sélectionnés.",
+    "emptyTitle": "Votre panier est vide",
+    "emptyBody": "Parcourez le catalogue pour choisir un pupitre ou un mouvement.",
+    "emptyAction": "Découvrir le catalogue",
+    "loading": "Chargement de votre panier",
+    "movementLabel": "{title}",
+    "itemCount": "{count, plural, one {# article} other {# articles}}",
+    "movementsLabel": "Mouvement / Voix",
+    "voiceLabel": "Voix",
+    "coverAlt": "Pochette de {title}",
+    "securePaymentNotice": "Le paiement est 100 % sécurisé.",
+    "checkout": "Passer à la commande",
+    "trustSecurePayment": "Paiement sécurisé",
+    "trustInstantAccess": "Accès immédiat",
+    "trustAudioQuality": "Audio haute qualité",
+    "libraryNotice": "Après votre achat, retrouvez vos pistes dans votre bibliothèque.",
+    "libraryLink": "En savoir plus"
   }
 }

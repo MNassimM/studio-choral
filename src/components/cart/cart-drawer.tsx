@@ -4,7 +4,8 @@ import { Dialog } from "@base-ui/react/dialog";
 import { useTranslations } from "next-intl";
 import { CheckCircle2, ShoppingCart, X } from "lucide-react";
 
-import { CartLineList } from "@/components/cart/cart-line-list";
+import { CartLineGroups } from "@/components/cart/cart-line-list";
+import { CartSummary } from "@/components/cart/cart-summary";
 import { useCart } from "@/components/cart/cart-provider";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
@@ -58,19 +59,17 @@ function CartDrawer() {
             ) : null}
           </div>
 
-          <div className="flex-1 overflow-y-auto px-5 py-2">
+          <div className="flex-1 overflow-y-auto px-5 py-2 scrollbar-thumb-primary scrollbar-track-background overflow-auto">
             {count > 0 ? (
               <Dialog.Description className="sr-only">
                 {t("panel.summaryDescription", { count })}
               </Dialog.Description>
             ) : null}
-            <CartLineList lines={lines} />
+            <CartLineGroups lines={lines} showPrices showWorkTitle />
           </div>
 
           <div className="flex flex-col gap-2 border-t border-border px-5 py-4">
-            <p className="text-xs text-muted-foreground">
-              {t("panel.totalNotice")}
-            </p>
+            <CartSummary />
             <Link
               href="/panier"
               onClick={() => setDrawerOpen(false)}

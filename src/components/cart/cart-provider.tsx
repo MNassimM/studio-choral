@@ -4,12 +4,22 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
   useState,
   useSyncExternalStore,
 } from "react";
 
-import { containsSku } from "@/lib/cart/cart-item";
+import { resolveCartAction } from "@/lib/cart/cart-actions";
+import {
+  EMPTY_RESOLVED_CART,
+  type ResolvedCart,
+  type ResolvedCartLine,
+} from "@/lib/cart/resolved-cart";
+
+import { absorbs } from "@/lib/access/grants";
+import { cartItemToGrant, containsSku } from "@/lib/cart/cart-item";
 import {
   addToCart,
   clearCart,
@@ -142,8 +152,18 @@ export type CartContextValue = {
   clear: () => void;
   /** Indique si une référence figure déjà dans le panier. */
   has: (sku: string) => boolean;
+  /** Indique si un article du panier couvre déjà ce produit. */
+  isCovered: (input: CartItemInput) => boolean;
   /** Rend le libellé connu d'une référence, ou null. */
   labelOf: (sku: string) => string | null;
+  /** Panier résolu par le serveur, noms et prix compris. */
+  resolved: ResolvedCart;
+  /** Vrai tant que la résolution serveur n'a pas répondu. */
+  isResolving: boolean;
+  /** Rend la ligne résolue d'une référence, ou null. */
+  lineOf: (sku: string) => ResolvedCartLine | null;
+  /** Lignes résolues indexées par référence. */
+  resolvedBySku: Map<string, ResolvedCartLine>;
   /** Référence du dernier article ajouté, ou null. */
   lastAddedSku: string | null;
   /** Vrai lorsque le tiroir est ouvert. */
@@ -176,6 +196,39 @@ function CartProvider({ children }: { children: React.ReactNode }) {
   const [lastAddedSku, setLastAddedSku] = useState<string | null>(null);
   const [isDrawerOpen, setDrawerOpen] = useState(false);
   const [isPreviewRequested, setPreviewOpen] = useState(false);
+  const [resolution, setResolution] = useState<{
+    key: string;
+    cart: ResolvedCart;
+  } | null>(null);
+
+  const skuKey = items.map((item) => item.sku).join("\u0000");
+  const requestRef = useRef(0);
+
+  useEffect(() => {
+    if (!hydrated || skuKey.length === 0) return;
+
+    requestRef.current += 1;
+    const requestId = requestRef.current;
+
+    resolveCartAction(skuKey.split("\u0000"))
+      .then((cart) => {
+        if (requestRef.current === requestId)
+          setResolution({ key: skuKey, cart });
+      })
+      .catch(() => {
+        if (requestRef.current === requestId) {
+          setResolution({ key: skuKey, cart: EMPTY_RESOLVED_CART });
+        }
+      });
+  }, [hydrated, skuKey]);
+
+  // Tant que la résolution en cours ne porte pas sur le panier courant, on
+  // n'expose aucun prix plutôt qu'un prix périmé.
+  const resolved =
+    resolution && resolution.key === skuKey
+      ? resolution.cart
+      : EMPTY_RESOLVED_CART;
+  const isResolving = skuKey.length > 0 && resolution?.key !== skuKey;
 
   const add = useCallback((input: CartItemInput, label?: string) => {
     if (label) labels.set(input.sku, label);
@@ -193,6 +246,11 @@ function CartProvider({ children }: { children: React.ReactNode }) {
     mutate((current) => (current.length === 0 ? current : clearCart()));
   }, []);
 
+  const resolvedBySku = useMemo(
+    () => new Map(resolved.lines.map((line) => [line.sku, line])),
+    [resolved],
+  );
+
   const value = useMemo<CartContextValue>(
     () => ({
       items,
@@ -203,7 +261,19 @@ function CartProvider({ children }: { children: React.ReactNode }) {
       remove,
       clear,
       has: (sku: string) => containsSku(items, sku),
-      labelOf: (sku: string) => labels.get(sku) ?? null,
+      isCovered: (input: CartItemInput) => {
+        const candidate = cartItemToGrant(input);
+        return items.some(
+          (item) =>
+            item.sku !== input.sku && absorbs(cartItemToGrant(item), candidate),
+        );
+      },
+      labelOf: (sku: string) =>
+        resolvedBySku.get(sku)?.name ?? labels.get(sku) ?? null,
+      resolved,
+      isResolving,
+      lineOf: (sku: string) => resolvedBySku.get(sku) ?? null,
+      resolvedBySku,
       lastAddedSku,
       isDrawerOpen,
       setDrawerOpen,
@@ -219,6 +289,9 @@ function CartProvider({ children }: { children: React.ReactNode }) {
       lastAddedSku,
       isDrawerOpen,
       isPreviewRequested,
+      resolved,
+      resolvedBySku,
+      isResolving,
     ],
   );
 

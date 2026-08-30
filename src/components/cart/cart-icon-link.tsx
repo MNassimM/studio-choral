@@ -8,7 +8,8 @@ import {
   CartCountBadge,
   useCartLinkLabel,
 } from "@/components/cart/cart-count-badge";
-import { CartLineList } from "@/components/cart/cart-line-list";
+import { CartLineGroups } from "@/components/cart/cart-line-list";
+import { CartSummary } from "@/components/cart/cart-summary";
 import { useCart } from "@/components/cart/cart-provider";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
@@ -22,7 +23,7 @@ const PREVIEW_OPEN_DELAY = 250;
 /**
  * Délai avant la fermeture de l'aperçu, en millisecondes.
  */
-const PREVIEW_CLOSE_DELAY = 200;
+const PREVIEW_CLOSE_DELAY = 100000;
 
 /**
  * Lien vers le panier, avec son compteur, pour l'en tête du header.
@@ -76,13 +77,19 @@ function CartIconLink() {
 
             <p className="sr-only">{t("summaryDescription", { count })}</p>
 
-            <div className="max-h-64 overflow-y-auto">
-              <CartLineList lines={lines} density="compact" removable={false} />
+            <div className="max-h-64 pr-2 scrollbar-thumb-primary scrollbar-track-background overflow-auto">
+              <CartLineGroups
+                lines={lines}
+                density="compact"
+                removable={false}
+                showPrices
+                showWorkTitle
+              />
             </div>
 
-            <p className="mt-3 border-t border-border pt-3 text-xs text-muted-foreground">
-              {t("totalNotice")}
-            </p>
+            <div className="mt-3 border-t border-border pt-3">
+              <CartSummary size="sm" />
+            </div>
           </PreviewCard.Popup>
         </PreviewCard.Positioner>
       </PreviewCard.Portal>

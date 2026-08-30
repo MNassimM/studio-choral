@@ -146,7 +146,10 @@ test("une autre œuvre n'absorbe jamais les lignes de la première", () => {
 });
 
 test("retirer une ligne la sort du panier", () => {
-  const items = removeFromCart(cart(altoKyrie, toutesVoixKyrie), "MESSE-KYRIE-ALTO");
+  const items = removeFromCart(
+    cart(altoKyrie, toutesVoixKyrie),
+    "MESSE-KYRIE-ALTO",
+  );
 
   assert.equal(items.length, 1);
   assert.equal(items[0].sku, "MESSE-KYRIE-ALL");

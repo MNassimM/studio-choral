@@ -1,19 +1,50 @@
 {
   "line": {
     "unknownItem": "Cart item",
+    "unavailableItem": "Unavailable item",
+    "unavailableNotice": "This item is no longer offered. Remove it to continue.",
     "absorbedNotice": "Already included in another item in your cart.",
+    "absorbedPriceNotice": "Not charged, already included in another item.",
+    "discountBadge": "-{percent}%",
+    "discountAnnouncement": "Discount of {percent} percent, price reduced from {original} to {discounted}.",
     "removeAriaLabel": "Remove {item} from the cart",
-    "empty": "Your cart is empty."
+    "empty": "Your cart is empty.",
+    "wholeWork": "Whole work"
   },
   "panel": {
     "title": "Your cart",
     "closeAriaLabel": "Close cart",
     "summaryDescription": "{count, plural, one {# item in your cart} other {# items in your cart}}",
-    "totalNotice": "The total and any discounts will be calculated at checkout.",
+    "totalLabel": "Total",
+    "totalPending": "Calculating",
+    "totalNotice": "The total will be recalculated at checkout.",
+    "absorbedExcluded": "{count, plural, one {# item already included, not charged.} other {# items already included, not charged.}}",
+    "unavailableExcluded": "{count, plural, one {# unavailable item, not charged.} other {# unavailable items, not charged.}}",
     "viewCart": "View cart"
   },
   "drawer": {
     "addedNotice": "{item} has been added to your cart.",
     "continueShopping": "Continue shopping"
+  },
+  "page": {
+    "title": "Your cart",
+    "metaTitle": "Your cart - Butterfly Studio Choral",
+    "metaDescription": "Find the voice parts and movements you have selected.",
+    "emptyTitle": "Your cart is empty",
+    "emptyBody": "Browse the catalogue to choose a voice part or a movement.",
+    "emptyAction": "Browse the catalogue",
+    "loading": "Loading your cart",
+    "movementLabel": "{title}",
+    "itemCount": "{count, plural, one {# item} other {# items}}",
+    "movementsLabel": "Movement / Voice",
+    "voiceLabel": "Voice",
+    "coverAlt": "Cover of {title}",
+    "securePaymentNotice": "Payment is 100% secure.",
+    "checkout": "Proceed to checkout",
+    "trustSecurePayment": "Secure payment",
+    "trustInstantAccess": "Instant access",
+    "trustAudioQuality": "High quality audio",
+    "libraryNotice": "After your purchase, find your tracks in your library.",
+    "libraryLink": "Learn more"
   }
 }

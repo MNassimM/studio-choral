@@ -65,6 +65,7 @@ a {
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-absorbed: var(--absorbed);
   --color-foreground: var(--foreground);
   --color-background: var(--background);
   --radius-sm: calc(var(--radius) * 0.6);
@@ -80,6 +81,7 @@ a {
   --background: #faf6ef;
   --foreground: #2a2620;
   --card: #ffffff;
+  --absorbed: lab(46 3.44 31.75);
   --card-foreground: #2a2620;
   --popover: #ffffff;
   --popover-foreground: #2a2620;
@@ -115,6 +117,7 @@ a {
   --background: #211d18;
   --foreground: #f3ecdd;
   --card: #2b2620;
+  --absorbed: lab(46 3.44 31.75);
   --card-foreground: #f3ecdd;
   --popover: #2b2620;
   --popover-foreground: #f3ecdd;

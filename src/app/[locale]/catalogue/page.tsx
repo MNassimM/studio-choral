@@ -422,7 +422,7 @@ export default async function CataloguePage(
             aria-label={tCommon("breadcrumbAriaLabel")}
             className="text-sm text-muted-foreground"
           >
-            <Link href="/" className="hover:text-primary">
+            <Link href="/" className="hover:text-primary !underline">
               {tCommon("breadcrumbHome")}
             </Link>
             <span className="mx-2">-{">"}</span>

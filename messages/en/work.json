@@ -9,7 +9,8 @@
     "discover": "Discover",
     "movementsCount": "{count, plural, one {# movement} other {# movements}}",
     "discountBadge": "-{percent}%",
-    "inCart": "Already in cart"
+    "inCart": "Already in cart",
+    "coveredByCart": "Already covered by your cart"
   },
   "period": {
     "MEDIEVAL": "Medieval",

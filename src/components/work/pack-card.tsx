@@ -16,6 +16,7 @@ import type {
  * @param bullets - Avantages listés sur la carte.
  * @param addToCartLabel - Libellé du bouton d'ajout au panier.
  * @param inCartLabel - Libellé du bouton lorsque l'offre est déjà au panier.
+ * @param coveredLabel - Libellé du bouton lorsqu'un article du panier couvre déjà l'offre.
  * @param byItNowLabel - Libellé du bouton d'achat immédiat.
  * @param featured - Met la carte en avant.
  * @param featuredBadge - Libellé de la pastille de mise en avant.
@@ -34,6 +35,7 @@ function PackCard({
   bullets,
   addToCartLabel,
   inCartLabel,
+  coveredLabel,
   byItNowLabel,
   featured = false,
   featuredBadge,
@@ -50,6 +52,7 @@ function PackCard({
   bullets: string[];
   addToCartLabel: string;
   inCartLabel: string;
+  coveredLabel: string;
   byItNowLabel: string;
   featured?: boolean;
   featuredBadge?: string;
@@ -171,20 +174,21 @@ function PackCard({
 
       {alreadyOwned ? null : (
         <>
-        <AddToCartButton
-          offer={offer}
-          label={addToCartLabel}
-          inCartLabel={inCartLabel}
-          size={isSmall ? "sm" : "default"}
-        />
-        {/* TODO : achat immédiat non implémenté */}
-        <Button
-          disabled
-          size={isSmall ? "sm" : "default"}
-          className="w-full rounded-full bg-secondary text-text-primary-foreground hover:bg-secondary/90"
-        >
-          {byItNowLabel}
-        </Button>
+          <AddToCartButton
+            offer={offer}
+            label={addToCartLabel}
+            inCartLabel={inCartLabel}
+            coveredLabel={coveredLabel}
+            size={isSmall ? "sm" : "default"}
+          />
+          {/* TODO : achat immédiat non implémenté */}
+          <Button
+            disabled
+            size={isSmall ? "sm" : "default"}
+            className="w-full rounded-full bg-secondary text-text-primary-foreground hover:bg-secondary/90"
+          >
+            {byItNowLabel}
+          </Button>
         </>
       )}
     </div>
