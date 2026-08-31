@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { CheckCircle2, X } from "lucide-react";
+import { ArrowRight, CheckCircle2, X } from "lucide-react";
 
 import { CartLineGroups } from "@/components/cart/cart-line-list";
 import { useCart } from "@/components/cart/cart-provider";
@@ -44,10 +44,15 @@ function CartPanelContent({
 
   return (
     <>
-      <div className="flex items-center justify-between gap-2">
-        <p id={titleId} className="text-sm font-semibold">
-          {t("panel.title")}
-        </p>
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex flex-col">
+          <p id={titleId} className="text-base font-semibold">
+            {t("panel.title")}
+          </p>
+          <p id={descriptionId} className="text-xs text-muted-foreground">
+            {t("page.itemCount", { count })}
+          </p>
+        </div>
         <Button
           type="button"
           variant="ghost"
@@ -60,6 +65,8 @@ function CartPanelContent({
         </Button>
       </div>
 
+    
+      
       <div aria-live="polite">
         {lastAddedLabel ? (
           <p className="mt-2 flex items-start gap-2 rounded-lg border border-primary/30 bg-secondary/50 p-2.5 text-xs">
@@ -72,17 +79,13 @@ function CartPanelContent({
         ) : null}
       </div>
 
-      <p id={descriptionId} className="sr-only">
-        {t("panel.summaryDescription", { count })}
-      </p>
-
-      <div className="mt-2 max-h-64 overflow-auto pr-2 scrollbar-thumb-primary scrollbar-track-background">
+      <div className="mt-2 max-h-80 overflow-auto pr-1 scrollbar-thumb-primary scrollbar-track-background">
         <CartLineGroups
           lines={items}
           density={density}
           removable={removable}
           showPrices
-          showWorkTitle
+          workCards
         />
       </div>
 
@@ -94,6 +97,7 @@ function CartPanelContent({
           className={cn(buttonVariants({ size: "sm" }), "w-full rounded-full")}
         >
           {t("panel.viewCart")}
+          <ArrowRight className="size-4" aria-hidden="true" />
         </Link>
       </div>
     </>

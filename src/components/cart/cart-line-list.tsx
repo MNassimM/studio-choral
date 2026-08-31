@@ -1,7 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Trash2 } from "lucide-react";
+import { ChevronDown, Music2, Trash2 } from "lucide-react";
+import { useId, useState } from "react";
 
 import { usePriceFormatter } from "@/components/cart/cart-price";
 import { useCart } from "@/components/cart/cart-provider";
@@ -15,6 +16,48 @@ import type { CartItem } from "@/lib/cart/types";
  * Densité d'affichage des lignes du panier.
  */
 type CartLineDensity = "comfortable" | "compact";
+
+/**
+ * Emplacement réservé à la pochette d'une oeuvre.
+ *
+ * @param small - Vrai pour la vignette resserrée des panneaux.
+ * @returns Le visuel rendu.
+ */
+function CartWorkCover({ small = false }: { small?: boolean }) {
+  return (
+    <div
+      aria-hidden="true"
+      className={cn(
+        "flex aspect-square shrink-0 items-center justify-center rounded-xl border border-border bg-secondary text-primary",
+        small ? "w-14" : "w-20 sm:w-24",
+      )}
+    >
+      <Music2 className={small ? "size-5" : "size-7 sm:size-9"} />
+    </div>
+  );
+}
+
+/**
+ * Additionne les montants dus des lignes d'une oeuvre.
+ *
+ * @param lines - Lignes de l'oeuvre.
+ * @param resolvedBySku - Lignes résolues, indexées par référence.
+ * @returns Le total et sa devise, ou null si une ligne n'est pas résolue.
+ */
+function sumWorkLines(
+  lines: CartItem[],
+  resolvedBySku: Map<string, ResolvedCartLine>,
+): { cents: number; currency: string } | null {
+  let cents = 0;
+  let currency: string | null = null;
+  for (const line of lines) {
+    const resolved = resolvedBySku.get(line.sku);
+    if (!resolved || resolved.currency === null) return null;
+    cents += resolved.payableCents;
+    currency ??= resolved.currency;
+  }
+  return currency === null ? null : { cents, currency };
+}
 
 /**
  * Prix d'une ligne, remisé ou non.
@@ -210,6 +253,8 @@ function CartLineList({
  * @param showPrices - Vrai pour afficher les prix résolus par le serveur.
  * @param showWorkTitle - Vrai pour titrer aussi chaque oeuvre.
  * @param emptyMessage - Message affiché lorsque le panier est vide.
+ * @param pageCart - Vrai si le rendu est pour la page du panier, faux pour les panneaux.
+ * @param workCards - Vrai pour afficher les lignes sous forme de cartes d'oeuvre.
  * @returns Les groupes rendus, ou le message de panier vide.
  */
 function CartLineGroups({
@@ -220,6 +265,7 @@ function CartLineGroups({
   showWorkTitle = false,
   emptyMessage,
   pageCart = false,
+  workCards = false,
 }: {
   lines: CartItem[];
   density?: CartLineDensity;
@@ -228,9 +274,15 @@ function CartLineGroups({
   showWorkTitle?: boolean;
   emptyMessage?: string;
   pageCart?: boolean;
+  workCards?: boolean;
 }) {
   const t = useTranslations("cart.line");
+  const tCard = useTranslations("work.card");
+  const tPanel = useTranslations("cart.panel");
+  const formatPrice = usePriceFormatter();
   const { resolvedBySku } = useCart();
+  const [collapsed, setCollapsed] = useState<string[]>([]);
+  const baseId = useId();
   const compact = density === "compact";
 
   if (lines.length === 0) {
@@ -249,45 +301,112 @@ function CartLineGroups({
   );
 
   return (
-    <div className="flex flex-col gap-4">
-      {groups.map((work) => (
-        <div
-          key={work.workId}
-          className={cn(
-            "flex flex-col",
-            pageCart ||
-              "rounded-2xl border border-border bg-card/40 p-2 sm:p-3",
-          )}
-        >
-          {showWorkTitle && work.workTitle ? (
-            <p className={cn(headingClass, "mb-1")}>{work.workTitle}</p>
-          ) : null}
-          {work.groups.map((movement, index) => (
-            <div
-              key={movement.movementId ?? "work"}
-              className={cn(
-                index > 0 && "mt-2 border-t border-border pt-2",
-                showWorkTitle && work.splitByMovement && "pl-3",
-              )}
-            >
-              {work.splitByMovement ? (
-                <p className={headingClass}>
-                  {movement.movementTitle ?? t("wholeWork")}
-                </p>
-              ) : null}
-              <CartLineList
-                lines={movement.lines}
-                density={density}
-                removable={removable}
-                showPrices={showPrices}
-              />
+    <div className="flex flex-col gap-3">
+      {groups.map((work) => {
+        const workLines = work.groups.flatMap((movement) => movement.lines);
+        const resolved = resolvedBySku.get(workLines[0]?.sku ?? "");
+        const isCollapsed = collapsed.includes(work.workId);
+        const bodyId = `${baseId}-${work.workId}`;
+        const total = workCards ? sumWorkLines(workLines, resolvedBySku) : null;
+
+        return (
+          <div
+            key={work.workId}
+            className={cn(
+              "flex flex-col",
+              pageCart ||
+                "rounded-2xl border border-border bg-card/40 p-2 sm:p-3",
+            )}
+          >
+            {workCards ? (
+              <button
+                type="button"
+                aria-expanded={!isCollapsed}
+                aria-controls={bodyId}
+                onClick={() =>
+                  setCollapsed((current) =>
+                    current.includes(work.workId)
+                      ? current.filter((id) => id !== work.workId)
+                      : [...current, work.workId],
+                  )
+                }
+                className="flex w-full cursor-pointer items-center gap-3 text-left"
+              >
+                <CartWorkCover small />
+                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                  <span className="truncate text-sm font-semibold">
+                    {work.workTitle ?? t("unknownItem")}
+                  </span>
+                  {resolved?.workComposer ? (
+                    <span className="truncate text-xs text-primary">
+                      {resolved.workComposer}
+                    </span>
+                  ) : null}
+                  {work.splitByMovement ? (
+                    <span className="mt-0.5 w-fit rounded-full border border-border px-2 py-0.5 text-[0.65rem] text-muted-foreground">
+                      {tCard("movementsCount", {
+                        count: resolved?.workMovementCount ?? 0,
+                      })}
+                    </span>
+                  ) : null}
+                </span>
+                {isCollapsed && total ? (
+                  <span className="shrink-0 text-sm font-medium">
+                    {formatPrice(total.cents, total.currency)}
+                  </span>
+                ) : null}
+                <ChevronDown
+                  aria-hidden="true"
+                  className={cn(
+                    "size-4 shrink-0 text-muted-foreground transition-transform",
+                    isCollapsed || "rotate-180",
+                  )}
+                />
+              </button>
+            ) : null}
+
+            {workCards && !isCollapsed ? (
+              <span className="sr-only">
+                {tPanel("summaryDescription", { count: workLines.length })}
+              </span>
+            ) : null}
+
+            {showWorkTitle && !workCards && work.workTitle ? (
+              <p className={cn(headingClass, "mb-1")}>{work.workTitle}</p>
+            ) : null}
+
+            <div id={bodyId} hidden={workCards && isCollapsed}>
+              {work.groups.map((movement, index) => (
+                <div
+                  key={movement.movementId ?? "work"}
+                  className={cn(
+                    index > 0 && "mt-2 border-t border-border pt-2",
+                    (showWorkTitle || workCards) &&
+                      work.splitByMovement &&
+                      "pl-3",
+                    workCards && index === 0 && "mt-2",
+                  )}
+                >
+                  {work.splitByMovement ? (
+                    <p className={headingClass}>
+                      {movement.movementTitle ?? t("wholeWork")}
+                    </p>
+                  ) : null}
+                  <CartLineList
+                    lines={movement.lines}
+                    density={density}
+                    removable={removable}
+                    showPrices={showPrices}
+                  />
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      ))}
+          </div>
+        );
+      })}
     </div>
   );
 }
 
-export { CartLineGroups, CartLineItem, CartLineList };
+export { CartLineGroups, CartLineItem, CartLineList, CartWorkCover };
 export type { CartLineDensity };

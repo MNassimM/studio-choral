@@ -8,41 +8,22 @@ import {
   BadgeCheck,
   Info,
   Lock,
-  Music2,
   ShieldCheck,
   ShoppingCart,
   type LucideIcon,
 } from "lucide-react";
 import { useMemo } from "react";
 
-import { CartLineGroups } from "@/components/cart/cart-line-list";
+import {
+  CartLineGroups,
+  CartWorkCover,
+} from "@/components/cart/cart-line-list";
 import { useCart } from "@/components/cart/cart-provider";
 import { CartSummary } from "@/components/cart/cart-summary";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { groupCartLines, type CartWorkGroup } from "@/lib/cart/cart-grouping";
 import { cn } from "@/lib/utils";
-
-/**
- * Emplacement de la pochette d'une oeuvre.
- *
- * @remarks
- * coverImageKey est vide pour l'instant : emplacement réservé au bon ratio,
- * sans référencer de fichier inexistant. Le jour où une image existe, ce bloc
- * devient un next/image pointant vers l'URL signée.
- *
- * @returns Le visuel rendu.
- */
-function CartWorkCover() {
-  return (
-    <div
-      aria-hidden="true"
-      className="flex aspect-square w-20 shrink-0 items-center justify-center rounded-xl border border-border bg-secondary text-primary sm:w-24"
-    >
-      <Music2 className="size-7 sm:size-9" />
-    </div>
-  );
-}
 
 /**
  * Carte d'une oeuvre présente dans le panier.
