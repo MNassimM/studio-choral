@@ -9,7 +9,7 @@ import { useCart } from "@/components/cart/cart-provider";
 /**
  * Délai avant la fermeture automatique du panneau, en millisecondes.
  */
-const AUTO_CLOSE_DELAY = 7000000;
+const AUTO_CLOSE_DELAY = 7000;
 
 /**
  * Panneau de confirmation ouvert à chaque ajout au panier.

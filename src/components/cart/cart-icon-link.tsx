@@ -21,7 +21,7 @@ const PREVIEW_OPEN_DELAY = 250;
 /**
  * Délai avant la fermeture de l'aperçu, en millisecondes.
  */
-const PREVIEW_CLOSE_DELAY = 100000;
+const PREVIEW_CLOSE_DELAY = 350;
 
 /**
  * Lien vers le panier, avec son compteur, pour l'en tête du header.

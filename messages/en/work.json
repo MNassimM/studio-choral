@@ -35,7 +35,7 @@
     "BASS": "Bass"
   },
   "product": {
-    "allVoices": "All voices",
+    "allVoices": "Tutti",
     "nameTemplate": "{voice} - {target}"
   },
   "workPage": {

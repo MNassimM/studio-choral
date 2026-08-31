@@ -41,7 +41,7 @@ function MovementPanelSwitcher({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex max-w-xs flex-col gap-1.5 text-sm">
+      <div className="flex max-w-xs items-center gap-1.5 text-sm">
         <Select
           value={selectedId}
           onValueChange={(value) => {
