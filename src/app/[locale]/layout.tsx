@@ -7,7 +7,7 @@ import { getTranslations } from "next-intl/server";
 import "../globals.css";
 
 import { Header } from "@/components/layout/header";
-import { CartDrawer } from "@/components/cart/cart-drawer";
+import { CartAddPanel } from "@/components/cart/cart-add-panel";
 import { CartProvider } from "@/components/cart/cart-provider";
 import { CartReplaceDialog } from "@/components/cart/cart-replace-dialog";
 import { Footer } from "@/components/layout/footer";
@@ -81,7 +81,7 @@ export default async function RootLayout({
               <Header />
               <main className="flex-1">{children}</main>
               <Footer />
-              <CartDrawer />
+              <CartAddPanel />
               <CartReplaceDialog />
             </CartProvider>
           </DynamicRouteAlternatesProvider>

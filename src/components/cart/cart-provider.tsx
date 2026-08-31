@@ -133,6 +133,14 @@ function mutate(transform: (items: CartItem[]) => CartItem[]): void {
 const labels = new Map<string, string>();
 
 /**
+ * Mode d'ouverture du panneau du panier.
+ *
+ * Un seul mode peut valoir à la fois, ce qui rend leur exclusivité
+ * structurelle plutôt que conventionnelle.
+ */
+export type CartPanelMode = "hover" | "add" | null;
+
+/**
  * Ce que le fournisseur met à disposition des composants.
  */
 export type CartContextValue = {
@@ -166,10 +174,14 @@ export type CartContextValue = {
   resolvedBySku: Map<string, ResolvedCartLine>;
   /** Référence du dernier article ajouté, ou null. */
   lastAddedSku: string | null;
-  /** Vrai lorsque le tiroir est ouvert. */
-  isDrawerOpen: boolean;
-  /** Ouvre ou ferme le tiroir. */
-  setDrawerOpen: (open: boolean) => void;
+  /** Mode du panneau, ou null lorsqu'aucun n'est ouvert. */
+  panelMode: CartPanelMode;
+  /** Demande ou retire l'ouverture au survol, qui reprend la main sur l'ajout. */
+  requestHoverPanel: (open: boolean) => void;
+  /** Ferme le panneau ouvert par un ajout. */
+  closeAddPanel: () => void;
+  /** Retire la demande d'ouverture au survol. */
+  closeHoverPanel: () => void;
   /** Articles que l'ajout en attente remplacerait, vide hors confirmation. */
   replacedItems: CartItem[];
   /** Vrai lorsque la confirmation de remplacement est ouverte. */
@@ -180,10 +192,6 @@ export type CartContextValue = {
   cancelReplacement: () => void;
   /** Élément à refocaliser à la fermeture des dialogues. */
   triggerRef: React.RefObject<HTMLElement | null>;
-  /** Vrai lorsque l'aperçu au survol est ouvert. */
-  isPreviewOpen: boolean;
-  /** Demande l'ouverture ou la fermeture de l'aperçu au survol. */
-  setPreviewOpen: (open: boolean) => void;
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -204,8 +212,8 @@ function CartProvider({ children }: { children: React.ReactNode }) {
   );
 
   const [lastAddedSku, setLastAddedSku] = useState<string | null>(null);
-  const [isDrawerOpen, setDrawerOpen] = useState(false);
-  const [isPreviewRequested, setPreviewOpen] = useState(false);
+  const [isAddOpen, setAddOpen] = useState(false);
+  const [isHoverRequested, setHoverRequested] = useState(false);
   const [pending, setPending] = useState<{
     input: CartItemInput;
     label?: string;
@@ -256,8 +264,8 @@ function CartProvider({ children }: { children: React.ReactNode }) {
     if (label) labels.set(input.sku, label);
     mutate((current) => replaceInCart(current, input, Date.now()));
     setLastAddedSku(input.sku);
-    setPreviewOpen(false);
-    setDrawerOpen(true);
+    setHoverRequested(false);
+    setAddOpen(true);
   }, []);
 
   const add = useCallback(
@@ -268,7 +276,7 @@ function CartProvider({ children }: { children: React.ReactNode }) {
         return;
       }
       if (label) labels.set(input.sku, label);
-      setPreviewOpen(false);
+      setHoverRequested(false);
       setReplacedItems(covered);
       setPending({ input, label, covered });
     },
@@ -285,6 +293,30 @@ function CartProvider({ children }: { children: React.ReactNode }) {
   const cancelReplacement = useCallback(() => {
     setPending(null);
   }, []);
+
+  const closeAddPanel = useCallback(() => {
+    setAddOpen(false);
+  }, []);
+
+  // Le survol de l'icône ferme le panneau d'ajout et prend sa place. Base UI
+  // interrompt de toute façon le dialogue dès que l'interaction de survol
+  // démarre, on rend donc la reprise explicite plutôt que subie.
+  const requestHoverPanel = useCallback((open: boolean) => {
+    setHoverRequested(open);
+    if (open) setAddOpen(false);
+  }, []);
+
+  const closeHoverPanel = useCallback(() => {
+    setHoverRequested(false);
+  }, []);
+
+  // Un seul mode peut valoir à la fois, les deux panneaux ne peuvent donc
+  // jamais être ouverts ensemble.
+  const panelMode: CartPanelMode = isAddOpen
+    ? "add"
+    : isHoverRequested && items.length > 0 && pending === null
+      ? "hover"
+      : null;
 
   const remove = useCallback((sku: string) => {
     mutate((current) => removeFromCart(current, sku));
@@ -323,15 +355,15 @@ function CartProvider({ children }: { children: React.ReactNode }) {
       lineOf: (sku: string) => resolvedBySku.get(sku) ?? null,
       resolvedBySku,
       lastAddedSku,
-      isDrawerOpen,
-      setDrawerOpen,
+      panelMode,
+      requestHoverPanel,
+      closeAddPanel,
+      closeHoverPanel,
       replacedItems,
-      isReplaceOpen: pending !== null && !isDrawerOpen,
+      isReplaceOpen: pending !== null && panelMode !== "add",
       confirmReplacement,
       cancelReplacement,
       triggerRef,
-      isPreviewOpen: isPreviewRequested && !isDrawerOpen && items.length > 0,
-      setPreviewOpen,
     }),
     [
       items,
@@ -340,8 +372,10 @@ function CartProvider({ children }: { children: React.ReactNode }) {
       remove,
       clear,
       lastAddedSku,
-      isDrawerOpen,
-      isPreviewRequested,
+      panelMode,
+      requestHoverPanel,
+      closeAddPanel,
+      closeHoverPanel,
       resolved,
       resolvedBySku,
       isResolving,
