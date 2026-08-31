@@ -58,3 +58,18 @@ export function computeAllVoicesDiscount(
     discountedCents,
   };
 }
+
+/**
+ * Calcule ce qu'on économise en prenant toutes les voix plutôt que chaque pupitre.
+ *
+ * @param singleVoiceCents - Prix catalogue de chaque pupitre, en centimes.
+ * @param allVoicesCents - Prix catalogue du pack toutes voix, en centimes.
+ * @returns L'économie en centimes, jamais négative.
+ */
+export function computeAllVoicesSaving(
+  singleVoiceCents: readonly number[],
+  allVoicesCents: number,
+): number {
+  const total = singleVoiceCents.reduce((somme, cents) => somme + cents, 0);
+  return Math.max(0, total - allVoicesCents);
+}

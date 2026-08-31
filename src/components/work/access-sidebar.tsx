@@ -98,10 +98,11 @@ async function AccessSidebar({
               <span className="text-sm font-medium">
                 {movement.movementTitle}
               </span>
-            ) : 
+            ) : (
               <span className="text-sm font-medium">
                 {movement.movementTitle}
-              </span>}
+              </span>
+            )}
             <div className="flex flex-wrap gap-1.5">
               {movement.voices.map((voice) => (
                 <VoicePill

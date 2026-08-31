@@ -65,8 +65,6 @@ function CartPanelContent({
         </Button>
       </div>
 
-    
-      
       <div aria-live="polite">
         {lastAddedLabel ? (
           <p className="mt-2 flex items-start gap-2 rounded-lg border border-primary/30 bg-secondary/50 p-2.5 text-xs">

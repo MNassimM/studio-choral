@@ -10,12 +10,10 @@ import { Container } from "@/components/layout/container";
 import { Badge } from "@/components/ui/badge";
 import { AccessSidebar } from "@/components/work/access-sidebar";
 import { CollapsibleAccessPanel } from "@/components/work/collapsible-access-panel";
-import { CollapsibleOfferSection } from "@/components/work/collapsible-offer-section";
 import { StudioPlaceholder } from "@/components/work/studio-placeholder";
 import { DownloadFileGrid } from "@/components/work/download-file-grid";
-import { MovementOfferPanel } from "@/components/work/movement-offer-panel";
-import { WholeWorkOffers } from "@/components/work/whole-work-offers";
 import { MovementPanelSwitcher } from "@/components/work/movement-panel-switcher";
+import { OfferSelector } from "@/components/work/offer-selector";
 import { SyncDynamicRouteAlternates } from "@/components/layout/dynamic-route-alternates";
 import { Link, getPathname } from "@/i18n/navigation";
 import { routing, type AppLocale } from "@/i18n/routing";
@@ -299,7 +297,6 @@ export default async function WorkPage(
   }
 
   const {
-    lockedVoiceViews,
     downloadGroups,
     hasTuttiDownload,
     hasAccompanimentDownload,
@@ -400,7 +397,9 @@ export default async function WorkPage(
                   {resolved.title}
                 </h1>
                 {work.catalogueRef ? (
-                  <Badge className="text-xl p-3" variant="outline">{work.catalogueRef}</Badge>
+                  <Badge className="text-xl p-3" variant="outline">
+                    {work.catalogueRef}
+                  </Badge>
                 ) : null}
               </div>
               <p className="text-lg text-muted-foreground">{work.composer}</p>
@@ -467,42 +466,26 @@ export default async function WorkPage(
             )}
           </div>
 
-          {/* Étendre votre accès - absente si l'œuvre est déjà possédée en
-              intégralité ; sinon toujours au moins la carte « toutes les
-              voix », le mouvement d'abord (engagement faible), l'œuvre
-              complète ensuite (offre principale, en conclusion). */}
+          {/* Étendre votre accès : onglets par mouvement et par oeuvre,
+              absents si l'oeuvre est déjà possédée en intégralité. */}
           {!access.ownsFullWork ? (
-            <div className="flex flex-col gap-6">
-              <h2 className="text-xl font-semibold">
-                {tWorkPage("extendAccessHeading")}
-              </h2>
-
-              {!hasSingleMovement ? (
-                <CollapsibleOfferSection
-                  heading={tWorkPage("offersScopeMovement")}
-                >
-                  <MovementPanelSwitcher
-                    selectorLabel={tWorkPage("movementSelectorLabel")}
-                    defaultMovementId={defaultOfferMovementId}
-                    movements={movementOfferGroups.map((group) => ({
-                      id: group.movementId,
-                      label: group.movementTitle,
-                      statusLabel: group.fullyOwned
-                        ? tWorkPage("extendAccessAlreadyOwnedBadge")
-                        : "",
-                      panel: <MovementOfferPanel offers={group.offers} />,
-                    }))}
-                  />
-                </CollapsibleOfferSection>
-              ) : null}
-              <CollapsibleOfferSection heading={tWorkPage("offersScopeWork")}>
-                <WholeWorkOffers
-                  singleVoiceCards={workSingleVoiceCards}
-                  allVoicesCard={workAllVoicesCard}
-                  ownsAnything={access.ownsAnything}
-                  unlocksVoices={lockedVoiceViews.map((voice) => voice.label)}
-                />
-              </CollapsibleOfferSection>
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1">
+                <h2 className="text-xl font-semibold">
+                  {tWorkPage("extendAccessHeading")}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {tWorkPage("extendAccessHeadingLead")}
+                </p>
+              </div>
+              <OfferSelector
+                movementGroups={hasSingleMovement ? [] : movementOfferGroups}
+                workOffers={[
+                  ...workSingleVoiceCards,
+                  ...(workAllVoicesCard ? [workAllVoicesCard] : []),
+                ]}
+                defaultMovementId={defaultOfferMovementId}
+              />
             </div>
           ) : null}
         </Container>

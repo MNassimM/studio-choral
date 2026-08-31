@@ -1,7 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { computeAllVoicesDiscount } from "@/lib/pricing/all-voices-discount";
+import {
+  computeAllVoicesDiscount,
+  computeAllVoicesSaving,
+} from "@/lib/pricing/all-voices-discount";
 
 test("aucune voix possédée -> pas de remise", () => {
   const result = computeAllVoicesDiscount(
@@ -61,4 +64,12 @@ test("discountedCents ne descend jamais sous 0", () => {
   );
 
   assert.equal(result.discountedCents, 0);
+});
+
+test("l'économie du pack toutes voix est la différence avec les pupitres", () => {
+  assert.equal(computeAllVoicesSaving([190, 190, 190, 190], 390), 370);
+});
+
+test("un pack plus cher que la somme des pupitres n'économise rien", () => {
+  assert.equal(computeAllVoicesSaving([100, 100], 500), 0);
 });

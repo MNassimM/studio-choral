@@ -1,7 +1,15 @@
-import type { AccessScope, AudioType, VoiceCoverage, WorkAccess } from "@/types/domain";
+import type {
+  AccessScope,
+  AudioType,
+  VoiceCoverage,
+  WorkAccess,
+} from "@/types/domain";
 import { canDownload } from "@/lib/access/rules";
 import { productToGrant } from "@/lib/catalog/product-grant";
-import { computeAllVoicesDiscount } from "@/lib/pricing/all-voices-discount";
+import {
+  computeAllVoicesDiscount,
+  computeAllVoicesSaving,
+} from "@/lib/pricing/all-voices-discount";
 import type { CartItemInput } from "@/lib/cart/types";
 
 /**
@@ -38,7 +46,11 @@ export type MovementDownloadGroup = {
  */
 export type SimpleOfferView = CartItemInput & {
   name: string;
+  /** Libellé du pupitre seul, nul pour une offre toutes voix. */
+  voiceLabel: string | null;
   priceLabel: string;
+  priceCents: number;
+  currency: string;
 };
 
 /**
@@ -51,11 +63,12 @@ export type AllVoicesDiscountView = {
 };
 
 /**
- * Carte du pack toutes voix de l'œuvre entière.
+ * Ce que la ligne toutes voix ajoute par rapport aux pupitres.
  */
-export type WorkAllVoicesOfferView = SimpleOfferView & {
-  /** Nul quand aucune voix n'est encore possédée, donc aucune remise à afficher. */
-  discount: AllVoicesDiscountView | null;
+export type AllVoicesExtraView = {
+  voiceCount: number;
+  /** Nul quand le pack ne fait économiser rien. */
+  savingLabel: string | null;
 };
 
 /**
@@ -64,6 +77,8 @@ export type WorkAllVoicesOfferView = SimpleOfferView & {
 export type OwnedOfferView = SimpleOfferView & {
   alreadyOwned: boolean;
   discount: AllVoicesDiscountView | null;
+  /** Renseigné seulement pour l'offre toutes voix. */
+  allVoices: AllVoicesExtraView | null;
 };
 
 /** Les offres d'un mouvement, regroupées pour le sélecteur. */
@@ -126,7 +141,10 @@ export type WorkPageViewModelParams<TProduct extends ViewModelProduct> = {
   /** Rend un prix déjà formaté dans la devise et la locale courantes. */
   getPriceLabel: (priceCents: number, currency: string) => string;
   /** Compose le nom affiché d'un produit à partir du pupitre et de la cible. */
-  composeProductName: (voiceLabel: string | null, targetTitle: string) => string;
+  composeProductName: (
+    voiceLabel: string | null,
+    targetTitle: string,
+  ) => string;
   /** Vrai si un droit déjà détenu absorbe ce produit, donc si l'offre est déjà possédée. */
   isAlreadyOwned: (product: TProduct) => boolean;
 };
@@ -136,7 +154,6 @@ export type WorkPageViewModelParams<TProduct extends ViewModelProduct> = {
  */
 export type WorkPageViewModel = {
   ownedVoiceViews: SidebarVoiceView[];
-  lockedVoiceViews: SidebarVoiceView[];
   downloadGroups: MovementDownloadGroup[];
   hasTuttiDownload: boolean;
   hasAccompanimentDownload: boolean;
@@ -144,7 +161,7 @@ export type WorkPageViewModel = {
   movementOfferGroups: MovementOfferGroup[];
   defaultOfferMovementId: string;
   workSingleVoiceCards: OwnedOfferView[];
-  workAllVoicesCard: WorkAllVoicesOfferView | null;
+  workAllVoicesCard: OwnedOfferView | null;
   hasSingleMovement: boolean;
 };
 
@@ -211,9 +228,6 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
   const ownedVoiceViews: SidebarVoiceView[] = allWorkVoiceCodes
     .filter((code) => access.ownedVoiceCodes.includes(code))
     .map((code) => ({ code, label: voiceLabelByCode.get(code) ?? code }));
-  const lockedVoiceViews: SidebarVoiceView[] = allWorkVoiceCodes
-    .filter((code) => !access.ownedVoiceCodes.includes(code))
-    .map((code) => ({ code, label: voiceLabelByCode.get(code) ?? code }));
 
   // Téléchargements, dérivés exclusivement de canDownload()
   const downloadGroups: MovementDownloadGroup[] = movements.map((movement) => {
@@ -274,7 +288,9 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
       ? (voiceLabelByCode.get(product.voice.code) ?? product.voice.code)
       : null;
     const targetTitle =
-      product.scope === "WORK" ? workTitle : (product.movement?.title ?? workTitle);
+      product.scope === "WORK"
+        ? workTitle
+        : (product.movement?.title ?? workTitle);
     return composeProductName(voiceLabel, targetTitle);
   }
 
@@ -282,8 +298,8 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
    * Construit la vue de remise d'un produit couvrant toutes les voix.
    *
    * @remarks
-   * TODO webhook Stripe. Au moment de facturer, le webhook devra appeler computeAllVoicesDiscount() côté serveur 
-   * avec la même couverture. 
+   * TODO webhook Stripe. Au moment de facturer, le webhook devra appeler computeAllVoicesDiscount() côté serveur
+   * avec la même couverture.
    *
    * @param product - Produit toutes voix concerné.
    * @param coverage - Cellules possédées et totales sur le périmètre du produit.
@@ -351,50 +367,108 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
       sku: product.sku,
       ...productToGrant(workId, product),
       name: composeName(product),
+      voiceLabel: product.voice
+        ? (voiceLabelByCode.get(product.voice.code) ?? product.voice.code)
+        : null,
       priceLabel: getPriceLabel(product.priceCents, product.currency),
+      priceCents: product.priceCents,
+      currency: product.currency,
     };
   }
 
-  // Toutes les offres du mouvement, y compris celles déjà possédées qui s'affichent grisées avec un bandeau. 
-  const movementOfferGroups: MovementOfferGroup[] = movements.map((movement) => ({
-    movementId: movement.id,
-    movementTitle: movement.title,
-    fullyOwned: isMovementFullyOwned(movement.id),
-    offers: products
-      .filter(
-        (product) =>
-          product.scope === "MOVEMENT" && product.movementId === movement.id,
-      )
-      .map((product) => ({
-        ...buildSimpleOffer(product),
-        alreadyOwned: isAlreadyOwned(product),
-        discount:
-          product.coverage === "ALL_VOICES"
-            ? buildAllVoicesDiscountView(product, movementCoverage(movement.id))
-            : null,
-      })),
-  }));
+  /**
+   * Construit ce que la ligne toutes voix ajoute face aux pupitres du lot.
+   *
+   * @param product - Produit toutes voix.
+   * @param siblings - Produits pupitre du même périmètre.
+   * @returns Le nombre de voix et l'économie, ou null si le lot est vide.
+   */
+  function buildAllVoicesExtra(
+    product: TProduct,
+    siblings: TProduct[],
+  ): AllVoicesExtraView | null {
+    if (siblings.length === 0) return null;
+
+    const saving = computeAllVoicesSaving(
+      siblings.map((sibling) => sibling.priceCents),
+      product.priceCents,
+    );
+    return {
+      voiceCount: siblings.length,
+      savingLabel: saving > 0 ? getPriceLabel(saving, product.currency) : null,
+    };
+  }
+
+  // Toutes les offres du mouvement, y compris celles déjà possédées qui s'affichent grisées avec un bandeau.
+  const movementOfferGroups: MovementOfferGroup[] = movements.map(
+    (movement) => ({
+      movementId: movement.id,
+      movementTitle: movement.title,
+      fullyOwned: isMovementFullyOwned(movement.id),
+      offers: products
+        .filter(
+          (product) =>
+            product.scope === "MOVEMENT" && product.movementId === movement.id,
+        )
+        .map((product) => ({
+          ...buildSimpleOffer(product),
+          alreadyOwned: isAlreadyOwned(product),
+          discount:
+            product.coverage === "ALL_VOICES"
+              ? buildAllVoicesDiscountView(
+                  product,
+                  movementCoverage(movement.id),
+                )
+              : null,
+          allVoices:
+            product.coverage === "ALL_VOICES"
+              ? buildAllVoicesExtra(
+                  product,
+                  products.filter(
+                    (sibling) =>
+                      sibling.scope === "MOVEMENT" &&
+                      sibling.movementId === movement.id &&
+                      sibling.coverage === "SINGLE_VOICE",
+                  ),
+                )
+              : null,
+        })),
+    }),
+  );
   const defaultOfferMovementId =
     movementOfferGroups.find((group) => !group.fullyOwned)?.movementId ??
     movementOfferGroups[0]?.movementId ??
     "";
 
   // Offres de portée oeuvre entière
-  const workScopeProducts = products.filter((product) => product.scope === "WORK");
+  const workScopeProducts = products.filter(
+    (product) => product.scope === "WORK",
+  );
   const workSingleVoiceCards: OwnedOfferView[] = workScopeProducts
     .filter((product) => product.coverage === "SINGLE_VOICE")
     .map((product) => ({
       ...buildSimpleOffer(product),
       alreadyOwned: isAlreadyOwned(product),
       discount: null,
+      allVoices: null,
     }));
   const workAllVoicesProduct = workScopeProducts.find(
     (product) => product.coverage === "ALL_VOICES",
   );
-  const workAllVoicesCard: WorkAllVoicesOfferView | null = workAllVoicesProduct
+  const workAllVoicesCard: OwnedOfferView | null = workAllVoicesProduct
     ? {
         ...buildSimpleOffer(workAllVoicesProduct),
-        discount: buildAllVoicesDiscountView(workAllVoicesProduct, workCoverage()),
+        alreadyOwned: isAlreadyOwned(workAllVoicesProduct),
+        discount: buildAllVoicesDiscountView(
+          workAllVoicesProduct,
+          workCoverage(),
+        ),
+        allVoices: buildAllVoicesExtra(
+          workAllVoicesProduct,
+          workScopeProducts.filter(
+            (product) => product.coverage === "SINGLE_VOICE",
+          ),
+        ),
       }
     : null;
 
@@ -402,7 +476,6 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
 
   return {
     ownedVoiceViews,
-    lockedVoiceViews,
     downloadGroups,
     hasTuttiDownload,
     hasAccompanimentDownload,

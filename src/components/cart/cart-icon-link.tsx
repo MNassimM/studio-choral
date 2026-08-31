@@ -56,7 +56,12 @@ function CartIconLink() {
       </PreviewCard.Trigger>
 
       <PreviewCard.Portal>
-        <PreviewCard.Positioner side="bottom" align="end" sideOffset={8} className="z-100">
+        <PreviewCard.Positioner
+          side="bottom"
+          align="end"
+          sideOffset={8}
+          className="z-100"
+        >
           <PreviewCard.Popup className="z-50 flex w-96 flex-col rounded-md border border-border bg-popover p-4 text-popover-foreground shadow-lg transition-opacity duration-150 data-closed:opacity-0 data-open:opacity-100">
             <CartPanelContent onClose={closeHoverPanel} />
           </PreviewCard.Popup>

@@ -141,6 +141,11 @@ const labels = new Map<string, string>();
 export type CartPanelMode = "hover" | "add" | null;
 
 /**
+ * Un produit à ajouter, avec le libellé affiché en attendant le serveur.
+ */
+export type AddInput = CartItemInput & { name?: string };
+
+/**
  * Ce que le fournisseur met à disposition des composants.
  */
 export type CartContextValue = {
@@ -152,6 +157,8 @@ export type CartContextValue = {
   isHydrated: boolean;
   /** Ajoute un produit au panier, ou demande confirmation s'il en couvre d'autres. */
   add: (input: CartItemInput, label?: string) => void;
+  /** Ajoute plusieurs produits en une seule fois. */
+  addMany: (inputs: AddInput[]) => void;
   /** Retire un produit du panier. */
   remove: (sku: string) => void;
   /** Vide le panier. */
@@ -215,8 +222,7 @@ function CartProvider({ children }: { children: React.ReactNode }) {
   const [isAddOpen, setAddOpen] = useState(false);
   const [isHoverRequested, setHoverRequested] = useState(false);
   const [pending, setPending] = useState<{
-    input: CartItemInput;
-    label?: string;
+    inputs: AddInput[];
     covered: CartItem[];
   } | null>(null);
   const [replacedItems, setReplacedItems] = useState<CartItem[]>([]);
@@ -254,38 +260,67 @@ function CartProvider({ children }: { children: React.ReactNode }) {
   const isResolving = skuKey.length > 0 && resolution?.key !== skuKey;
 
   /**
-   * Ajoute un produit et ouvre le tiroir.
+   * Ajoute les produits en une seule fois et ouvre le panneau.
    *
-   * @param input - Produit à ajouter.
-   * @param label - Libellé affiché avant la réponse du serveur.
+   * @param inputs - Produits à ajouter.
    * @returns Rien.
    */
-  const commitAdd = useCallback((input: CartItemInput, label?: string) => {
-    if (label) labels.set(input.sku, label);
-    mutate((current) => replaceInCart(current, input, Date.now()));
-    setLastAddedSku(input.sku);
+  const commitAdd = useCallback((inputs: AddInput[]) => {
+    if (inputs.length === 0) return;
+
+    for (const input of inputs) {
+      if (input.name) labels.set(input.sku, input.name);
+    }
+    const addedAt = Date.now();
+    // Un seul mutate, donc une seule écriture et une seule ouverture.
+    mutate((current) =>
+      inputs.reduce(
+        (items, input) => replaceInCart(items, input, addedAt),
+        current,
+      ),
+    );
+    setLastAddedSku(inputs[inputs.length - 1].sku);
     setHoverRequested(false);
     setAddOpen(true);
   }, []);
 
-  const add = useCallback(
-    (input: CartItemInput, label?: string) => {
-      const covered = findCoveredItems(snapshot.items, input);
-      if (covered.length === 0) {
-        commitAdd(input, label);
+  const addMany = useCallback(
+    (inputs: AddInput[]) => {
+      // On réunit tout ce qui serait remplacé pour n'ouvrir qu'une modale.
+      const covered = new Map<string, CartItem>();
+      for (const input of inputs) {
+        for (const item of findCoveredItems(snapshot.items, input)) {
+          covered.set(item.sku, item);
+        }
+      }
+      const remplaces = [...covered.values()].filter(
+        (item) => !inputs.some((input) => input.sku === item.sku),
+      );
+
+      if (remplaces.length === 0) {
+        commitAdd(inputs);
         return;
       }
-      if (label) labels.set(input.sku, label);
+      for (const input of inputs) {
+        if (input.name) labels.set(input.sku, input.name);
+      }
       setHoverRequested(false);
-      setReplacedItems(covered);
-      setPending({ input, label, covered });
+      setReplacedItems(remplaces);
+      setPending({ inputs, covered: remplaces });
     },
     [commitAdd],
   );
 
+  const add = useCallback(
+    (input: CartItemInput, label?: string) => {
+      addMany([{ ...input, name: label }]);
+    },
+    [addMany],
+  );
+
   const confirmReplacement = useCallback(() => {
     setPending((current) => {
-      if (current) commitAdd(current.input, current.label);
+      if (current) commitAdd(current.inputs);
       return null;
     });
   }, [commitAdd]);
@@ -337,6 +372,7 @@ function CartProvider({ children }: { children: React.ReactNode }) {
       count: items.length,
       isHydrated: hydrated,
       add,
+      addMany,
       remove,
       clear,
       has: (sku: string) => containsSku(items, sku),
@@ -369,6 +405,7 @@ function CartProvider({ children }: { children: React.ReactNode }) {
       items,
       hydrated,
       add,
+      addMany,
       remove,
       clear,
       lastAddedSku,
