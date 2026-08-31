@@ -28,13 +28,6 @@ export type CartItem = CartItemInput & {
 };
 
 /**
- * Une ligne de panier accompagnée de son état d'absorption.
- */
-export type CartLine = CartItem & {
-  absorbedBy: string | null;
-};
-
-/**
  * Forme du contenu écrit dans le stockage du navigateur.
  */
 export type StoredCart = {

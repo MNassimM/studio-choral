@@ -4,10 +4,11 @@ import assert from "node:assert/strict";
 import {
   addToCart,
   clearCart,
+  findCoveredItems,
   findOwnedItems,
   removeFromCart,
   removeOwnedItems,
-  resolveCartLines,
+  replaceInCart,
 } from "@/lib/cart/cart-rules";
 import { cartItemToGrant } from "@/lib/cart/cart-item";
 import type { CartItem, CartItemInput } from "@/lib/cart/types";
@@ -74,10 +75,8 @@ function grant(overrides: Partial<Grant>): Grant {
 }
 
 test("un panier vide ne contient aucune ligne", () => {
-  const lines = resolveCartLines([]);
-
-  assert.deepEqual(lines, []);
   assert.deepEqual(clearCart(), []);
+  assert.deepEqual(findCoveredItems([], altoKyrie), []);
 });
 
 test("un ajout simple place le produit dans le panier", () => {
@@ -105,44 +104,65 @@ test("ajouter deux fois le même produit ne fait rien", () => {
   assert.equal(twice, once);
 });
 
-test("un produit ajouté après un autre qu'il couvre le marque absorbé", () => {
-  const lines = resolveCartLines(cart(altoKyrie, toutesVoixKyrie));
+test("un produit large annonce les articles étroits qu'il remplacerait", () => {
+  const covered = findCoveredItems(cart(altoKyrie), toutesVoixKyrie);
 
-  assert.equal(lines.length, 2);
-  assert.equal(lines[0].absorbedBy, "MESSE-KYRIE-ALL");
-  assert.equal(lines[1].absorbedBy, null);
+  assert.equal(covered.length, 1);
+  assert.equal(covered[0].sku, "MESSE-KYRIE-ALTO");
 });
 
-test("un produit ajouté alors qu'un autre le couvre déjà est marqué absorbé", () => {
-  const lines = resolveCartLines(cart(toutesVoixKyrie, altoKyrie));
+test("un produit étroit ne remplacerait pas le produit large qui le couvre", () => {
+  const covered = findCoveredItems(cart(toutesVoixKyrie), altoKyrie);
 
-  assert.equal(lines.length, 2);
-  assert.equal(lines[0].absorbedBy, null);
-  assert.equal(lines[1].absorbedBy, "MESSE-KYRIE-ALL");
+  assert.deepEqual(covered, []);
 });
 
-test("une ligne absorbée reste dans le panier", () => {
-  const items = cart(altoKyrie, toutesVoixKyrie);
-
-  assert.equal(items.length, 2);
-  assert.ok(items.some((item) => item.sku === "MESSE-KYRIE-ALTO"));
-});
-
-test("le pack de l'œuvre entière absorbe toutes les lignes de cette œuvre", () => {
-  const lines = resolveCartLines(
-    cart(altoKyrie, toutesVoixKyrie, oeuvreComplete),
+test("le pack de l'œuvre entière remplacerait toutes les lignes de cette œuvre", () => {
+  const covered = findCoveredItems(
+    cart(altoKyrie, toutesVoixKyrie, autreOeuvre),
+    oeuvreComplete,
   );
 
-  assert.equal(lines[0].absorbedBy, "MESSE-KYRIE-ALL");
-  assert.equal(lines[1].absorbedBy, "MESSE-WORK-ALL");
-  assert.equal(lines[2].absorbedBy, null);
+  assert.deepEqual(
+    covered.map((item) => item.sku),
+    ["MESSE-KYRIE-ALTO", "MESSE-KYRIE-ALL"],
+  );
 });
 
-test("une autre œuvre n'absorbe jamais les lignes de la première", () => {
-  const lines = resolveCartLines(cart(altoKyrie, autreOeuvre));
+test("une autre œuvre ne remplacerait jamais les lignes de la première", () => {
+  const covered = findCoveredItems(cart(altoKyrie), autreOeuvre);
 
-  assert.equal(lines[0].absorbedBy, null);
-  assert.equal(lines[1].absorbedBy, null);
+  assert.deepEqual(covered, []);
+});
+
+test("le remplacement retire les couverts et ajoute le nouveau en une fois", () => {
+  const items = replaceInCart(
+    cart(altoKyrie, autreOeuvre),
+    toutesVoixKyrie,
+    3000,
+  );
+
+  assert.deepEqual(
+    items.map((item) => item.sku),
+    ["MILLE-WORK-ALL", "MESSE-KYRIE-ALL"],
+  );
+  assert.equal(items[1].addedAt, 3000);
+});
+
+test("un remplacement sans rien à couvrir se comporte comme un ajout", () => {
+  const items = replaceInCart(cart(autreOeuvre), altoKyrie, 3000);
+
+  assert.deepEqual(
+    items.map((item) => item.sku),
+    ["MILLE-WORK-ALL", "MESSE-KYRIE-ALTO"],
+  );
+});
+
+test("remplacer par un produit déjà présent laisse le panier intact", () => {
+  const before = cart(altoKyrie);
+  const after = replaceInCart(before, altoKyrie, 3000);
+
+  assert.equal(after, before);
 });
 
 test("retirer une ligne la sort du panier", () => {

@@ -6,7 +6,7 @@ import {
   containsSku,
   createCartItem,
 } from "@/lib/cart/cart-item";
-import type { CartItem, CartItemInput, CartLine } from "@/lib/cart/types";
+import type { CartItem, CartItemInput } from "@/lib/cart/types";
 
 /**
  * Ajoute un produit au panier.
@@ -58,26 +58,47 @@ export function clearCart(): CartItem[] {
 }
 
 /**
- * Calcule l'état d'absorption de chaque ligne.
+ * Liste les articles du panier qu'un produit couvrirait entièrement.
  *
- * @param items - Lignes du panier.
- * @returns Les lignes, chacune accompagnée de la référence qui la couvre.
+ * @param items - Lignes actuelles du panier.
+ * @param input - Produit envisagé à l'ajout.
+ * @returns Les lignes que ce produit rendrait redondantes.
  */
-export function resolveCartLines(items: readonly CartItem[]): CartLine[] {
-  const grants = items.map(cartItemToGrant);
+export function findCoveredItems(
+  items: readonly CartItem[],
+  input: CartItemInput,
+): CartItem[] {
+  const candidate = cartItemToGrant(input);
+  return items.filter(
+    (item) =>
+      item.sku !== input.sku && absorbs(candidate, cartItemToGrant(item)),
+  );
+}
 
-  return items.map((item, index) => {
-    for (let other = 0; other < items.length; other += 1) {
-      if (other === index) continue;
-      if (!absorbs(grants[other], grants[index])) continue;
+/**
+ * Remplace les articles couverts par le produit qui les couvre.
+ *
+ * @param items - Lignes actuelles du panier.
+ * @param input - Produit à ajouter, référence et coordonnées d'accès.
+ * @param addedAt - Horodatage de l'ajout, en millisecondes.
+ * @returns Les lignes du panier après remplacement.
+ */
+export function replaceInCart(
+  items: readonly CartItem[],
+  input: CartItemInput,
+  addedAt: number,
+): CartItem[] {
+  if (containsSku(items, input.sku)) {
+    return items as CartItem[];
+  }
 
-      const mutual = absorbs(grants[index], grants[other]);
-      if (!mutual || other < index) {
-        return { ...item, absorbedBy: items[other].sku };
-      }
-    }
-    return { ...item, absorbedBy: null };
-  });
+  const coveredSkus = new Set(
+    findCoveredItems(items, input).map((item) => item.sku),
+  );
+  return [
+    ...items.filter((item) => !coveredSkus.has(item.sku)),
+    createCartItem(input, addedAt),
+  ];
 }
 
 /**

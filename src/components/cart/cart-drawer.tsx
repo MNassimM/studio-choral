@@ -18,8 +18,15 @@ import { cn } from "@/lib/utils";
  */
 function CartDrawer() {
   const t = useTranslations("cart");
-  const { lines, count, lastAddedSku, labelOf, isDrawerOpen, setDrawerOpen } =
-    useCart();
+  const {
+    items,
+    count,
+    lastAddedSku,
+    labelOf,
+    isDrawerOpen,
+    setDrawerOpen,
+    triggerRef,
+  } = useCart();
 
   const lastAddedLabel = lastAddedSku ? labelOf(lastAddedSku) : null;
 
@@ -27,7 +34,10 @@ function CartDrawer() {
     <Dialog.Root modal open={isDrawerOpen} onOpenChange={setDrawerOpen}>
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-50 bg-foreground/40 backdrop-blur-[1px] transition-opacity duration-200 data-closed:opacity-0 data-open:opacity-100" />
-        <Dialog.Popup className="fixed inset-y-0 right-0 z-50 flex w-full max-w-sm flex-col border-l border-border bg-background shadow-xl transition-transform duration-200 data-closed:translate-x-full data-open:translate-x-0">
+        <Dialog.Popup
+          finalFocus={triggerRef}
+          className="fixed inset-y-0 right-0 z-50 flex w-full max-w-sm flex-col border-l border-border bg-background shadow-xl transition-transform duration-200 data-closed:translate-x-full data-open:translate-x-0"
+        >
           <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-4">
             <Dialog.Title className="flex items-center gap-2 text-base font-semibold">
               <ShoppingCart
@@ -65,7 +75,7 @@ function CartDrawer() {
                 {t("panel.summaryDescription", { count })}
               </Dialog.Description>
             ) : null}
-            <CartLineGroups lines={lines} showPrices showWorkTitle />
+            <CartLineGroups lines={items} showPrices showWorkTitle />
           </div>
 
           <div className="flex flex-col gap-2 border-t border-border px-5 py-4">

@@ -29,30 +29,47 @@ function AddToCartButton({
   coveredLabel: string;
   size?: "sm" | "default";
 }) {
-  const { add, has, isCovered, isHydrated } = useCart();
+  const {
+    add,
+    has,
+    isCovered,
+    itemsCoveredBy,
+    labelOf,
+    isHydrated,
+    triggerRef,
+  } = useCart();
+
   const alreadyInCart = isHydrated && has(offer.sku);
   const alreadyCovered = isHydrated && isCovered(offer);
-  const unavailable = alreadyInCart || alreadyCovered;
+  const blocked = alreadyInCart || alreadyCovered;
+
+  const waiting =
+    !blocked &&
+    isHydrated &&
+    itemsCoveredBy(offer).some((item) => labelOf(item.sku) === null);
+
+  const inert = blocked || waiting;
 
   return (
     <Button
       type="button"
       size={size}
-      aria-disabled={unavailable || undefined}
-      onClick={() => {
-        if (unavailable) return;
+      aria-disabled={inert || undefined}
+      onClick={(event) => {
+        if (inert) return;
+        triggerRef.current = event.currentTarget;
         add(offer, offer.name);
       }}
       className="mt-2 w-full rounded-full aria-disabled:cursor-default aria-disabled:bg-muted aria-disabled:text-muted-foreground aria-disabled:hover:bg-muted"
     >
-      {unavailable ? (
+      {blocked ? (
         <Check className="size-4" aria-hidden="true" />
       ) : (
         <ShoppingCart className="size-4" aria-hidden="true" />
       )}
       {alreadyCovered && !alreadyInCart ? coveredLabel : null}
       {alreadyInCart ? inCartLabel : null}
-      {unavailable ? null : label}
+      {blocked ? null : label}
     </Button>
   );
 }

@@ -35,11 +35,6 @@ function CartSummary({ size = "default" }: { size?: "sm" | "default" | "lg" }) {
         <span>{t("totalLabel")}</span>
         <span aria-live="polite">{total ?? t("totalPending")}</span>
       </div>
-      {resolved.absorbedCount > 0 ? (
-        <p className="text-xs text-muted-foreground">
-          {t("absorbedExcluded", { count: resolved.absorbedCount })}
-        </p>
-      ) : null}
       {resolved.unavailableCount > 0 ? (
         <p className="text-xs text-muted-foreground">
           {t("unavailableExcluded", { count: resolved.unavailableCount })}

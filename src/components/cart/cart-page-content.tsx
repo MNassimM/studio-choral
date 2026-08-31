@@ -248,11 +248,11 @@ function CartPageEmpty() {
 function CartPageContent({ titleClassName }: { titleClassName?: string }) {
   const t = useTranslations("cart.page");
   const tDrawer = useTranslations("cart.drawer");
-  const { lines, count, isHydrated, resolvedBySku } = useCart();
+  const { items, count, isHydrated, resolvedBySku } = useCart();
 
   const groups = useMemo(
-    () => groupCartLines(lines, resolvedBySku),
-    [lines, resolvedBySku],
+    () => groupCartLines(items, resolvedBySku),
+    [items, resolvedBySku],
   );
 
   if (!isHydrated) {

@@ -3,8 +3,6 @@
     "unknownItem": "Article du panier",
     "unavailableItem": "Article indisponible",
     "unavailableNotice": "Cet article n'est plus proposé. Retirez le pour continuer.",
-    "absorbedNotice": "Déjà inclus dans un autre article de votre panier.",
-    "absorbedPriceNotice": "Non facturé, déjà inclus dans un autre article.",
     "discountBadge": "-{percent} %",
     "discountAnnouncement": "Remise de {percent} pour cent, prix ramené de {original} à {discounted}.",
     "removeAriaLabel": "Retirer {item} du panier",
@@ -18,7 +16,6 @@
     "totalLabel": "Total",
     "totalPending": "Calcul en cours",
     "totalNotice": "Le total sera recalculé au moment du paiement.",
-    "absorbedExcluded": "{count, plural, one {# article déjà inclus, non facturé.} other {# articles déjà inclus, non facturés.}}",
     "unavailableExcluded": "{count, plural, one {# article indisponible, non facturé.} other {# articles indisponibles, non facturés.}}",
     "viewCart": "Voir le panier"
   },
@@ -46,5 +43,13 @@
     "trustAudioQuality": "Audio haute qualité",
     "libraryNotice": "Après votre achat, retrouvez vos pistes dans votre bibliothèque.",
     "libraryLink": "En savoir plus"
+  },
+  "replace": {
+    "title": "Cet article en remplace d'autres",
+    "body": "{count, plural, one {Cet ajout remplacera l'article suivant, déjà couvert par votre sélection.} other {Cet ajout remplacera les # articles suivants, déjà couverts par votre sélection.}}",
+    "closeAriaLabel": "Fermer la confirmation",
+    "confirm": "{count, plural, one {Remplacer l'article} other {Remplacer les # articles}}",
+    "cancel": "Annuler",
+    "notice": "Les articles remplacés sont retirés du panier. Vous pourrez les rajouter plus tard."
   }
 }

@@ -44,8 +44,6 @@ export type PricedCartLine = {
   discount: AllVoicesDiscount | null;
   /** Montant réellement compté dans le total, en centimes. */
   payableCents: number;
-  /** Référence de l'article qui absorbe celui ci, ou null. */
-  absorbedBy: string | null;
   /** Vrai lorsque le produit n'existe plus ou n'est plus actif. */
   unavailable: boolean;
 };
@@ -59,8 +57,6 @@ export type PricedCart = {
   totalCents: number;
   /** Devise du total, nulle quand aucune ligne n'est facturable. */
   currency: string | null;
-  /** Nombre de lignes exclues du total parce qu'absorbées. */
-  absorbedCount: number;
   /** Nombre de lignes exclues du total parce qu'indisponibles. */
   unavailableCount: number;
 };
@@ -138,8 +134,8 @@ export function unionOfCoveredCells(
  * Ce que la tarification du panier attend en entrée.
  */
 export type PriceCartParams = {
-  /** Lignes du panier, chacune accompagnée de son état d'absorption. */
-  lines: { sku: string; absorbedBy: string | null }[];
+  /** Références des articles du panier, dans leur ordre d'ajout. */
+  skus: string[];
   /** Produits du catalogue correspondant aux références présentes. */
   products: Map<string, PricedProduct>;
   /** Disposition de chaque oeuvre concernée. */
@@ -159,30 +155,27 @@ export type PriceCartParams = {
  * @returns Les lignes tarifées et le total facturable.
  */
 export function priceCart({
-  lines,
+  skus,
   products,
   layouts,
   grants,
 }: PriceCartParams): PricedCart {
-  // Seules les lignes facturables couvrent du contenu pour les autres. Une
-  // ligne absorbée ou indisponible ne remise donc rien.
-  const billableCoordinates = lines
-    .filter((line) => line.absorbedBy === null)
-    .map((line) => products.get(line.sku))
+  // Une ligne indisponible ne couvre rien, donc ne remise aucune autre ligne.
+  const billableCoordinates = skus
+    .map((sku) => products.get(sku))
     .filter((product): product is PricedProduct => product !== undefined);
 
-  const pricedLines: PricedCartLine[] = lines.map((line) => {
-    const product = products.get(line.sku);
+  const pricedLines: PricedCartLine[] = skus.map((sku) => {
+    const product = products.get(sku);
 
     if (!product) {
       return {
-        sku: line.sku,
+        sku,
         name: null,
         priceCents: null,
         currency: null,
         discount: null,
         payableCents: 0,
-        absorbedBy: line.absorbedBy,
         unavailable: true,
       };
     }
@@ -192,13 +185,8 @@ export function priceCart({
       name: product.name,
       priceCents: product.priceCents,
       currency: product.currency,
-      absorbedBy: line.absorbedBy,
       unavailable: false,
     };
-
-    if (line.absorbedBy !== null) {
-      return { ...base, discount: null, payableCents: 0 };
-    }
 
     const layout = layouts.get(product.workId);
     if (product.coverage !== "ALL_VOICES" || !layout) {
@@ -232,7 +220,6 @@ export function priceCart({
 
   let totalCents = 0;
   let currency: string | null = null;
-  let absorbedCount = 0;
   let unavailableCount = 0;
 
   for (const line of pricedLines) {
@@ -240,19 +227,9 @@ export function priceCart({
       unavailableCount += 1;
       continue;
     }
-    if (line.absorbedBy !== null) {
-      absorbedCount += 1;
-      continue;
-    }
     totalCents += line.payableCents;
     currency ??= line.currency;
   }
 
-  return {
-    lines: pricedLines,
-    totalCents,
-    currency,
-    absorbedCount,
-    unavailableCount,
-  };
+  return { lines: pricedLines, totalCents, currency, unavailableCount };
 }

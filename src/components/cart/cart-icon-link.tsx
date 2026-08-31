@@ -36,7 +36,7 @@ const PREVIEW_CLOSE_DELAY = 100000;
 function CartIconLink() {
   const t = useTranslations("cart.panel");
   const label = useCartLinkLabel();
-  const { lines, count, isPreviewOpen, setPreviewOpen } = useCart();
+  const { items, count, isPreviewOpen, setPreviewOpen } = useCart();
 
   return (
     <PreviewCard.Root open={isPreviewOpen} onOpenChange={setPreviewOpen}>
@@ -79,7 +79,7 @@ function CartIconLink() {
 
             <div className="max-h-64 pr-2 scrollbar-thumb-primary scrollbar-track-background overflow-auto">
               <CartLineGroups
-                lines={lines}
+                lines={items}
                 density="compact"
                 removable={false}
                 showPrices

@@ -1,5 +1,5 @@
 import type { ResolvedCartLine } from "@/lib/cart/resolved-cart";
-import type { CartLine } from "@/lib/cart/types";
+import type { CartItem } from "@/lib/cart/types";
 
 /**
  * Un sous groupe de lignes, correspondant à un mouvement ou à l'oeuvre entière.
@@ -8,7 +8,7 @@ export type CartMovementGroup = {
   /** Nul lorsque les lignes portent sur l'oeuvre entière. */
   movementId: string | null;
   movementTitle: string | null;
-  lines: CartLine[];
+  lines: CartItem[];
 };
 
 /**
@@ -33,7 +33,7 @@ export type CartWorkGroup = {
  * @returns Les groupes prêts à être rendus.
  */
 export function groupCartLines(
-  lines: CartLine[],
+  lines: CartItem[],
   resolvedBySku: Map<string, ResolvedCartLine>,
 ): CartWorkGroup[] {
   const byWork = new Map<string, CartWorkGroup>();

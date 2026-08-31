@@ -21,10 +21,10 @@ import {
 import { absorbs } from "@/lib/access/grants";
 import { cartItemToGrant, containsSku } from "@/lib/cart/cart-item";
 import {
-  addToCart,
   clearCart,
+  findCoveredItems,
   removeFromCart,
-  resolveCartLines,
+  replaceInCart,
 } from "@/lib/cart/cart-rules";
 import { parseCart } from "@/lib/cart/cart-serialization";
 import {
@@ -32,7 +32,7 @@ import {
   readStoredCart,
   writeStoredCart,
 } from "@/lib/cart/cart-storage";
-import type { CartItem, CartItemInput, CartLine } from "@/lib/cart/types";
+import type { CartItem, CartItemInput } from "@/lib/cart/types";
 
 /**
  * Snapshot du panier partagé par tous les listeners.
@@ -138,13 +138,11 @@ const labels = new Map<string, string>();
 export type CartContextValue = {
   /** Lignes du panier, dans leur ordre d'ajout. */
   items: CartItem[];
-  /** Les mêmes lignes, chacune accompagnée de son état d'absorption. */
-  lines: CartLine[];
-  /** Nombre de lignes du panier, absorbées comprises. */
+  /** Nombre de lignes du panier. */
   count: number;
   /** Faux tant que le panier conservé n'a pas été relu. */
   isHydrated: boolean;
-  /** Ajoute un produit au panier, puis ouvre le tiroir. */
+  /** Ajoute un produit au panier, ou demande confirmation s'il en couvre d'autres. */
   add: (input: CartItemInput, label?: string) => void;
   /** Retire un produit du panier. */
   remove: (sku: string) => void;
@@ -154,6 +152,8 @@ export type CartContextValue = {
   has: (sku: string) => boolean;
   /** Indique si un article du panier couvre déjà ce produit. */
   isCovered: (input: CartItemInput) => boolean;
+  /** Rend les articles du panier que ce produit remplacerait. */
+  itemsCoveredBy: (input: CartItemInput) => CartItem[];
   /** Rend le libellé connu d'une référence, ou null. */
   labelOf: (sku: string) => string | null;
   /** Panier résolu par le serveur, noms et prix compris. */
@@ -170,6 +170,16 @@ export type CartContextValue = {
   isDrawerOpen: boolean;
   /** Ouvre ou ferme le tiroir. */
   setDrawerOpen: (open: boolean) => void;
+  /** Articles que l'ajout en attente remplacerait, vide hors confirmation. */
+  replacedItems: CartItem[];
+  /** Vrai lorsque la confirmation de remplacement est ouverte. */
+  isReplaceOpen: boolean;
+  /** Confirme le remplacement, retire les couverts et ajoute le produit. */
+  confirmReplacement: () => void;
+  /** Abandonne le remplacement sans rien changer au panier. */
+  cancelReplacement: () => void;
+  /** Élément à refocaliser à la fermeture des dialogues. */
+  triggerRef: React.RefObject<HTMLElement | null>;
   /** Vrai lorsque l'aperçu au survol est ouvert. */
   isPreviewOpen: boolean;
   /** Demande l'ouverture ou la fermeture de l'aperçu au survol. */
@@ -196,6 +206,13 @@ function CartProvider({ children }: { children: React.ReactNode }) {
   const [lastAddedSku, setLastAddedSku] = useState<string | null>(null);
   const [isDrawerOpen, setDrawerOpen] = useState(false);
   const [isPreviewRequested, setPreviewOpen] = useState(false);
+  const [pending, setPending] = useState<{
+    input: CartItemInput;
+    label?: string;
+    covered: CartItem[];
+  } | null>(null);
+  const [replacedItems, setReplacedItems] = useState<CartItem[]>([]);
+  const triggerRef = useRef<HTMLElement | null>(null);
   const [resolution, setResolution] = useState<{
     key: string;
     cart: ResolvedCart;
@@ -222,20 +239,51 @@ function CartProvider({ children }: { children: React.ReactNode }) {
       });
   }, [hydrated, skuKey]);
 
-  // Tant que la résolution en cours ne porte pas sur le panier courant, on
-  // n'expose aucun prix plutôt qu'un prix périmé.
   const resolved =
     resolution && resolution.key === skuKey
       ? resolution.cart
       : EMPTY_RESOLVED_CART;
   const isResolving = skuKey.length > 0 && resolution?.key !== skuKey;
 
-  const add = useCallback((input: CartItemInput, label?: string) => {
+  /**
+   * Ajoute un produit et ouvre le tiroir.
+   *
+   * @param input - Produit à ajouter.
+   * @param label - Libellé affiché avant la réponse du serveur.
+   * @returns Rien.
+   */
+  const commitAdd = useCallback((input: CartItemInput, label?: string) => {
     if (label) labels.set(input.sku, label);
-    mutate((current) => addToCart(current, input, Date.now()));
+    mutate((current) => replaceInCart(current, input, Date.now()));
     setLastAddedSku(input.sku);
     setPreviewOpen(false);
     setDrawerOpen(true);
+  }, []);
+
+  const add = useCallback(
+    (input: CartItemInput, label?: string) => {
+      const covered = findCoveredItems(snapshot.items, input);
+      if (covered.length === 0) {
+        commitAdd(input, label);
+        return;
+      }
+      if (label) labels.set(input.sku, label);
+      setPreviewOpen(false);
+      setReplacedItems(covered);
+      setPending({ input, label, covered });
+    },
+    [commitAdd],
+  );
+
+  const confirmReplacement = useCallback(() => {
+    setPending((current) => {
+      if (current) commitAdd(current.input, current.label);
+      return null;
+    });
+  }, [commitAdd]);
+
+  const cancelReplacement = useCallback(() => {
+    setPending(null);
   }, []);
 
   const remove = useCallback((sku: string) => {
@@ -254,7 +302,6 @@ function CartProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<CartContextValue>(
     () => ({
       items,
-      lines: resolveCartLines(items),
       count: items.length,
       isHydrated: hydrated,
       add,
@@ -268,6 +315,7 @@ function CartProvider({ children }: { children: React.ReactNode }) {
             item.sku !== input.sku && absorbs(cartItemToGrant(item), candidate),
         );
       },
+      itemsCoveredBy: (input: CartItemInput) => findCoveredItems(items, input),
       labelOf: (sku: string) =>
         resolvedBySku.get(sku)?.name ?? labels.get(sku) ?? null,
       resolved,
@@ -277,6 +325,11 @@ function CartProvider({ children }: { children: React.ReactNode }) {
       lastAddedSku,
       isDrawerOpen,
       setDrawerOpen,
+      replacedItems,
+      isReplaceOpen: pending !== null && !isDrawerOpen,
+      confirmReplacement,
+      cancelReplacement,
+      triggerRef,
       isPreviewOpen: isPreviewRequested && !isDrawerOpen && items.length > 0,
       setPreviewOpen,
     }),
@@ -292,6 +345,10 @@ function CartProvider({ children }: { children: React.ReactNode }) {
       resolved,
       resolvedBySku,
       isResolving,
+      pending,
+      replacedItems,
+      confirmReplacement,
+      cancelReplacement,
     ],
   );
 

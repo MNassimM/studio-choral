@@ -9,6 +9,7 @@ import "../globals.css";
 import { Header } from "@/components/layout/header";
 import { CartDrawer } from "@/components/cart/cart-drawer";
 import { CartProvider } from "@/components/cart/cart-provider";
+import { CartReplaceDialog } from "@/components/cart/cart-replace-dialog";
 import { Footer } from "@/components/layout/footer";
 import { routing } from "@/i18n/routing";
 import { DynamicRouteAlternatesProvider } from "@/components/layout/dynamic-route-alternates";
@@ -81,6 +82,7 @@ export default async function RootLayout({
               <main className="flex-1">{children}</main>
               <Footer />
               <CartDrawer />
+              <CartReplaceDialog />
             </CartProvider>
           </DynamicRouteAlternatesProvider>
         </NextIntlClientProvider>

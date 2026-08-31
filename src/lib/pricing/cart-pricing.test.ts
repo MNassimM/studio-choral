@@ -115,7 +115,7 @@ test("l'union ne compte pas deux fois une cellule couverte par deux sources", ()
 test("sans droit ni autre article, le pack est au prix catalogue", () => {
   const pack = product({ sku: "pack" });
   const result = priceCart({
-    lines: [{ sku: "pack", absorbedBy: null }],
+    skus: ["pack"],
     products: catalogue(pack),
     layouts: LAYOUTS,
     grants: [],
@@ -151,11 +151,7 @@ test("la remise combine droits détenus et autres articles du panier, sans doubl
   ];
 
   const result = priceCart({
-    lines: [
-      { sku: "pack", absorbedBy: null },
-      { sku: "soprano", absorbedBy: null },
-      { sku: "m1-toutes", absorbedBy: null },
-    ],
+    skus: ["pack", "soprano", "m1-toutes"],
     products: catalogue(pack, soprano, m1),
     layouts: LAYOUTS,
     grants,
@@ -170,38 +166,10 @@ test("la remise combine droits détenus et autres articles du panier, sans doubl
   assert.equal(packLine?.payableCents, 1000);
 });
 
-test("une ligne absorbée ne coûte rien et ne remise pas les autres", () => {
-  const pack = product({ sku: "pack" });
-  const soprano = product({
-    sku: "soprano",
-    voiceCode: "S",
-    coverage: "SINGLE_VOICE",
-    priceCents: 1000,
-  });
-
-  const result = priceCart({
-    lines: [
-      { sku: "pack", absorbedBy: null },
-      { sku: "soprano", absorbedBy: "pack" },
-    ],
-    products: catalogue(pack, soprano),
-    layouts: LAYOUTS,
-    grants: [],
-  });
-
-  assert.equal(result.lines[1]?.payableCents, 0);
-  assert.equal(result.lines[0]?.discount, null);
-  assert.equal(result.totalCents, 4000);
-  assert.equal(result.absorbedCount, 1);
-});
-
 test("un article absent du catalogue est marqué indisponible et exclu du total", () => {
   const pack = product({ sku: "pack" });
   const result = priceCart({
-    lines: [
-      { sku: "pack", absorbedBy: null },
-      { sku: "disparu", absorbedBy: null },
-    ],
+    skus: ["pack", "disparu"],
     products: catalogue(pack),
     layouts: LAYOUTS,
     grants: [],
@@ -228,7 +196,7 @@ test("un pack entièrement couvert tombe à zéro sans passer sous zéro", () =>
   ];
 
   const result = priceCart({
-    lines: [{ sku: "pack", absorbedBy: null }],
+    skus: ["pack"],
     products: catalogue(pack),
     layouts: LAYOUTS,
     grants,
@@ -257,7 +225,7 @@ test("une voix seule ne reçoit jamais de remise", () => {
   ];
 
   const result = priceCart({
-    lines: [{ sku: "soprano", absorbedBy: null }],
+    skus: ["soprano"],
     products: catalogue(soprano),
     layouts: LAYOUTS,
     grants,

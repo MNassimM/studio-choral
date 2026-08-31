@@ -3,9 +3,9 @@ import assert from "node:assert/strict";
 
 import { groupCartLines } from "@/lib/cart/cart-grouping";
 import type { ResolvedCartLine } from "@/lib/cart/resolved-cart";
-import type { CartLine } from "@/lib/cart/types";
+import type { CartItem } from "@/lib/cart/types";
 
-function line(over: Partial<CartLine> & { sku: string }): CartLine {
+function line(over: Partial<CartItem> & { sku: string }): CartItem {
   return {
     workId: "w1",
     movementId: null,
@@ -13,7 +13,6 @@ function line(over: Partial<CartLine> & { sku: string }): CartLine {
     scope: "WORK",
     coverage: "ALL_VOICES",
     addedAt: 0,
-    absorbedBy: null,
     ...over,
   };
 }
@@ -34,7 +33,6 @@ function resolved(
     currency: "EUR",
     discount: null,
     payableCents: 1000,
-    absorbedBy: null,
     unavailable: false,
     ...over,
   };

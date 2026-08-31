@@ -37,7 +37,6 @@ export type ResolvedCartLine = {
   discount: ResolvedCartDiscount | null;
   /** Montant compté dans le total, en centimes. */
   payableCents: number;
-  absorbedBy: string | null;
   unavailable: boolean;
 };
 
@@ -48,7 +47,6 @@ export type ResolvedCart = {
   lines: ResolvedCartLine[];
   totalCents: number;
   currency: string | null;
-  absorbedCount: number;
   unavailableCount: number;
 };
 
@@ -59,6 +57,5 @@ export const EMPTY_RESOLVED_CART: ResolvedCart = {
   lines: [],
   totalCents: 0,
   currency: null,
-  absorbedCount: 0,
   unavailableCount: 0,
 };

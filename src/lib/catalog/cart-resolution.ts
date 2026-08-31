@@ -6,8 +6,6 @@ import { getCurrentUser } from "@/lib/auth/current-user";
 import { getUserGrants } from "@/lib/catalog/access-grants";
 import { buildWorkAccessInput } from "@/lib/catalog/work-access-input";
 import { prisma } from "@/lib/db/prisma";
-import { resolveCartLines } from "@/lib/cart/cart-rules";
-import type { CartItem } from "@/lib/cart/types";
 import {
   EMPTY_RESOLVED_CART,
   type ResolvedCart,
@@ -149,32 +147,8 @@ export async function resolveCart(
     voiceLabels.set(product.sku, label ?? t("product.allVoices"));
   }
 
-  // Les coordonnées servant à l'absorption viennent de la base, jamais du
-  // navigateur. Les références inconnues gardent leur place dans la liste.
-  const serverItems: CartItem[] = [];
-  for (const [index, sku] of skus.entries()) {
-    const product = pricedProducts.get(sku);
-    if (!product) continue;
-    serverItems.push({
-      sku,
-      workId: product.workId,
-      movementId: product.movementId,
-      voiceCode: product.voiceCode,
-      scope: product.scope,
-      coverage: product.coverage,
-      addedAt: index,
-    });
-  }
-
-  const absorbedBySku = new Map(
-    resolveCartLines(serverItems).map((line) => [line.sku, line.absorbedBy]),
-  );
-
   const priced = priceCart({
-    lines: skus.map((sku) => ({
-      sku,
-      absorbedBy: absorbedBySku.get(sku) ?? null,
-    })),
+    skus,
     products: pricedProducts,
     layouts,
     grants,
@@ -206,7 +180,6 @@ export async function resolveCart(
           }
         : null,
       payableCents: line.payableCents,
-      absorbedBy: line.absorbedBy,
       unavailable: line.unavailable,
     };
   });
@@ -215,7 +188,6 @@ export async function resolveCart(
     lines,
     totalCents: priced.totalCents,
     currency: priced.currency,
-    absorbedCount: priced.absorbedCount,
     unavailableCount: priced.unavailableCount,
   };
 }

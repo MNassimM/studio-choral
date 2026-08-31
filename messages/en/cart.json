@@ -3,8 +3,6 @@
     "unknownItem": "Cart item",
     "unavailableItem": "Unavailable item",
     "unavailableNotice": "This item is no longer offered. Remove it to continue.",
-    "absorbedNotice": "Already included in another item in your cart.",
-    "absorbedPriceNotice": "Not charged, already included in another item.",
     "discountBadge": "-{percent}%",
     "discountAnnouncement": "Discount of {percent} percent, price reduced from {original} to {discounted}.",
     "removeAriaLabel": "Remove {item} from the cart",
@@ -18,7 +16,6 @@
     "totalLabel": "Total",
     "totalPending": "Calculating",
     "totalNotice": "The total will be recalculated at checkout.",
-    "absorbedExcluded": "{count, plural, one {# item already included, not charged.} other {# items already included, not charged.}}",
     "unavailableExcluded": "{count, plural, one {# unavailable item, not charged.} other {# unavailable items, not charged.}}",
     "viewCart": "View cart"
   },
@@ -46,5 +43,13 @@
     "trustAudioQuality": "High quality audio",
     "libraryNotice": "After your purchase, find your tracks in your library.",
     "libraryLink": "Learn more"
+  },
+  "replace": {
+    "title": "This item replaces others",
+    "body": "{count, plural, one {Adding this will replace the following item, already covered by your selection.} other {Adding this will replace the following # items, already covered by your selection.}}",
+    "closeAriaLabel": "Close confirmation",
+    "confirm": "{count, plural, one {Replace the item} other {Replace the # items}}",
+    "cancel": "Cancel",
+    "notice": "Replaced items are removed from the cart. You can add them back later."
   }
 }

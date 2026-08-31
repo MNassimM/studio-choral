@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { groupCartLines } from "@/lib/cart/cart-grouping";
 import { cn } from "@/lib/utils";
 import type { ResolvedCartLine } from "@/lib/cart/resolved-cart";
-import type { CartLine } from "@/lib/cart/types";
+import type { CartItem } from "@/lib/cart/types";
 
 /**
  * Densité d'affichage des lignes du panier.
@@ -17,23 +17,17 @@ import type { CartLine } from "@/lib/cart/types";
 type CartLineDensity = "comfortable" | "compact";
 
 /**
- * Prix d'une ligne, dans l'un de ses trois états possibles.
- *
- * Le prix barré est retiré aux lecteurs d'écran, une phrase invisible portant
- * le prix réellement dû à sa place.
+ * Prix d'une ligne, remisé ou non.
  *
  * @param resolved - Ligne résolue par le serveur, ou null si elle ne l'est pas encore.
- * @param absorbed - Vrai lorsque la ligne est incluse dans une autre.
  * @param compact - Vrai pour la variante resserrée.
  * @returns Le prix rendu, ou null en l'absence de résolution.
  */
 function CartLinePrice({
   resolved,
-  absorbed,
   compact,
 }: {
   resolved: ResolvedCartLine | null;
-  absorbed: boolean;
   compact: boolean;
 }) {
   const t = useTranslations("cart.line");
@@ -45,17 +39,6 @@ function CartLinePrice({
 
   const currency = resolved.currency;
   const size = compact ? "text-xs" : "text-sm";
-
-  if (absorbed) {
-    return (
-      <span className={cn(size, "shrink-0 text-muted-foreground")}>
-        <span aria-hidden="true" className="line-through text-absorbed">
-          {formatPrice(resolved.priceCents, currency)}
-        </span>
-        <span className="sr-only">{t("absorbedPriceNotice")}</span>
-      </span>
-    );
-  }
 
   if (resolved.discount) {
     const { percentOff, originalCents, discountedCents } = resolved.discount;
@@ -95,10 +78,9 @@ function CartLinePrice({
  * Une ligne du panier, soit un pupitre acheté.
  *
  * Le mouvement n'est pas répété ici, il titre le groupe auquel la ligne
- * appartient. Le libellé barré est toujours accompagné d'une mention écrite,
- * afin que l'absorption ne repose pas sur le seul indice visuel.
+ * appartient.
  *
- * @param line - Ligne à afficher, état d'absorption compris.
+ * @param line - Ligne à afficher.
  * @param density - Densité d'affichage.
  * @param removable - Vrai pour proposer le retrait de la ligne.
  * @param showPrices - Vrai pour afficher les prix résolus par le serveur.
@@ -110,7 +92,7 @@ function CartLineItem({
   removable = true,
   showPrices = false,
 }: {
-  line: CartLine;
+  line: CartItem;
   density?: CartLineDensity;
   removable?: boolean;
   showPrices?: boolean;
@@ -118,7 +100,6 @@ function CartLineItem({
   const t = useTranslations("cart.line");
   const { labelOf, lineOf, remove } = useCart();
   const resolved = lineOf(line.sku);
-  const absorbed = line.absorbedBy !== null;
   const unavailable = resolved?.unavailable ?? false;
   const label = labelOf(line.sku) ?? t("unknownItem");
   const compact = density === "compact";
@@ -128,26 +109,16 @@ function CartLineItem({
     : (resolved?.voiceLabel ?? label);
 
   return (
-    <li
-      className={cn(
-        "flex items-center justify-between gap-3"
-      )}
-    >
+    <li className={cn("flex items-center justify-between gap-3")}>
       <div className="flex min-w-0 flex-col">
         <span
           className={cn(
             compact ? "text-xs" : "text-sm",
             "text-muted-foreground",
-            absorbed && "line-through text-absorbed",
           )}
         >
           {title}
         </span>
-        {absorbed ? (
-          <span className="text-xs pb-2 text-absorbed">
-            {t("absorbedNotice")}
-          </span>
-        ) : null}
         {unavailable ? (
           <span className="text-xs text-muted-foreground pb-2">
             {t("unavailableNotice")}
@@ -156,11 +127,7 @@ function CartLineItem({
       </div>
       <div className="flex shrink-0 items-center gap-2">
         {showPrices ? (
-          <CartLinePrice
-            resolved={resolved}
-            absorbed={absorbed}
-            compact={compact}
-          />
+          <CartLinePrice resolved={resolved} compact={compact} />
         ) : null}
         {removable ? (
           <Button
@@ -200,7 +167,7 @@ function CartLineList({
   showPrices = false,
   emptyMessage,
 }: {
-  lines: CartLine[];
+  lines: CartItem[];
   density?: CartLineDensity;
   removable?: boolean;
   showPrices?: boolean;
@@ -254,7 +221,7 @@ function CartLineGroups({
   emptyMessage,
   pageCart = false,
 }: {
-  lines: CartLine[];
+  lines: CartItem[];
   density?: CartLineDensity;
   removable?: boolean;
   showPrices?: boolean;
@@ -275,14 +242,23 @@ function CartLineGroups({
   }
 
   const groups = groupCartLines(lines, resolvedBySku);
-  const headingClass = cn("font-medium", "pb-1", compact ? "text-xs" : "text-sm");
+  const headingClass = cn(
+    "font-medium",
+    "pb-1",
+    compact ? "text-xs" : "text-sm",
+  );
 
   return (
     <div className="flex flex-col gap-4">
       {groups.map((work) => (
-        <div key={work.workId} className={cn("flex flex-col",
-          pageCart || "rounded-2xl border border-border bg-card/40 p-2 sm:p-3"
-        )}>
+        <div
+          key={work.workId}
+          className={cn(
+            "flex flex-col",
+            pageCart ||
+              "rounded-2xl border border-border bg-card/40 p-2 sm:p-3",
+          )}
+        >
           {showWorkTitle && work.workTitle ? (
             <p className={cn(headingClass, "mb-1")}>{work.workTitle}</p>
           ) : null}
