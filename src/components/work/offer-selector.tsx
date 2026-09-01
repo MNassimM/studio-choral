@@ -3,7 +3,7 @@
 import { Tabs } from "@base-ui/react/tabs";
 import { Tooltip } from "@base-ui/react/tooltip";
 import { useTranslations } from "next-intl";
-import { CircleHelp, ShoppingCart } from "lucide-react";
+import { CircleHelp, ShoppingCart, CircleCheck } from "lucide-react";
 import { useId, useMemo, useState } from "react";
 
 import { usePriceFormatter } from "@/components/cart/cart-price";
@@ -19,6 +19,15 @@ import type {
 } from "@/lib/works/work-page-view-model";
 
 /**
+ * Ce que chaque voix inclut, affiché en tête du tableau.
+ */
+const INCLUSION_KEYS = [
+  "extendAccessBulletPredominant",
+  "extendAccessBulletMix",
+  "extendAccessBulletTempo",
+] as const;
+
+/**
  * Une ligne du tableau, avec sa case et son prix.
  */
 function OfferRow({
@@ -32,22 +41,27 @@ function OfferRow({
 }) {
   const t = useTranslations("work.workPage");
   const tCard = useTranslations("work.card");
-  const { has } = useCart();
+  const { has, isCovered } = useCart();
 
   const inCart = has(offer.sku);
+  const covered = !inCart && isCovered(offer);
   const featured = offer.allVoices !== null;
   const labelId = useId();
 
-  if (offer.alreadyOwned) {
+  if (offer.alreadyOwned || covered) {
     return (
       <li className="flex items-center gap-3 px-3 py-2.5 opacity-60">
         <Checkbox checked disabled aria-labelledby={labelId} />
         <span id={labelId} className="flex flex-1 items-center gap-2 text-sm">
           {offer.voiceLabel ?? t("offersAllVoicesLabel")}
-          <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
-            {t("extendAccessAlreadyOwnedBadge")}
+          <span className={cn("rounded-full border", offer.alreadyOwned ? "border-border" : "border-primary/50", "px-2 py-0.5 text-xs text-muted-foreground")}>
+            {offer.alreadyOwned
+              ? t("extendAccessAlreadyOwnedBadge")
+              : tCard("coveredByCart")}
           </span>
-          <span className="sr-only">{t("offersOwnedReason")}</span>
+          <span className="sr-only">
+            {covered ? t("offersCoveredReason") : t("offersOwnedReason")}
+          </span>
         </span>
       </li>
     );
@@ -58,10 +72,12 @@ function OfferRow({
       className={cn(
         "flex items-start gap-3 px-3 py-2.5",
         featured && "rounded-lg border-l-2 border-primary bg-primary/10 py-3.5",
+        inCart && "opacity-60",
       )}
     >
       <Checkbox
         checked={checked}
+        disabled={inCart}
         onCheckedChange={onToggle}
         aria-labelledby={labelId}
         className="mt-0.5 cursor-pointer"
@@ -130,15 +146,18 @@ function OfferTable({ offers }: { offers: OwnedOfferView[] }) {
   const t = useTranslations("work.workPage");
   const tCard = useTranslations("work.card");
   const formatPrice = usePriceFormatter();
-  const { addMany, has, remove } = useCart();
+  const { addMany, has, isCovered, remove } = useCart();
   const [selected, setSelected] = useState<string[]>([]);
 
   const selectable = useMemo(
     () =>
       offers
-        .filter((offer) => !offer.alreadyOwned)
+        .filter(
+          (offer) =>
+            !offer.alreadyOwned && !has(offer.sku) && !isCovered(offer),
+        )
         .map((offer) => ({ sku: offer.sku, coverage: offer.coverage })),
-    [offers],
+    [offers, has, isCovered],
   );
 
   const chosen = keepSelectable(selected, selectable);
@@ -158,39 +177,51 @@ function OfferTable({ offers }: { offers: OwnedOfferView[] }) {
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="overflow-hidden rounded-xl border border-border">
-        <p className="border-b border-border bg-card/40 px-3 py-2 text-xs tracking-wide text-muted-foreground uppercase">
-          {t("offersInclusionsHeading")} · {t("extendAccessBulletPredominant")}{" "}
-          · {t("extendAccessBulletMix")} · {t("extendAccessBulletTempo")}
+    <div className="grid items-start gap-4 lg:grid-cols-[1fr_20rem]">
+      <div className="flex min-w-0 flex-col gap-3">
+        <div className="overflow-hidden rounded-xl border border-border">
+          <p className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-border bg-card/40 px-3 py-2 text-xs tracking-wide text-muted-foreground uppercase">
+            <span className="font-medium">{t("offersInclusionsHeading")}</span>
+            {INCLUSION_KEYS.map((key) => (
+              <span key={key} className="inline-flex items-center gap-1 text-[0.625rem]">
+                <CircleCheck
+                  className="size-3.5 shrink-0 text-primary"
+                  aria-hidden="true"
+                />
+                {t(key)}
+              </span>
+            ))}
+          </p>
+          <ul
+            role="group"
+            aria-label={t("offersGroupLabel")}
+            className="flex flex-col divide-y divide-border"
+          >
+            {offers.map((offer) => (
+              <OfferRow
+                key={offer.sku}
+                offer={offer}
+                checked={chosen.includes(offer.sku) || has(offer.sku)}
+                onToggle={() => {
+                  if (has(offer.sku)) {
+                    remove(offer.sku);
+                    return;
+                  }
+                  setSelected((current) =>
+                    toggleOffer(current, offer, selectable),
+                  );
+                }}
+              />
+            ))}
+          </ul>
+        </div>
+
+        <p className="text-xs text-muted-foreground">
+          {t("offersAutoUncheck")}
         </p>
-        <ul
-          role="group"
-          aria-label={t("offersGroupLabel")}
-          className="flex flex-col divide-y divide-border"
-        >
-          {offers.map((offer) => (
-            <OfferRow
-              key={offer.sku}
-              offer={offer}
-              checked={chosen.includes(offer.sku) || has(offer.sku)}
-              onToggle={() => {
-                if (has(offer.sku)) {
-                  remove(offer.sku);
-                  return;
-                }
-                setSelected((current) =>
-                  toggleOffer(current, offer, selectable),
-                );
-              }}
-            />
-          ))}
-        </ul>
       </div>
 
-      <p className="text-xs text-muted-foreground">{t("offersAutoUncheck")}</p>
-
-      <div className="flex flex-col gap-3 rounded-xl border border-border p-3">
+      <div className="flex flex-col gap-3 rounded-xl border border-border p-3 lg:sticky lg:top-24">
         <div className="flex items-baseline justify-between gap-3">
           <span className="text-sm text-muted-foreground" aria-live="polite">
             {t("offersSelectedCount", { count: chosen.length })}
@@ -236,72 +267,87 @@ function OfferSelector({
 }) {
   const t = useTranslations("work.workPage");
   const hasMovements = movementGroups.length > 0;
+  // Tabs.Panel garde le panneau precedent monte, on ne rend donc que l actif.
+  const [tab, setTab] = useState<"movement" | "work">(
+    hasMovements ? "movement" : "work",
+  );
 
   return (
-    <Tabs.Root defaultValue={hasMovements ? "movement" : "work"}>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <Tabs.List className="flex gap-2">
-          {hasMovements ? (
+    <Tabs.Root
+      value={tab}
+      onValueChange={(value) => setTab(value as "movement" | "work")}
+    >
+      {hasMovements ? (
+        <div className="flex flex-wrap items-center gap-3">
+          <Tabs.List className="flex gap-2">
             <Tabs.Tab
               value="movement"
               className="cursor-pointer rounded-lg border border-transparent px-3 py-1.5 text-sm aria-selected:border-primary/40 aria-selected:bg-primary/15 aria-selected:text-primary"
             >
               {t("offersScopeMovement")}
             </Tabs.Tab>
-          ) : null}
-          <Tabs.Tab
-            value="work"
-            className="cursor-pointer rounded-lg border border-transparent px-3 py-1.5 text-sm aria-selected:border-primary/40 aria-selected:bg-primary/15 aria-selected:text-primary"
-          >
-            {t("offersScopeWork")}
-          </Tabs.Tab>
-        </Tabs.List>
+            <Tabs.Tab
+              value="work"
+              className="cursor-pointer rounded-lg border border-transparent px-3 py-1.5 text-sm aria-selected:border-primary/40 aria-selected:bg-primary/15 aria-selected:text-primary"
+            >
+              {t("offersScopeWork")}
+            </Tabs.Tab>
+          </Tabs.List>
 
-        <Tooltip.Root>
-          <Tooltip.Trigger
-            render={
-              <button
-                type="button"
-                className="flex cursor-pointer items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-              />
-            }
-          >
-            <CircleHelp className="size-4" aria-hidden="true" />
-            {t("offersDifferenceLabel")}
-          </Tooltip.Trigger>
-          <Tooltip.Portal>
-            <Tooltip.Positioner side="bottom" align="end" sideOffset={8}>
-              <Tooltip.Popup className="z-50 flex max-w-xs flex-col gap-2 rounded-xl border border-border bg-popover p-3 text-xs text-popover-foreground shadow-lg">
-                <span>{t("offersDifferenceMovement")}</span>
-                <span>{t("offersDifferenceWork")}</span>
-              </Tooltip.Popup>
-            </Tooltip.Positioner>
-          </Tooltip.Portal>
-        </Tooltip.Root>
-      </div>
+          <Tooltip.Root>
+            <Tooltip.Trigger
+              render={
+                <button
+                  type="button"
+                  className="flex cursor-pointer items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+                />
+              }
+            >
+              <CircleHelp className="size-4" aria-hidden="true" />
+              {t("offersDifferenceLabel")}
+            </Tooltip.Trigger>
+            <Tooltip.Portal>
+              <Tooltip.Positioner side="bottom" align="end" sideOffset={8}>
+                <Tooltip.Popup className="z-50 flex max-w-xs flex-col gap-2 rounded-xl border border-border bg-popover p-3 text-xs text-popover-foreground shadow-lg">
+                  <span>{t("offersDifferenceMovement")}</span>
+                  <span>{t("offersDifferenceWork")}</span>
+                </Tooltip.Popup>
+              </Tooltip.Positioner>
+            </Tooltip.Portal>
+          </Tooltip.Root>
+        </div>
+      ) : null}
 
       {hasMovements ? (
-        <Tabs.Panel value="movement" className="mt-3 flex flex-col gap-4">
-          <p className="text-sm text-muted-foreground">
-            {t("offersScopeMovementHint")}
-          </p>
-          <MovementPanelSwitcher
-            selectorLabel={t("movementSelectorLabel")}
-            defaultMovementId={defaultMovementId}
-            movements={movementGroups.map((group) => ({
-              id: group.movementId,
-              label: group.movementTitle,
-              panel: <OfferTable offers={group.offers} />,
-            }))}
-          />
+        <Tabs.Panel value="movement" className="mt-3">
+          {tab === "movement" ? (
+            <div className="flex flex-col gap-4">
+              <p className="text-sm text-muted-foreground">
+                {t("offersScopeMovementHint")}
+              </p>
+              <MovementPanelSwitcher
+                selectorLabel={t("movementSelectorLabel")}
+                defaultMovementId={defaultMovementId}
+                movements={movementGroups.map((group) => ({
+                  id: group.movementId,
+                  label: group.movementTitle,
+                  panel: <OfferTable offers={group.offers} />,
+                }))}
+              />
+            </div>
+          ) : null}
         </Tabs.Panel>
       ) : null}
 
-      <Tabs.Panel value="work" className="mt-3 flex flex-col gap-4">
-        <p className="text-sm text-muted-foreground">
-          {t("offersScopeWorkHint")}
-        </p>
-        <OfferTable offers={workOffers} />
+      <Tabs.Panel value="work" className="mt-3">
+        {tab === "work" ? (
+          <div className="flex flex-col gap-4">
+            <p className="text-sm text-muted-foreground">
+              {t("offersScopeWorkHint")}
+            </p>
+            <OfferTable offers={workOffers} />
+          </div>
+        ) : null}
       </Tabs.Panel>
     </Tabs.Root>
   );

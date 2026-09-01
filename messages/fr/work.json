@@ -98,6 +98,7 @@
     "offersDifferenceLabel": "Quelle différence ?",
     "offersDifferenceMovement": "Par mouvement : vous achetez les voix d'un seul mouvement, celui qui vous intéresse.",
     "offersDifferenceWork": "Par oeuvre : vous achetez les voix choisies sur l'oeuvre entière, tous les mouvements compris.",
-    "extendAccessHeadingLead": "Choisissez la façon dont vous souhaitez accéder aux audios."
+    "extendAccessHeadingLead": "Choisissez la façon dont vous souhaitez accéder aux audios.",
+    "offersCoveredReason": "Ce pupitre est déjà inclus dans un article de votre panier."
   }
 }

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import {
   coveredCells,
+  measureCoverage,
   priceCart,
   unionOfCoveredCells,
   type PricedProduct,
@@ -233,4 +234,63 @@ test("une voix seule ne reçoit jamais de remise", () => {
 
   assert.equal(result.lines[0]?.discount, null);
   assert.equal(result.totalCents, 1000);
+});
+
+test("la mesure compte les cellules du produit et celles déjà couvertes", () => {
+  const pack = {
+    workId: "w",
+    movementId: null,
+    voiceCode: null,
+    scope: "WORK" as const,
+    coverage: "ALL_VOICES" as const,
+  };
+  const alto = {
+    workId: "w",
+    movementId: null,
+    voiceCode: "A",
+    scope: "WORK" as const,
+    coverage: "SINGLE_VOICE" as const,
+  };
+
+  assert.deepEqual(measureCoverage(pack, LAYOUTS, [alto]), {
+    ownedUnits: 2,
+    totalUnits: 8,
+  });
+});
+
+test("la mesure d'un mouvement ne compte que les cellules de ce mouvement", () => {
+  const packM1 = {
+    workId: "w",
+    movementId: "m1",
+    voiceCode: null,
+    scope: "MOVEMENT" as const,
+    coverage: "ALL_VOICES" as const,
+  };
+  const altoOeuvre = {
+    workId: "w",
+    movementId: null,
+    voiceCode: "A",
+    scope: "WORK" as const,
+    coverage: "SINGLE_VOICE" as const,
+  };
+
+  assert.deepEqual(measureCoverage(packM1, LAYOUTS, [altoOeuvre]), {
+    ownedUnits: 1,
+    totalUnits: 4,
+  });
+});
+
+test("une oeuvre inconnue ne mesure rien", () => {
+  const ailleurs = {
+    workId: "autre",
+    movementId: null,
+    voiceCode: null,
+    scope: "WORK" as const,
+    coverage: "ALL_VOICES" as const,
+  };
+
+  assert.deepEqual(measureCoverage(ailleurs, LAYOUTS, []), {
+    ownedUnits: 0,
+    totalUnits: 0,
+  });
 });

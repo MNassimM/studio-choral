@@ -308,6 +308,7 @@ export default async function WorkPage(
     hasSingleMovement,
   } = buildWorkPageViewModel({
     access,
+    layout: workAccessInput,
     workId,
     voices,
     movements: work.movements,
@@ -474,9 +475,11 @@ export default async function WorkPage(
                 <h2 className="text-xl font-semibold">
                   {tWorkPage("extendAccessHeading")}
                 </h2>
-                <p className="text-sm text-muted-foreground">
-                  {tWorkPage("extendAccessHeadingLead")}
-                </p>
+                {work.movements.length > 1 ? (
+                  <p className="text-sm text-muted-foreground">
+                    {tWorkPage("extendAccessHeadingLead")}
+                  </p>
+                ) :null}
               </div>
               <OfferSelector
                 movementGroups={hasSingleMovement ? [] : movementOfferGroups}

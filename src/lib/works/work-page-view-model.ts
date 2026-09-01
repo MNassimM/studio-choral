@@ -3,13 +3,19 @@ import type {
   AudioType,
   VoiceCoverage,
   WorkAccess,
+  WorkAccessInput,
 } from "@/types/domain";
 import { canDownload } from "@/lib/access/rules";
 import { productToGrant } from "@/lib/catalog/product-grant";
 import {
   computeAllVoicesDiscount,
   computeAllVoicesSaving,
+  type AllVoicesCoverage,
 } from "@/lib/pricing/all-voices-discount";
+import {
+  measureCoverage,
+  type CoverageCoordinates,
+} from "@/lib/pricing/cart-pricing";
 import type { CartItemInput } from "@/lib/cart/types";
 
 /**
@@ -130,6 +136,8 @@ export type ViewModelProduct = {
  */
 export type WorkPageViewModelParams<TProduct extends ViewModelProduct> = {
   access: WorkAccess;
+  /** Mouvements et pupitres de l'oeuvre, déjà dérivés des pistes audio. */
+  layout: WorkAccessInput;
   voices: ViewModelVoice[];
   movements: ViewModelMovement[];
   products: TProduct[];
@@ -173,6 +181,7 @@ export type WorkPageViewModel = {
  */
 export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
   access,
+  layout,
   voices,
   movements,
   products,
@@ -191,16 +200,29 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
     voices.map((voice, index) => [voice.code, index]),
   );
 
-  const voiceCodesByMovementId = new Map<string, string[]>();
-  for (const movement of movements) {
-    const codes = new Set<string>();
-    for (const track of movement.audioFiles) {
-      if (track.voiceId) {
-        const code = voiceCodeById.get(track.voiceId);
-        if (code) codes.add(code);
-      }
-    }
-    voiceCodesByMovementId.set(movement.id, Array.from(codes));
+  // La dérivation des pupitres vient de buildWorkAccessInput, on ne la refait pas.
+  const voiceCodesByMovementId = new Map(
+    layout.movements.map((movement) => [movement.id, movement.voiceCodes]),
+  );
+  const layouts = new Map([[layout.id, layout]]);
+
+  /**
+   * Traduit les pupitres possédés en coordonnées, pour mesurer la couverture.
+   *
+   * @returns Une coordonnée par pupitre possédé sur un mouvement.
+   */
+  function ownedCoordinates(): CoverageCoordinates[] {
+    return layout.movements.flatMap((movement) =>
+      (access.movements[movement.id]?.ownedVoiceCodes ?? []).map(
+        (voiceCode) => ({
+          workId: layout.id,
+          movementId: movement.id,
+          voiceCode,
+          scope: "MOVEMENT" as const,
+          coverage: "SINGLE_VOICE" as const,
+        }),
+      ),
+    );
   }
 
   /**
@@ -307,7 +329,7 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
    */
   function buildAllVoicesDiscountView(
     product: TProduct,
-    coverage: { ownedUnits: number; totalUnits: number },
+    coverage: AllVoicesCoverage,
   ): AllVoicesDiscountView | null {
     if (coverage.ownedUnits === 0 || coverage.totalUnits === 0) return null;
 
@@ -328,16 +350,18 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
    * @param movementId - Mouvement à mesurer.
    * @returns Les cellules possédées et le total du mouvement.
    */
-  function movementCoverage(movementId: string): {
-    ownedUnits: number;
-    totalUnits: number;
-  } {
-    const voiceCodes = voiceCodesByMovementId.get(movementId) ?? [];
-    const owned = access.movements[movementId]?.ownedVoiceCodes ?? [];
-    return {
-      totalUnits: voiceCodes.length,
-      ownedUnits: voiceCodes.filter((code) => owned.includes(code)).length,
-    };
+  function movementCoverage(movementId: string): AllVoicesCoverage {
+    return measureCoverage(
+      {
+        workId: layout.id,
+        movementId,
+        voiceCode: null,
+        scope: "MOVEMENT",
+        coverage: "ALL_VOICES",
+      },
+      layouts,
+      ownedCoordinates(),
+    );
   }
 
   /**
@@ -345,15 +369,18 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
    *
    * @returns Les cellules mouvement fois voix possédées, et le total.
    */
-  function workCoverage(): { ownedUnits: number; totalUnits: number } {
-    let ownedUnits = 0;
-    let totalUnits = 0;
-    for (const [movementId, voiceCodes] of voiceCodesByMovementId) {
-      totalUnits += voiceCodes.length;
-      const owned = access.movements[movementId]?.ownedVoiceCodes ?? [];
-      ownedUnits += voiceCodes.filter((code) => owned.includes(code)).length;
-    }
-    return { ownedUnits, totalUnits };
+  function workCoverage(): AllVoicesCoverage {
+    return measureCoverage(
+      {
+        workId: layout.id,
+        movementId: null,
+        voiceCode: null,
+        scope: "WORK",
+        coverage: "ALL_VOICES",
+      },
+      layouts,
+      ownedCoordinates(),
+    );
   }
 
   /**

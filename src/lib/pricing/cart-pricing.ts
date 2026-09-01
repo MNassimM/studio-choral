@@ -6,6 +6,7 @@ import type {
 } from "@/types/domain";
 import {
   computeAllVoicesDiscount,
+  type AllVoicesCoverage,
   type AllVoicesDiscount,
 } from "@/lib/pricing/all-voices-discount";
 
@@ -118,7 +119,7 @@ export function coveredCells(
  * @returns L'ensemble des cellules couvertes, sans doublon.
  */
 export function unionOfCoveredCells(
-  coordinatesList: CoverageCoordinates[],
+  coordinatesList: readonly CoverageCoordinates[],
   layouts: Map<string, WorkAccessInput>,
 ): Set<string> {
   const cells = new Set<string>();
@@ -128,6 +129,32 @@ export function unionOfCoveredCells(
     for (const cell of coveredCells(coordinates, layout)) cells.add(cell);
   }
   return cells;
+}
+
+/**
+ * Mesure la part d'un produit déjà couverte par d'autres coordonnées.
+ *
+ * @param product - Produit dont on mesure la couverture.
+ * @param layouts - Disposition de chaque oeuvre concernée.
+ * @param covering - Droits ou articles qui couvrent peut être ce produit.
+ * @returns Les cellules couvertes et le total du produit.
+ */
+export function measureCoverage(
+  product: CoverageCoordinates,
+  layouts: Map<string, WorkAccessInput>,
+  covering: readonly CoverageCoordinates[],
+): AllVoicesCoverage {
+  const layout = layouts.get(product.workId);
+  if (!layout) return { ownedUnits: 0, totalUnits: 0 };
+
+  const productCells = new Set(coveredCells(product, layout));
+  const alreadyCovered = unionOfCoveredCells(covering, layouts);
+
+  let ownedUnits = 0;
+  for (const cell of productCells) {
+    if (alreadyCovered.has(cell)) ownedUnits += 1;
+  }
+  return { ownedUnits, totalUnits: productCells.size };
 }
 
 /**
@@ -188,33 +215,20 @@ export function priceCart({
       unavailable: false,
     };
 
-    const layout = layouts.get(product.workId);
-    if (product.coverage !== "ALL_VOICES" || !layout) {
+    if (product.coverage !== "ALL_VOICES") {
       return { ...base, discount: null, payableCents: product.priceCents };
     }
 
-    const productCells = new Set(coveredCells(product, layout));
-    const alreadyCovered = unionOfCoveredCells(
-      [
-        ...grants,
-        ...billableCoordinates.filter((other) => other.sku !== product.sku),
-      ],
-      layouts,
-    );
+    const coverage = measureCoverage(product, layouts, [
+      ...grants,
+      ...billableCoordinates.filter((other) => other.sku !== product.sku),
+    ]);
 
-    let ownedUnits = 0;
-    for (const cell of productCells) {
-      if (alreadyCovered.has(cell)) ownedUnits += 1;
-    }
-
-    if (ownedUnits === 0 || productCells.size === 0) {
+    if (coverage.ownedUnits === 0 || coverage.totalUnits === 0) {
       return { ...base, discount: null, payableCents: product.priceCents };
     }
 
-    const discount = computeAllVoicesDiscount(
-      { ownedUnits, totalUnits: productCells.size },
-      product.priceCents,
-    );
+    const discount = computeAllVoicesDiscount(coverage, product.priceCents);
     return { ...base, discount, payableCents: discount.discountedCents };
   });
 
