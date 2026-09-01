@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 /**
- * Conteneur centré qui applique la largeur et les marges latérales du site.
+ * Conteneur centré qui applique la largeur et les marges sur le coté du site.
  *
  * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
  * @returns Le conteneur rendu.

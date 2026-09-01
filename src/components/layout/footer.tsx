@@ -92,8 +92,8 @@ function YoutubeIcon({ className }: { className?: string }) {
 }
 
 const socialLinks = [
-  { label: "Facebook", href: "#", Icon: FacebookIcon },
-  { label: "Instagram", href: "#", Icon: InstagramIcon },
+  { label: "Facebook", href: "https://www.facebook.com/people/Butterfly-Chœur-de-chambre/61579272361631/", Icon: FacebookIcon },
+  { label: "Instagram", href: "https://www.instagram.com/choeur.butterfly/", Icon: InstagramIcon },
   { label: "YouTube", href: "#", Icon: YoutubeIcon },
   {
     label: "Email",
@@ -169,6 +169,7 @@ async function Footer() {
                 <a
                   key={label}
                   href={href}
+                  target="_blank"
                   aria-label={label}
                   className="flex size-9 items-center justify-center rounded-full border border-border text-foreground/70 transition-colors hover:border-primary hover:text-primary"
                 >
