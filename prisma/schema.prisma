@@ -63,6 +63,8 @@ model Work {
   /// Formation vocale (SATB, SATB div., SSAA...), saisie à la main -
   /// jamais déduite des AudioFile. Voir src/lib/works/voicing.ts.
   voicing          String?
+  /// Vrai si chaque mouvement de l'oeuvre attend une piste d'accompagnement.
+  hasAccompaniment Boolean        @default(false) @map("has_accompaniment")
   /// Langue du texte CHANTÉ (code ISO 639-1 : "fr", "la", "de", "en", "it"...),
   /// sans AUCUN rapport avec la langue d'interface du site. Voir
   /// src/lib/works/languages.ts pour les libellés français.

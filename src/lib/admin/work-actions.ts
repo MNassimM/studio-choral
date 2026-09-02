@@ -5,7 +5,10 @@ import { Prisma } from "@/generated/prisma/client";
 import { MusicalPeriod } from "@/generated/prisma/enums";
 
 import { requireAdmin } from "@/lib/admin/authorization";
-import { workFormSchema, type WorkFormValues } from "@/lib/admin/work-form-schema";
+import {
+  workFormSchema,
+  type WorkFormValues,
+} from "@/lib/admin/work-form-schema";
 import { prisma } from "@/lib/db/prisma";
 
 /**
@@ -13,8 +16,7 @@ import { prisma } from "@/lib/db/prisma";
  */
 
 type ActionResult =
-  | { ok: true; workId: string }
-  | { ok: false; error: string; field?: string };
+  { ok: true; workId: string } | { ok: false; error: string; field?: string };
 
 /** Convertit un prix saisi en euros vers des centimes entiers. */
 function toCents(euros: number): number {
@@ -42,9 +44,9 @@ function uniqueSlugs(titles: string[]): string[] {
   });
 }
 
-/** 
- * Vérifie que la période saisie fait partie de l'enum Prisma. 
-*/
+/**
+ * Vérifie que la période saisie fait partie de l'enum Prisma.
+ */
 function toMusicalPeriod(value: string): MusicalPeriod | null {
   return value in MusicalPeriod ? (value as MusicalPeriod) : null;
 }
@@ -198,7 +200,11 @@ export async function createWork(input: WorkFormValues): Promise<ActionResult> {
 
   for (const slug of [data.slug, data.translations.en.slug]) {
     if (await isSlugTaken(slug)) {
-      return { ok: false, error: `Le slug ${slug} est déjà utilisé.`, field: "slug" };
+      return {
+        ok: false,
+        error: `Le slug ${slug} est déjà utilisé.`,
+        field: "slug",
+      };
     }
   }
 
@@ -289,7 +295,11 @@ export async function updateWork(
 
   for (const slug of [data.slug, data.translations.en.slug]) {
     if (await isSlugTaken(slug, workId)) {
-      return { ok: false, error: `Le slug ${slug} est déjà utilisé.`, field: "slug" };
+      return {
+        ok: false,
+        error: `Le slug ${slug} est déjà utilisé.`,
+        field: "slug",
+      };
     }
   }
 
@@ -396,35 +406,35 @@ export async function updateWork(
       // la référence suit le slug et change quand on renomme l'oeuvre.
       for (const row of rows) {
         const existing = await tx.product.findFirst({
-            where: {
+          where: {
             workId,
             movementId: row.movementId ?? null,
             voiceId: row.voiceId ?? null,
             coverage: row.coverage,
-            },
-            select: { id: true },
+          },
+          select: { id: true },
         });
 
         if (existing) {
-            await tx.product.update({
+          await tx.product.update({
             where: { id: existing.id },
             data: {
-                sku: row.sku,
-                name: row.name,
-                priceCents: row.priceCents,
-                position: row.position,
-                isActive: true,
+              sku: row.sku,
+              name: row.name,
+              priceCents: row.priceCents,
+              position: row.position,
+              isActive: true,
             },
-            });
+          });
         } else {
-            await tx.product.create({
+          await tx.product.create({
             data: {
-                ...row,
-                workId,
+              ...row,
+              workId,
             },
-            });
+          });
         }
-     }
+      }
     });
 
     revalidatePath("/admin/works");
