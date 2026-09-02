@@ -3,7 +3,7 @@
 import { Tabs } from "@base-ui/react/tabs";
 import { Tooltip } from "@base-ui/react/tooltip";
 import { useTranslations } from "next-intl";
-import { CircleHelp, ShoppingCart, CircleCheck } from "lucide-react";
+import { CircleHelp, ShoppingCart, CircleCheck, LockKeyhole } from "lucide-react";
 import { useId, useMemo, useState } from "react";
 
 import { usePriceFormatter } from "@/components/cart/cart-price";
@@ -51,7 +51,12 @@ function OfferRow({
   if (offer.alreadyOwned || covered) {
     return (
       <li className="flex items-center gap-3 px-3 py-2.5 opacity-60">
-        <Checkbox checked disabled aria-labelledby={labelId} />
+        {offer.alreadyOwned ? (
+          <LockKeyhole className="size-3.5 shrink-0" />
+        ):(
+          <Checkbox checked disabled aria-labelledby={labelId} />
+        )}
+        
         <span id={labelId} className="flex flex-1 items-center gap-2 text-sm">
           {offer.voiceLabel ?? t("offersAllVoicesLabel")}
           <span className={cn("rounded-full border", offer.alreadyOwned ? "border-border" : "border-primary/50", "px-2 py-0.5 text-xs text-muted-foreground")}>
@@ -71,7 +76,7 @@ function OfferRow({
     <li
       className={cn(
         "flex items-start gap-3 px-3 py-2.5",
-        featured && "rounded-lg border-l-2 border-primary bg-primary/10 py-3.5",
+        featured && "border-l-2 border-primary bg-primary/10 py-3.5",
         inCart && "opacity-60",
       )}
     >
@@ -80,7 +85,7 @@ function OfferRow({
         disabled={inCart}
         onCheckedChange={onToggle}
         aria-labelledby={labelId}
-        className="mt-0.5 cursor-pointer"
+        className={cn("mt-0.5 cursor-pointer", /*inCart && "data-checked:bg-chart-3! data-checked:border-chart-3!"*/)}
       />
       <span className="flex flex-1 flex-col gap-0.5">
         <span id={labelId} className="flex flex-wrap items-center gap-2">
@@ -214,35 +219,38 @@ function OfferTable({ offers }: { offers: OwnedOfferView[] }) {
               />
             ))}
           </ul>
+          <div className="flex flex-row justify-between gap-3 p-3">
+            <div className="flex items-baseline justify-between gap-3">
+              <span className="text-sm text-muted-foreground" aria-live="polite">
+                {t("offersSelectedCount", { count: chosen.length })}
+              </span>
+              <span className="text-lg font-semibold" aria-live="polite">
+                {formatPrice(totalCents, currency)}
+              </span>
+            </div>
+            <Button
+              type="button"
+              size="lg"
+              disabled={chosen.length === 0}
+              onClick={() => addMany(chosenOffers)}
+              className="cursor-pointer rounded-full"
+            >
+              <ShoppingCart className="size-4" aria-hidden="true" />
+              {tCard("addToCart")}
+            </Button>
+          </div>
         </div>
-
-        <p className="text-xs text-muted-foreground">
-          {t("offersAutoUncheck")}
-        </p>
+        <div className="flex justify-between gap-3 px-3">
+          <p className="text-xs text-muted-foreground">
+            {t("offersAutoUncheck")}
+          </p>
+          <p className="text-center text-xs text-muted-foreground">
+            {t("offersReassurance")}
+          </p>
+        </div>
       </div>
-
-      <div className="flex flex-col gap-3 rounded-xl border border-border p-3 lg:sticky lg:top-24">
-        <div className="flex items-baseline justify-between gap-3">
-          <span className="text-sm text-muted-foreground" aria-live="polite">
-            {t("offersSelectedCount", { count: chosen.length })}
-          </span>
-          <span className="text-lg font-semibold" aria-live="polite">
-            {formatPrice(totalCents, currency)}
-          </span>
-        </div>
-        <Button
-          type="button"
-          size="lg"
-          disabled={chosen.length === 0}
-          onClick={() => addMany(chosenOffers)}
-          className="w-full cursor-pointer rounded-full"
-        >
-          <ShoppingCart className="size-4" aria-hidden="true" />
-          {tCard("addToCart")}
-        </Button>
-        <p className="text-center text-xs text-muted-foreground">
-          {t("offersReassurance")}
-        </p>
+      <div className="flex w-full h-max border-t border-border bg-primary">
+        fsdfsd
       </div>
     </div>
   );
@@ -278,7 +286,7 @@ function OfferSelector({
       onValueChange={(value) => setTab(value as "movement" | "work")}
     >
       {hasMovements ? (
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3 mb-3">
           <Tabs.List className="flex gap-2">
             <Tabs.Tab
               value="movement"
@@ -319,7 +327,7 @@ function OfferSelector({
       ) : null}
 
       {hasMovements ? (
-        <Tabs.Panel value="movement" className="mt-3">
+        <Tabs.Panel value="movement">
           {tab === "movement" ? (
             <div className="flex flex-col gap-4">
               <p className="text-sm text-muted-foreground">
