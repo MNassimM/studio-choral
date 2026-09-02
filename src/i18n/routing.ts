@@ -51,6 +51,14 @@ export const routing = defineRouting({
       fr: "/bibliotheque",
       en: "/library",
     },
+    "/admin": {
+      fr: "/admin",
+      en: "/admin",
+    },
+    "/admin/works": {
+      fr: "/admin/oeuvres",
+      en: "/admin/works",
+    },
     "/a-propos": {
       fr: "/a-propos",
       en: "/about",

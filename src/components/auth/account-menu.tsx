@@ -18,9 +18,10 @@ import { cn } from "@/lib/utils";
  *
  * @param email - Adresse du compte connecté, affichée en tête du menu.
  * @param name - Nom du compte connecté, affiché dans le menu.
+ * @param admin - Indique si l'utilisateur est administrateur.
  * @returns Le menu rendu.
  */
-function AccountMenu({ name, email }: { name: string; email: string }) {
+function AccountMenu({ name, email, admin }: { name: string; email: string; admin: boolean }) {
   const t = useTranslations("auth.account");
   const tLinks = useTranslations("navigation");
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -73,6 +74,15 @@ function AccountMenu({ name, email }: { name: string; email: string }) {
             >
               {tLinks("footer.linkLibrary")}
             </Menu.Item>
+            
+            {admin && (
+            <Menu.Item
+              render={<Link href="/admin/works" />}
+              className="flex w-full items-center rounded-lg px-2.5 py-2 text-sm outline-none select-none data-highlighted:bg-accent"
+            >
+              Administration
+            </Menu.Item>
+            )}
 
             <div aria-hidden="true" className="my-1 h-px bg-border" />
             <Menu.Item

@@ -6,6 +6,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { cn } from "@/lib/utils";
+import { isAdmin } from "@/lib/admin/authorization";
 
 /**
  * Emplacement compte de l'en tête, dont le contenu dépend de la session.
@@ -21,7 +22,7 @@ async function AccountSlot({ compact = false }: { compact?: boolean }) {
   const user = await getCurrentUser();
 
   if (user) {
-    return <AccountMenu name={user.name || user.email} email={user.email} />;
+    return <AccountMenu name={user.name || user.email} email={user.email} admin={isAdmin(user)} />;
   }
 
   return (
