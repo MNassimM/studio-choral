@@ -68,6 +68,8 @@ a {
   --color-absorbed: var(--absorbed);
   --color-foreground: var(--foreground);
   --color-background: var(--background);
+  --color-public: var(--public);
+  --color-public-background: var(--public-background);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -97,6 +99,8 @@ a {
   --border: #e7dfcc;
   --input: #e7dfcc;
   --ring: #b8863e;
+  --public: #66BE9A;
+  --public-background: #2D4030;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -133,6 +137,8 @@ a {
   --border: #3a332b;
   --input: #3a332b;
   --ring: #d9a857;
+  --public: #66BE9A;
+  --public-background: #2D4030;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);

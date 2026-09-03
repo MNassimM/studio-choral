@@ -95,7 +95,7 @@ function StatusBadge({ published }: { published: boolean }) {
       variant="outline"
       className={cn(
         published
-          ? "border-border text-muted-foreground"
+          ? "border-public text-public bg-public-background"
           : "border-primary/50 text-primary",
       )}
     >
