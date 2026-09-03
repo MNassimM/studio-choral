@@ -55,7 +55,7 @@ export function emptyWorkFormDraft(): WorkFormDraft {
       en: { slug: "", title: null, shortDescription: null, description: null },
     },
     voiceCodes: [],
-    movements: [],
+    movements: [{ key: newMovementKey(), title: "" }],
     prices: {
       movementSingleVoice: null,
       movementAllVoices: null,

@@ -11,6 +11,7 @@ import {
 } from "react-hook-form";
 
 import { SectionAVenir } from "@/components/admin/work-form-fields";
+import { WorkMovementsSection } from "@/components/admin/work-form-movements";
 import { WorkMusicSection } from "@/components/admin/work-form-music";
 import { WorkPricesSection } from "@/components/admin/work-form-prices";
 import { WorkTextsSection } from "@/components/admin/work-form-texts";
@@ -64,10 +65,26 @@ export function WorkForm({
 
   const [erreurGlobale, setErreurGlobale] = useState<string | null>(null);
 
+  const [titreSuiviLOeuvre, setTitreSuiviLOeuvre] = useState(
+    !(
+      mode === "edit" &&
+      initialValues.movements.length === 1 &&
+      initialValues.movements[0].title !== initialValues.title
+    ),
+  );
+
   // Un slug cesse de suivre son titre dès que quelqu'un y touche, et en
   // modification il ne bouge jamais tout seul, sous peine de casser les liens.
   const slugFige = useRef(mode === "edit");
   const slugAnglaisFige = useRef(mode === "edit");
+
+  /** Réaligne le mouvement unique sur le titre de l'oeuvre. */
+  function reprendreLeTitre() {
+    setTitreSuiviLOeuvre(true);
+    form.setValue("movements.0.title", form.getValues("title"), {
+      shouldValidate: false,
+    });
+  }
 
   /** Recalcule les deux slugs tant qu'ils suivent encore leur titre. */
   function suivreLesTitres(titreFr: string, titreEn: string | null) {
@@ -84,6 +101,11 @@ export function WorkForm({
           shouldValidate: false,
         },
       );
+    }
+
+    // Un seul mouvement, il porte le titre de l'oeuvre.
+    if (titreSuiviLOeuvre && form.getValues("movements").length === 1) {
+      form.setValue("movements.0.title", titreFr, { shouldValidate: false });
     }
   }
 
@@ -171,10 +193,9 @@ export function WorkForm({
             <WorkMusicSection />
 
             {/* Emplacement de l'éditeur de mouvements, prompt suivant. */}
-            <SectionAVenir
-              title="Mouvements"
-              note="L'éditeur de mouvements arrive bientot !!!!"
-              error={form.formState.errors.movements?.message}
+            <WorkMovementsSection
+              titreSuiviLOeuvre={titreSuiviLOeuvre}
+              reprendreLeTitre={reprendreLeTitre}
             />
 
             {/* Emplacement de la matrice audio, prompt suivant. */}
