@@ -478,6 +478,35 @@ export async function publishWork(workId: string): Promise<ActionResult> {
 }
 
 /**
+ * Supprime une oeuvre, à condition que personne n'y ait jamais eu accès.
+ *
+ * @param workId - Oeuvre à supprimer.
+ * @returns L'identifiant de l'oeuvre, ou la raison du refus.
+ */
+export async function deleteWork(workId: string): Promise<ActionResult> {
+  await requireAdmin();
+
+  const work = await prisma.work.findUnique({
+    where: { id: workId },
+    select: { title: true, _count: { select: { libraryItems: true } } },
+  });
+
+  if (!work) return { ok: false, error: "Œuvre introuvable." };
+
+  if (work._count.libraryItems > 0) {
+    return {
+      ok: false,
+      error: `${work.title} compte ${work._count.libraryItems} accès accordé${work._count.libraryItems > 1 ? "s" : ""}. Dépubliez la plutôt que de la supprimer, un accès payé ne doit jamais disparaître.`,
+    };
+  }
+
+  await prisma.work.delete({ where: { id: workId } });
+
+  revalidateCatalog();
+  return { ok: true, workId };
+}
+
+/**
  * Retire une oeuvre du catalogue public.
  *
  * @param workId - Oeuvre à dépublier.

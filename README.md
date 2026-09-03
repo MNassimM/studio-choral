@@ -14,7 +14,7 @@ Application web du Butterfly Studio Choral.
 ```bash
 npm run dev     # démarrer le serveur de développement
 npm run build   # build de production
-npm run start   # lancer le build de production
+npm run start   # run le build de production
 npm run lint    # vérification ESLint
 ```
 
