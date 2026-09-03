@@ -2,6 +2,7 @@ import { getLocale } from "next-intl/server";
 
 import { WorkForm } from "@/components/admin/work-form";
 import { redirect } from "@/i18n/navigation";
+import { loadVoiceOptions } from "@/lib/admin/voice-options";
 import { createWork } from "@/lib/admin/work-actions";
 import {
   emptyWorkFormDraft,
@@ -32,11 +33,14 @@ async function creer(values: WorkFormValues): Promise<WorkActionResult> {
 /**
  * Page de création d'une oeuvre.
  */
-export default function NewWorkPage() {
+export default async function NewWorkPage() {
+  const voices = await loadVoiceOptions();
+
   return (
     <WorkForm
       mode="create"
       initialValues={emptyWorkFormDraft()}
+      voices={voices}
       submitAction={creer}
     />
   );

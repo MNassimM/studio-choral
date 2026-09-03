@@ -14,8 +14,10 @@ import { SectionAVenir } from "@/components/admin/work-form-fields";
 import { WorkMovementsSection } from "@/components/admin/work-form-movements";
 import { WorkMusicSection } from "@/components/admin/work-form-music";
 import { WorkPricesSection } from "@/components/admin/work-form-prices";
+import { WorkVoicesSection } from "@/components/admin/work-form-voices";
 import { WorkTextsSection } from "@/components/admin/work-form-texts";
 import { Button, buttonVariants } from "@/components/ui/button";
+import type { VoiceOption } from "@/lib/admin/voice-options";
 import { Link } from "@/i18n/navigation";
 import type {
   WorkActionResult,
@@ -37,6 +39,7 @@ import { cn } from "@/lib/utils";
  *
  * @param mode - Création ou modification, ce qui change la règle de slug.
  * @param initialValues - Valeurs de départ, brouillon vide en création.
+ * @param voices - Les pupitres de la base, chargés par la page serveur.
  * @param submitAction - Action serveur appelée à la soumission.
  * @param submitLabel - Texte du bouton d'enregistrement.
  * @returns Le formulaire rendu.
@@ -44,11 +47,13 @@ import { cn } from "@/lib/utils";
 export function WorkForm({
   mode,
   initialValues,
+  voices,
   submitAction,
   submitLabel = "Enregistrer le brouillon",
 }: {
   mode: "create" | "edit";
   initialValues: WorkFormDraft;
+  voices: VoiceOption[];
   submitAction: (values: WorkFormValues) => Promise<WorkActionResult>;
   submitLabel?: string;
 }) {
@@ -212,11 +217,9 @@ export function WorkForm({
               note="Le dépôt d'image arrive bientot !!!!"
             />
 
-            {/* Emplacement du sélecteur de pupitres, prompt suivant. */}
-            <SectionAVenir
-              title="Pupitres"
-              note="Le sélecteur de pupitres arrive bientot !!!!"
-              error={form.formState.errors.voiceCodes?.message}
+            <WorkVoicesSection
+              voices={voices}
+              initialVoiceCodes={initialValues.voiceCodes}
             />
 
             <WorkPricesSection />

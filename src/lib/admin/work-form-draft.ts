@@ -103,6 +103,7 @@ export type WorkRow = {
     scope: string;
     coverage: string;
     priceCents: number;
+    isActive: boolean;
     voiceId: string | null;
     voice: { code: string } | null;
   }[];
@@ -124,16 +125,21 @@ export function workToDraft(work: WorkRow): WorkFormDraft {
     (translation) => translation.locale === "en",
   );
 
+  // Une offre retirée de la vente n'est pas supprimée, elle passe en inactif.
+  // Tout se dérive donc des seules offres actives, sans quoi un pupitre retiré
+  // ressusciterait au rechargement et un prix périmé pourrait ressortir.
+  const actifs = work.products.filter((product) => product.isActive);
+
   const prix = (scope: string, coverage: string) =>
     toEuros(
-      work.products.find(
+      actifs.find(
         (product) => product.scope === scope && product.coverage === coverage,
       )?.priceCents,
     );
 
   const voiceCodes = [
     ...new Set(
-      work.products
+      actifs
         .filter((product) => product.voice !== null)
         .map((product) => product.voice!.code),
     ),

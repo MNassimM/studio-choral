@@ -4,6 +4,7 @@ import { getLocale } from "next-intl/server";
 import { WorkAdminActions } from "@/components/admin/work-admin-actions";
 import { WorkForm } from "@/components/admin/work-form";
 import { redirect } from "@/i18n/navigation";
+import { loadVoiceOptions } from "@/lib/admin/voice-options";
 import {
   deleteWork,
   publishWork,
@@ -32,6 +33,7 @@ export default async function EditWorkPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const voices = await loadVoiceOptions();
 
   const work = await prisma.work.findUnique({
     where: { id },
@@ -67,6 +69,7 @@ export default async function EditWorkPage({
           scope: true,
           coverage: true,
           priceCents: true,
+          isActive: true,
           voiceId: true,
           voice: { select: { code: true } },
         },
@@ -98,6 +101,7 @@ export default async function EditWorkPage({
       <WorkForm
         mode="edit"
         initialValues={workToDraft(work)}
+        voices={voices}
         submitAction={enregistrer}
         submitLabel="Enregistrer les modifications"
       />
