@@ -284,7 +284,7 @@ export default async function WorkPage(
     });
   }
 
-  // Compose le nom affiché d'un produit (pupitre ou œuvre complète) pour l'affichage dans les cartes de pack.
+  // Compose le nom affiché d'un produit (pupitre ou oeuvre complète) pour l'affichage dans les cartes de pack.
   function composeProductName(
     voiceLabel: string | null,
     targetTitle: string,

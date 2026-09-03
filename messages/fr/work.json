@@ -29,9 +29,21 @@
   },
   "voice": {
     "SOPRANO": "Soprano",
+    "SOPRANO_1": "Soprano 1",
+    "SOPRANO_2": "Soprano 2",
+    "MEZZO": "Mezzo-soprano",
     "ALTO": "Alto",
+    "ALTO_1": "Alto 1",
+    "ALTO_2": "Alto 2",
+    "COUNTERTENOR": "Contre-ténor",
+    "CONTRALTO": "Contralto",
     "TENOR": "Ténor",
-    "BASS": "Basse"
+    "TENOR_1": "Ténor 1",
+    "TENOR_2": "Ténor 2",
+    "BARITONE": "Baryton",
+    "BASS": "Basse",
+    "BASS_1": "Basse 1",
+    "BASS_2": "Basse 2"
   },
   "product": {
     "allVoices": "Tutti",

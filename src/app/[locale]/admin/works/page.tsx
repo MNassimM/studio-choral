@@ -145,7 +145,7 @@ export default async function AdminWorksPage({
       movements: { select: { id: true } },
       translations: { where: { locale: "en" }, select: { id: true } },
       products: {
-        where: { voiceId: { not: null } },
+        where: { voiceId: { not: null }, isActive: true },
         select: { voiceId: true },
         distinct: ["voiceId"],
       },
