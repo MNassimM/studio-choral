@@ -202,18 +202,18 @@ function checkPrices(work: z.infer<typeof baseSchema>, ctx: z.RefinementCtx) {
     }
   }
 
-  if (workAll <= workSingle) {
+  if (workAll < workSingle) {
     ctx.addIssue({
       code: "custom",
       message:
-        "Le pack complet doit coûter plus cher qu'une voix sur l'œuvre entière.",
+        "Le pack complet ne peut pas coûter moins qu'une voix sur l'œuvre entière.",
       path: ["prices", "workAllVoices"],
     });
   }
-  if (workAll >= workSingle * voiceCount) {
+  if (workAll > workSingle * voiceCount) {
     ctx.addIssue({
       code: "custom",
-      message: `Le pack complet doit coûter moins que les ${voiceCount} pupitres pris séparément.`,
+      message: `Le pack complet ne peut pas coûter plus que les ${voiceCount} pupitres pris séparément.`,
       path: ["prices", "workAllVoices"],
     });
   }
@@ -223,32 +223,33 @@ function checkPrices(work: z.infer<typeof baseSchema>, ctx: z.RefinementCtx) {
   const mvtSingle = toCents(movementSingleVoice);
   const mvtAll = toCents(movementAllVoices);
 
-  if (mvtAll <= mvtSingle) {
-    ctx.addIssue({
-      code: "custom",
-      message: "Le pack toutes voix doit coûter plus cher qu'une voix seule.",
-      path: ["prices", "movementAllVoices"],
-    });
-  }
-  if (mvtAll >= mvtSingle * voiceCount) {
-    ctx.addIssue({
-      code: "custom",
-      message: `Le pack d'un mouvement doit coûter moins que les ${voiceCount} pupitres pris séparément.`,
-      path: ["prices", "movementAllVoices"],
-    });
-  }
-  if (workSingle <= mvtSingle) {
+  if (mvtAll < mvtSingle) {
     ctx.addIssue({
       code: "custom",
       message:
-        "Une voix sur l'œuvre entière doit coûter plus cher que sur un seul mouvement.",
+        "Le pack toutes voix ne peut pas coûter moins qu'une voix seule.",
+      path: ["prices", "movementAllVoices"],
+    });
+  }
+  if (mvtAll > mvtSingle * voiceCount) {
+    ctx.addIssue({
+      code: "custom",
+      message: `Le pack d'un mouvement ne peut pas coûter plus que les ${voiceCount} pupitres pris séparément.`,
+      path: ["prices", "movementAllVoices"],
+    });
+  }
+  if (workSingle < mvtSingle) {
+    ctx.addIssue({
+      code: "custom",
+      message:
+        "Une voix sur l'œuvre entière ne peut pas coûter moins que sur un seul mouvement.",
       path: ["prices", "workSingleVoice"],
     });
   }
-  if (workAll >= mvtAll * movementCount) {
+  if (workAll > mvtAll * movementCount) {
     ctx.addIssue({
       code: "custom",
-      message: `Le pack complet doit coûter moins que les ${movementCount} mouvements pris séparément.`,
+      message: `Le pack complet ne peut pas coûter plus que les ${movementCount} mouvements pris séparément.`,
       path: ["prices", "workAllVoices"],
     });
   }
@@ -321,3 +322,56 @@ export const workFormSchema = baseSchema.superRefine((work, ctx) => {
 });
 
 export type WorkFormValues = z.infer<typeof workFormSchema>;
+
+/**
+ * Coefficient appliqué au passage de une voix à toutes les voix.
+ */
+export const ALL_VOICES_FACTOR = 1;
+
+/** Coefficient appliqué au passage d'un mouvement à l'oeuvre entière. */
+export const WHOLE_WORK_FACTOR = 1;
+
+/**
+ * Déduit les trois prix dérivés du seul prix saisi.
+ *
+ * @param source - Le prix saisi, en euros.
+ * @param voiceCount - Nombre de pupitres retenus.
+ * @param movementCount - Nombre de mouvements.
+ * @returns Les quatre prix, ceux de mouvement nuls s'il n'y en a qu'un.
+ */
+export function derivePrices(
+  source: number | null,
+  voiceCount: number,
+  movementCount: number,
+): WorkFormValues["prices"] {
+  const vide = {
+    movementSingleVoice: null,
+    movementAllVoices: null,
+    workSingleVoice: 0,
+    workAllVoices: 0,
+  };
+  if (source === null || !Number.isFinite(source) || source <= 0) return vide;
+  if (voiceCount < 1 || movementCount < 1) return vide;
+
+  const cents = toCents(source);
+  const enEuros = (valeur: number) => Math.round(valeur) / 100;
+  const toutesVoix = (unitaire: number) =>
+    Math.round(unitaire * voiceCount * ALL_VOICES_FACTOR);
+
+  if (movementCount === 1) {
+    return {
+      movementSingleVoice: null,
+      movementAllVoices: null,
+      workSingleVoice: enEuros(cents),
+      workAllVoices: enEuros(toutesVoix(cents)),
+    };
+  }
+
+  const oeuvreUneVoix = Math.round(cents * movementCount * WHOLE_WORK_FACTOR);
+  return {
+    movementSingleVoice: enEuros(cents),
+    movementAllVoices: enEuros(toutesVoix(cents)),
+    workSingleVoice: enEuros(oeuvreUneVoix),
+    workAllVoices: enEuros(toutesVoix(oeuvreUneVoix)),
+  };
+}
