@@ -83,6 +83,7 @@ export function WorkMusicSection() {
               onValueChange={(value) =>
                 form.setValue("period", value as WorkFormDraft["period"], {
                   shouldValidate: true,
+                  shouldDirty: true,
                 })
               }
             >
@@ -133,6 +134,7 @@ export function WorkMusicSection() {
               onValueChange={(value) =>
                 form.setValue("language", value as WorkFormDraft["language"], {
                   shouldValidate: true,
+                  shouldDirty: true,
                 })
               }
             >
@@ -189,7 +191,9 @@ export function WorkMusicSection() {
           <Checkbox
             checked={accompagnement}
             onCheckedChange={(checked) =>
-              form.setValue("hasAccompaniment", checked === true)
+              form.setValue("hasAccompaniment", checked === true, {
+                shouldDirty: true,
+              })
             }
           />
           Chaque mouvement a un accompagnement

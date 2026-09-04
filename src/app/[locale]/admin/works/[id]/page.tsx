@@ -138,13 +138,17 @@ export default async function EditWorkPage({
         storedMeta={storedMeta}
         submitAction={enregistrer}
         submitLabel="Enregistrer les modifications"
+        publication={{
+          workId: work.id,
+          isPublished: work.isPublished,
+          onPublish: publishWork,
+          onUnpublish: unpublishWork,
+        }}
       />
       <WorkAdminActions
         workId={work.id}
         title={work.title}
         isPublished={work.isPublished}
-        onPublish={publishWork}
-        onUnpublish={unpublishWork}
         onDelete={supprimer}
       />
     </div>

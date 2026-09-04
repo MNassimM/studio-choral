@@ -218,7 +218,10 @@ export function WorkAudioSection({
           track.type === next.type
         ),
     );
-    form.setValue("tracks", [...autres, next], { shouldValidate: true });
+    form.setValue("tracks", [...autres, next], {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
   }
 
   /** Retire la case du brouillon, sans rien supprimer côté serveur. */
@@ -226,7 +229,7 @@ export function WorkAudioSection({
     form.setValue(
       "tracks",
       tracks.filter((autre) => autre !== track),
-      { shouldValidate: true },
+      { shouldValidate: true, shouldDirty: true },
     );
   }
 

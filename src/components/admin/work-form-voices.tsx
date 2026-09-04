@@ -70,7 +70,10 @@ export function WorkVoicesSection({
 
   /** Écrit la nouvelle liste et relance la validation du champ. */
   function write(next: string[]) {
-    form.setValue("voiceCodes", next, { shouldValidate: true });
+    form.setValue("voiceCodes", next, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
   }
 
   /** Retient un pupitre de plus. */

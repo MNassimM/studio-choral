@@ -18,6 +18,7 @@ import { SectionAVenir } from "@/components/admin/work-form-fields";
 import { WorkMovementsSection } from "@/components/admin/work-form-movements";
 import { WorkMusicSection } from "@/components/admin/work-form-music";
 import { WorkPricesSection } from "@/components/admin/work-form-prices";
+import { WorkPublishButtons } from "@/components/admin/work-publish-buttons";
 import { WorkVoicesSection } from "@/components/admin/work-form-voices";
 import { WorkTextsSection } from "@/components/admin/work-form-texts";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -47,6 +48,7 @@ import { cn } from "@/lib/utils";
  * @param storedMeta - Nom, taille et format des pistes déjà enregistrées.
  * @param submitAction - Action serveur appelée à la soumission.
  * @param submitLabel - Texte du bouton d'enregistrement.
+ * @param publication - Actions de publication, absentes en création.
  * @returns Le formulaire rendu.
  */
 export function WorkForm({
@@ -56,6 +58,7 @@ export function WorkForm({
   storedMeta = {},
   submitAction,
   submitLabel = "Enregistrer le brouillon",
+  publication,
 }: {
   mode: "create" | "edit";
   initialValues: WorkFormDraft;
@@ -63,6 +66,13 @@ export function WorkForm({
   storedMeta?: StoredTrackMeta;
   submitAction: (values: WorkFormValues) => Promise<WorkActionResult>;
   submitLabel?: string;
+  /** Absent en création : il n'y a rien à publier tant que rien n'existe. */
+  publication?: {
+    workId: string;
+    isPublished: boolean;
+    onPublish: (workId: string) => Promise<WorkActionResult>;
+    onUnpublish: (workId: string) => Promise<WorkActionResult>;
+  };
 }) {
   const form = useForm<WorkFormDraft, unknown, WorkFormValues>({
     // Le brouillon porte une clé par mouvement que le schéma ignore et retire
@@ -98,6 +108,7 @@ export function WorkForm({
     setTitreSuiviLOeuvre(true);
     form.setValue("movements.0.title", form.getValues("title"), {
       shouldValidate: false,
+      shouldDirty: true,
     });
   }
 
@@ -120,14 +131,22 @@ export function WorkForm({
 
     // Un seul mouvement, il porte le titre de l'oeuvre.
     if (titreSuiviLOeuvre && form.getValues("movements").length === 1) {
-      form.setValue("movements.0.title", titreFr, { shouldValidate: false });
+      form.setValue("movements.0.title", titreFr, {
+        shouldValidate: false,
+        shouldDirty: true,
+      });
     }
   }
 
   const onSubmit = form.handleSubmit(async (values) => {
     setErreurGlobale(null);
     const result = await submitAction(values);
-    if (result.ok) return;
+    if (result.ok) {
+      // Les valeurs enregistrées deviennent la nouvelle référence, le
+      // formulaire redevient vierge et la publication se rouvre.
+      form.reset(form.getValues());
+      return;
+    }
 
     // Le serveur revalide tout et peut refuser ce que le client croyait bon.
     if (result.field) {
@@ -142,6 +161,9 @@ export function WorkForm({
   });
 
   const enCours = form.formState.isSubmitting;
+  // On ne compare rien avec la base, react-hook-form sait seul si l'admin a
+  // touché à quelque chose depuis le chargement.
+  const modifie = form.formState.isDirty;
 
   return (
     <FormProvider {...form}>
@@ -168,10 +190,21 @@ export function WorkForm({
             >
               Annuler
             </Link>
+            {publication ? (
+              <WorkPublishButtons
+                workId={publication.workId}
+                isPublished={publication.isPublished}
+                disabled={modifie || enCours || envoiEnCours}
+                onPublish={publication.onPublish}
+                onUnpublish={publication.onUnpublish}
+                onError={setErreurGlobale}
+              />
+            ) : null}
             <Button
               type="submit"
               size="lg"
-              disabled={enCours || envoiEnCours}
+              disabled={!modifie || enCours || envoiEnCours}
+              title={modifie ? undefined : "Aucune modification à enregistrer."}
               className="rounded-full"
             >
               {enCours ? (

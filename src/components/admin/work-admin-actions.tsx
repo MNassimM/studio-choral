@@ -1,7 +1,7 @@
 "use client";
 
 import { Dialog } from "@base-ui/react/dialog";
-import { AlertCircle, Eye, EyeOff, Loader2, Trash2 } from "lucide-react";
+import { AlertCircle, Loader2, Trash2 } from "lucide-react";
 import { useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -79,8 +79,6 @@ function ConfirmationSuppression({
  * @param workId - Oeuvre concernée.
  * @param title - Titre affiché dans la confirmation.
  * @param isPublished - État courant, qui décide du bouton montré.
- * @param onPublish - Action de publication.
- * @param onUnpublish - Action de dépublication.
  * @param onDelete - Action de suppression, qui redirige en cas de succès.
  * @returns Les boutons rendus.
  */
@@ -88,15 +86,11 @@ export function WorkAdminActions({
   workId,
   title,
   isPublished,
-  onPublish,
-  onUnpublish,
   onDelete,
 }: {
   workId: string;
   title: string;
   isPublished: boolean;
-  onPublish: (workId: string) => Promise<WorkActionResult>;
-  onUnpublish: (workId: string) => Promise<WorkActionResult>;
   onDelete: (workId: string) => Promise<WorkActionResult>;
 }) {
   const [message, setMessage] = useState<string | null>(null);
@@ -114,12 +108,12 @@ export function WorkAdminActions({
 
   return (
     <section className="flex flex-col gap-4 rounded-2xl border border-border bg-card/40 p-5">
-      <h2 className="font-medium">Publication</h2>
+      <h2 className="font-medium">Supprimer</h2>
 
       <p className="text-sm text-muted-foreground">
         {isPublished
-          ? "Cette œuvre est visible dans le catalogue public."
-          : "Cette œuvre est en brouillon, elle n'apparaît nulle part."}
+          ? "Cette œuvre est visible dans le catalogue public. Publier ou dépublier se fait depuis l'entête du formulaire."
+          : "Cette œuvre est en brouillon, elle n'apparaît nulle part. Publier se fait depuis l'entête du formulaire."}
       </p>
 
       {message ? (
@@ -136,29 +130,6 @@ export function WorkAdminActions({
       ) : null}
 
       <div className="flex flex-col gap-2">
-        {isPublished ? (
-          <Button
-            type="button"
-            variant="outline"
-            disabled={enCours}
-            onClick={() => run(onUnpublish)}
-            className="cursor-pointer rounded-full"
-          >
-            <EyeOff className="size-4" aria-hidden="true" />
-            Dépublier
-          </Button>
-        ) : (
-          <Button
-            type="button"
-            disabled={enCours}
-            onClick={() => run(onPublish)}
-            className="cursor-pointer rounded-full"
-          >
-            <Eye className="size-4" aria-hidden="true" />
-            Publier
-          </Button>
-        )}
-
         <Button
           type="button"
           variant="ghost"
