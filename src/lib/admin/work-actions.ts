@@ -14,6 +14,12 @@ import {
   uniqueSlugs,
   type VoiceRow,
 } from "@/lib/admin/work-products";
+import {
+  buildPendingKey,
+  buildTrackKey,
+  extensionOf,
+  storage,
+} from "@/lib/storage/storage";
 import { prisma } from "@/lib/db/prisma";
 
 /**
@@ -108,6 +114,91 @@ function toFailure(cause: unknown): ActionResult {
 }
 
 /**
+ * Range les pistes fraîchement déposées, après le commit de l'oeuvre.
+ *
+ * @remarks
+ * Hors transaction volontairement : déplacer quatre-vingts objets dépasserait
+ * de loin le délai de cinq secondes d'une transaction interactive. La clé
+ * source se reconstruit ici, jamais reçue du client, et la clé définitive
+ * étant déterministe, un objet resté en rade sera écrasé au prochain
+ * enregistrement de la même case.
+ *
+ * @param workId - Oeuvre concernée.
+ * @param tracks - Les cases du brouillon.
+ * @param movementIdByKey - Correspondance entre clé de mouvement et id.
+ * @param voiceIdByCode - Correspondance entre code de pupitre et id.
+ * @returns Le nombre de pistes rangées et celles qui ont échoué.
+ */
+async function storePendingTracks(
+  workId: string,
+  tracks: WorkFormValues["tracks"],
+  movementIdByKey: Map<string, string>,
+  voiceIdByCode: Map<string, string>,
+): Promise<{ stored: number; failed: string[] }> {
+  const attente = tracks.filter((track) => track.state.kind === "pending");
+  const failed: string[] = [];
+  let stored = 0;
+
+  for (const track of attente) {
+    if (track.state.kind !== "pending") continue;
+    const movementId = movementIdByKey.get(track.movementKey);
+    const voiceId = track.voiceCode
+      ? (voiceIdByCode.get(track.voiceCode) ?? null)
+      : null;
+    const extension = extensionOf(track.state.filename);
+
+    if (!movementId || extension === null) {
+      failed.push(track.state.filename);
+      continue;
+    }
+
+    const source = buildPendingKey(track.state.uploadId, track.state.filename);
+    const cible = buildTrackKey({
+      workId,
+      movementId,
+      type: track.type,
+      voiceCode: track.voiceCode,
+      extension,
+    });
+
+    const deplace = await storage.moveObject(source, cible);
+    if (!deplace.ok) {
+      console.error("work-actions moveObject", deplace.error);
+      failed.push(track.state.filename);
+      continue;
+    }
+
+    // Prisma refuse un nul dans une clé unique composée, et voiceId l'est
+    // pour un tutti. On retrouve donc la case par ses coordonnées.
+    const existante = await prisma.audioFile.findFirst({
+      where: { movementId, voiceId, type: track.type },
+      select: { id: true },
+    });
+
+    const valeurs = {
+      storageKey: cible,
+      durationSeconds: track.state.durationSeconds,
+      mimeType: track.state.mimeType,
+      sizeBytes: track.state.sizeBytes,
+    };
+
+    if (existante) {
+      await prisma.audioFile.update({
+        where: { id: existante.id },
+        data: valeurs,
+      });
+    } else {
+      await prisma.audioFile.create({
+        data: { movementId, voiceId, type: track.type, ...valeurs },
+      });
+    }
+    stored += 1;
+  }
+
+  return { stored, failed };
+}
+
+/**
  * Crée une oeuvre complète, toujours en brouillon.
  *
  * @param input - Valeurs du formulaire, encore non validées.
@@ -170,7 +261,10 @@ export async function createWork(input: WorkFormValues): Promise<ActionResult> {
           },
         },
         include: {
-          movements: { select: { id: true, slug: true, title: true } },
+          movements: {
+            select: { id: true, slug: true, title: true },
+            orderBy: { position: "asc" },
+          },
         },
       });
 
@@ -187,7 +281,31 @@ export async function createWork(input: WorkFormValues): Promise<ActionResult> {
       return created;
     });
 
+    // Deuxième temps, hors transaction : les mouvements viennent d'être créés
+    // dans l'ordre du brouillon, la clé du brouillon se relie donc par rang.
+    const movementIdByKey = new Map(
+      data.movements.map((movement, index) => [
+        movement.key,
+        work.movements[index].id,
+      ]),
+    );
+    const voiceIdByCode = new Map(
+      voices.map((voice) => [voice.code, voice.id]),
+    );
+    const range = await storePendingTracks(
+      work.id,
+      data.tracks,
+      movementIdByKey,
+      voiceIdByCode,
+    );
+
     revalidateCatalog();
+    if (range.failed.length > 0) {
+      return {
+        ok: false,
+        error: `L'œuvre est enregistrée, mais ces pistes n'ont pas pu être rangées : ${range.failed.join(", ")}.`,
+      };
+    }
     return { ok: true, workId: work.id };
   } catch (cause) {
     return toFailure(cause);
@@ -225,6 +343,9 @@ export async function updateWork(
     const movementSlugs = uniqueSlugs(
       data.movements.map((movement) => movement.title),
     );
+
+    // Rempli dans la transaction, relu juste après pour ranger les pistes.
+    let enregistres: { id: string; slug: string; title: string }[] = [];
 
     await prisma.$transaction(async (tx) => {
       await tx.work.update({
@@ -323,6 +444,7 @@ export async function updateWork(
         select: { id: true, slug: true, title: true },
         orderBy: { position: "asc" },
       });
+      enregistres = movements;
 
       const rows = buildProductRows(
         data.slug,
@@ -385,7 +507,31 @@ export async function updateWork(
       }
     });
 
+    // Deuxième temps, hors transaction. Les mouvements sont triés par
+    // position, comme le brouillon, la clé se relie donc par rang.
+    const movementIdByKey = new Map(
+      data.movements.map((movement, index) => [
+        movement.key,
+        enregistres[index].id,
+      ]),
+    );
+    const voiceIdByCode = new Map(
+      voices.map((voice) => [voice.code, voice.id]),
+    );
+    const range = await storePendingTracks(
+      workId,
+      data.tracks,
+      movementIdByKey,
+      voiceIdByCode,
+    );
+
     revalidateCatalog();
+    if (range.failed.length > 0) {
+      return {
+        ok: false,
+        error: `L'œuvre est enregistrée, mais ces pistes n'ont pas pu être rangées : ${range.failed.join(", ")}.`,
+      };
+    }
     return { ok: true, workId };
   } catch (cause) {
     return toFailure(cause);

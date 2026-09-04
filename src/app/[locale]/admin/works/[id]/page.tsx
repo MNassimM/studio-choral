@@ -52,7 +52,14 @@ export default async function EditWorkPage({
       hasAccompaniment: true,
       isPublished: true,
       movements: {
-        select: { id: true, title: true },
+        select: {
+          id: true,
+          title: true,
+          // storageKey n'est jamais sélectionné, il ne quitte pas le serveur.
+          audioFiles: {
+            select: { id: true, type: true, voice: { select: { code: true } } },
+          },
+        },
         orderBy: { position: "asc" },
       },
       translations: {

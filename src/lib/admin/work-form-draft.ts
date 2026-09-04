@@ -15,16 +15,15 @@ type WorkFormInput = z.input<typeof workFormSchema>;
 /**
  * Un mouvement en cours d'édition.
  */
-export type MovementDraft = WorkFormInput["movements"][number] & {
-  key: string;
-};
+export type MovementDraft = WorkFormInput["movements"][number];
 
 /**
  * Ce que le formulaire tient en mémoire.
  */
-export type WorkFormDraft = Omit<WorkFormInput, "movements"> & {
-  movements: MovementDraft[];
-};
+export type WorkFormDraft = WorkFormInput;
+
+/** Une case de la matrice audio, telle que le brouillon la porte. */
+export type TrackDraft = WorkFormInput["tracks"][number];
 
 /**
  * Ce que renvoient createWork et updateWork.
@@ -56,6 +55,7 @@ export function emptyWorkFormDraft(): WorkFormDraft {
     },
     voiceCodes: [],
     movements: [{ key: newMovementKey(), title: "" }],
+    tracks: [],
     prices: {
       movementSingleVoice: null,
       movementAllVoices: null,
@@ -67,13 +67,7 @@ export function emptyWorkFormDraft(): WorkFormDraft {
 
 /** Repasse un brouillon en valeurs d'action, sans les clés de mouvement. */
 export function toWorkFormValues(draft: WorkFormDraft): WorkFormValues {
-  return {
-    ...draft,
-    movements: draft.movements.map(({ key, ...movement }) => {
-      void key;
-      return movement;
-    }),
-  } as WorkFormValues;
+  return draft as WorkFormValues;
 }
 
 /**
@@ -91,7 +85,15 @@ export type WorkRow = {
   language: string | null;
   composedYear: number | null;
   hasAccompaniment: boolean;
-  movements: { id: string; title: string }[];
+  movements: {
+    id: string;
+    title: string;
+    audioFiles: {
+      id: string;
+      type: TrackDraft["type"];
+      voice: { code: string } | null;
+    }[];
+  }[];
   translations: {
     locale: string;
     slug: string;
@@ -171,6 +173,16 @@ export function workToDraft(work: WorkRow): WorkFormDraft {
       id: movement.id,
       title: movement.title,
     })),
+    // La clé du mouvement vaut son id pour une ligne déjà enregistrée, les
+    // cases s'y rattachent donc directement.
+    tracks: work.movements.flatMap((movement) =>
+      movement.audioFiles.map((piste) => ({
+        movementKey: movement.id,
+        voiceCode: piste.voice?.code ?? null,
+        type: piste.type,
+        state: { kind: "stored" as const, audioFileId: piste.id },
+      })),
+    ),
     prices: {
       movementSingleVoice: prix("MOVEMENT", "SINGLE_VOICE"),
       movementAllVoices: prix("MOVEMENT", "ALL_VOICES"),

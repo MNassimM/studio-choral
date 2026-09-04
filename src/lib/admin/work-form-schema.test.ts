@@ -28,13 +28,14 @@ const messe = {
   },
   voiceCodes: SATB,
   movements: [
-    { title: "Kyrie" },
-    { title: "Gloria" },
-    { title: "Credo" },
-    { title: "Sanctus" },
-    { title: "Benedictus" },
-    { title: "Agnus Dei" },
+    { key: "k1", title: "Kyrie" },
+    { key: "k2", title: "Gloria" },
+    { key: "k3", title: "Credo" },
+    { key: "k4", title: "Sanctus" },
+    { key: "k5", title: "Benedictus" },
+    { key: "k6", title: "Agnus Dei" },
   ],
+  tracks: [],
   prices: {
     movementSingleVoice: 1.9,
     movementAllVoices: 3.9,
@@ -62,7 +63,7 @@ const milleRegretz = {
       description: "One of the most copied chansons of its century.",
     },
   },
-  movements: [{ title: "Mille regretz" }],
+  movements: [{ key: "m1", title: "Mille regretz" }],
   prices: {
     movementSingleVoice: null,
     movementAllVoices: null,
@@ -175,7 +176,7 @@ test("un pupitre en double est refusé", () => {
 test("deux mouvements de même titre sont refusés", () => {
   const erreurs = chemins({
     ...messe,
-    movements: [...messe.movements.slice(0, 5), { title: "Kyrie" }],
+    movements: [...messe.movements.slice(0, 5), { key: "k6", title: "Kyrie" }],
   });
   assert.ok(erreurs.includes("movements"));
 });

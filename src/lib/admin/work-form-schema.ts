@@ -1,6 +1,7 @@
 import { z } from "zod";
 
-import { MusicalPeriod } from "@/generated/prisma/enums";
+import { AudioType, MusicalPeriod } from "@/generated/prisma/enums";
+import type { AudioType as AudioTypeName } from "@/types/domain";
 import { voicingSchema } from "@/lib/works/voicing";
 import { isKnownWorkLanguageCode } from "@/lib/works/work-language";
 
@@ -52,6 +53,11 @@ const englishSchema = z.object({
 
 /** Un mouvement de l'oeuvre. L'identifiant n'existe qu'en modification. */
 const movementSchema = z.object({
+  /**
+   * Clé client, stable dès l'ajout de la ligne. C'est par elle que les
+   * pistes se rattachent, un mouvement neuf n'ayant pas encore d'id.
+   */
+  key: z.string().min(1),
   id: z.string().min(1).optional(),
   title: z
     .string()
@@ -68,6 +74,40 @@ const pricesSchema = z.object({
   movementAllVoices: priceSchema.nullable(),
   workSingleVoice: priceSchema,
   workAllVoices: priceSchema,
+});
+
+/** Les types de piste qui portent un pupitre. */
+const PER_VOICE_AUDIO_TYPES: AudioTypeName[] = [
+  "SOLO",
+  "PREDOMINANT",
+  "PREVIEW",
+];
+
+/**
+ * Une case de la matrice audio, soit déjà en base, soit fraîchement déposée.
+ */
+const trackSchema = z.object({
+  /** Rattachement par la clé du mouvement, jamais par son id. */
+  movementKey: z.string().min(1),
+  /** Code du pupitre, nul pour un tutti ou un accompagnement. */
+  voiceCode: z.string().min(1).nullable(),
+  type: z.enum(AudioType),
+  state: z.discriminatedUnion("kind", [
+    z.object({
+      kind: z.literal("stored"),
+      audioFileId: z.string().min(1),
+    }),
+    z.object({
+      kind: z.literal("pending"),
+      /** Identifiant du téléversement, qui recompose la clé sous pending. */
+      uploadId: z.string().min(1),
+      filename: z.string().min(1).max(255),
+      sizeBytes: z.number().int().positive(),
+      /** Mesurée dans le navigateur, revalidée ici. */
+      durationSeconds: z.number().int().positive().max(7200),
+      mimeType: z.string().min(1).max(100),
+    }),
+  ]),
 });
 
 const baseSchema = z.object({
@@ -125,6 +165,8 @@ const baseSchema = z.object({
     .array(movementSchema)
     .min(1, "Une œuvre doit avoir au moins un mouvement.")
     .max(60, "Une œuvre ne peut pas avoir autant de mouvements."),
+
+  tracks: z.array(trackSchema).max(2000),
 
   prices: pricesSchema,
 });
@@ -212,6 +254,58 @@ function checkPrices(work: z.infer<typeof baseSchema>, ctx: z.RefinementCtx) {
   }
 }
 
+/**
+ * Vérifie que les cases de la matrice se tiennent.
+ */
+function checkTracks(work: z.infer<typeof baseSchema>, ctx: z.RefinementCtx) {
+  const cles = new Set(work.movements.map((movement) => movement.key));
+  const pupitres = new Set(work.voiceCodes);
+  const vues = new Set<string>();
+
+  work.tracks.forEach((track, index) => {
+    if (!cles.has(track.movementKey)) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Cette piste vise un mouvement qui n'existe plus.",
+        path: ["tracks", index],
+      });
+    }
+
+    const parPupitre = PER_VOICE_AUDIO_TYPES.includes(track.type);
+    if (parPupitre && track.voiceCode === null) {
+      ctx.addIssue({
+        code: "custom",
+        message: `Une piste ${track.type} doit porter un pupitre.`,
+        path: ["tracks", index],
+      });
+    }
+    if (!parPupitre && track.voiceCode !== null) {
+      ctx.addIssue({
+        code: "custom",
+        message: `Une piste ${track.type} ne porte pas de pupitre.`,
+        path: ["tracks", index],
+      });
+    }
+    if (track.voiceCode !== null && !pupitres.has(track.voiceCode)) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Cette piste vise un pupitre qui n'est plus retenu.",
+        path: ["tracks", index],
+      });
+    }
+
+    const cellule = `${track.movementKey}|${track.voiceCode ?? ""}|${track.type}`;
+    if (vues.has(cellule)) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Deux pistes visent la même case de la matrice.",
+        path: ["tracks", index],
+      });
+    }
+    vues.add(cellule);
+  });
+}
+
 export const workFormSchema = baseSchema.superRefine((work, ctx) => {
   const titres = work.movements.map((movement) => movement.title);
   if (new Set(titres).size !== titres.length) {
@@ -223,6 +317,7 @@ export const workFormSchema = baseSchema.superRefine((work, ctx) => {
   }
 
   checkPrices(work, ctx);
+  checkTracks(work, ctx);
 });
 
 export type WorkFormValues = z.infer<typeof workFormSchema>;
