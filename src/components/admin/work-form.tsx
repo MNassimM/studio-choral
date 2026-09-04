@@ -10,6 +10,10 @@ import {
   type Resolver,
 } from "react-hook-form";
 
+import {
+  WorkAudioSection,
+  type StoredTrackMeta,
+} from "@/components/admin/work-form-audio";
 import { SectionAVenir } from "@/components/admin/work-form-fields";
 import { WorkMovementsSection } from "@/components/admin/work-form-movements";
 import { WorkMusicSection } from "@/components/admin/work-form-music";
@@ -40,6 +44,7 @@ import { cn } from "@/lib/utils";
  * @param mode - Création ou modification, ce qui change la règle de slug.
  * @param initialValues - Valeurs de départ, brouillon vide en création.
  * @param voices - Les pupitres de la base, chargés par la page serveur.
+ * @param storedMeta - Nom, taille et format des pistes déjà enregistrées.
  * @param submitAction - Action serveur appelée à la soumission.
  * @param submitLabel - Texte du bouton d'enregistrement.
  * @returns Le formulaire rendu.
@@ -48,12 +53,14 @@ export function WorkForm({
   mode,
   initialValues,
   voices,
+  storedMeta = {},
   submitAction,
   submitLabel = "Enregistrer le brouillon",
 }: {
   mode: "create" | "edit";
   initialValues: WorkFormDraft;
   voices: VoiceOption[];
+  storedMeta?: StoredTrackMeta;
   submitAction: (values: WorkFormValues) => Promise<WorkActionResult>;
   submitLabel?: string;
 }) {
@@ -69,6 +76,9 @@ export function WorkForm({
   });
 
   const [erreurGlobale, setErreurGlobale] = useState<string | null>(null);
+  // Un envoi audio en cours interdit l'enregistrement, le brouillon citerait
+  // un fichier que R2 n'a pas encore reçu.
+  const [envoiEnCours, setEnvoiEnCours] = useState(false);
 
   const [titreSuiviLOeuvre, setTitreSuiviLOeuvre] = useState(
     !(
@@ -161,7 +171,7 @@ export function WorkForm({
             <Button
               type="submit"
               size="lg"
-              disabled={enCours}
+              disabled={enCours || envoiEnCours}
               className="rounded-full"
             >
               {enCours ? (
@@ -203,10 +213,10 @@ export function WorkForm({
               reprendreLeTitre={reprendreLeTitre}
             />
 
-            {/* Emplacement de la matrice audio, prompt suivant. */}
-            <SectionAVenir
-              title="Pistes audio"
-              note="L'import et la matrice des pistes arrivent bientot !!!!"
+            <WorkAudioSection
+              voices={voices}
+              storedMeta={storedMeta}
+              onBusyChange={setEnvoiEnCours}
             />
           </div>
 

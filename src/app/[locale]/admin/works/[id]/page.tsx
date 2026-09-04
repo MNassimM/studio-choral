@@ -57,7 +57,16 @@ export default async function EditWorkPage({
           title: true,
           // storageKey n'est jamais sélectionné, il ne quitte pas le serveur.
           audioFiles: {
-            select: { id: true, type: true, voice: { select: { code: true } } },
+            select: {
+              id: true,
+              type: true,
+              sizeBytes: true,
+              mimeType: true,
+              durationSeconds: true,
+              // On ne remonte que le dernier segment, jamais la clé entière.
+              storageKey: true,
+              voice: { select: { code: true } },
+            },
           },
         },
         orderBy: { position: "asc" },
@@ -103,12 +112,29 @@ export default async function EditWorkPage({
     return result;
   }
 
+  // Métadonnées des pistes déjà en base, pour que la matrice affiche un nom,
+  // une taille et un format. La clé n'en sort jamais, seul son dernier segment.
+  const storedMeta = Object.fromEntries(
+    work.movements.flatMap((movement) =>
+      movement.audioFiles.map((piste) => [
+        piste.id,
+        {
+          filename: piste.storageKey.split("/").pop() ?? "piste",
+          sizeBytes: piste.sizeBytes,
+          mimeType: piste.mimeType,
+          durationSeconds: piste.durationSeconds,
+        },
+      ]),
+    ),
+  );
+
   return (
     <div className="flex flex-col gap-6">
       <WorkForm
         mode="edit"
         initialValues={workToDraft(work)}
         voices={voices}
+        storedMeta={storedMeta}
         submitAction={enregistrer}
         submitLabel="Enregistrer les modifications"
       />
