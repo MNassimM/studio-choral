@@ -5,6 +5,10 @@ import { revalidatePath } from "next/cache";
 import { Prisma } from "@/generated/prisma/client";
 import { requireAdmin } from "@/lib/admin/authorization";
 import {
+  summarizeMissingTracks,
+  syncProductActivation,
+} from "@/lib/admin/product-activation";
+import {
   workFormSchema,
   type WorkFormValues,
 } from "@/lib/admin/work-form-schema";
@@ -299,6 +303,8 @@ export async function createWork(input: WorkFormValues): Promise<ActionResult> {
       voiceIdByCode,
     );
 
+    await syncProductActivation(work.id);
+
     revalidateCatalog();
     if (range.failed.length > 0) {
       return {
@@ -346,6 +352,8 @@ export async function updateWork(
 
     // Rempli dans la transaction, relu juste après pour ranger les pistes.
     let enregistres: { id: string; slug: string; title: string }[] = [];
+    // Compté dans la transaction, rapporté après coup.
+    let objetsNonSupprimes = 0;
 
     await prisma.$transaction(async (tx) => {
       await tx.work.update({
@@ -408,6 +416,23 @@ export async function updateWork(
             `Ces mouvements ont déjà été vendus et ne peuvent pas être supprimés : ${titres.join(", ")}.`,
             "movements",
           );
+        }
+
+        // Les AudioFile partent en cascade avec le mouvement, mais pas les
+        // objets R2, qui sont sous works et non sous pending : la règle de
+        // cycle de vie ne les ramasserait jamais. On les efface avant.
+        const orphelins = await tx.audioFile.findMany({
+          where: { movementId: { in: doomed.map((movement) => movement.id) } },
+          select: { storageKey: true },
+        });
+        for (const piste of orphelins) {
+          const efface = await storage.deleteObject(piste.storageKey);
+          if (!efface.ok) {
+            // Un échec ne bloque pas la suppression de la ligne, il est
+            // seulement signalé : la ligne doit partir de toute façon.
+            console.error("work-actions orphelin", efface.error);
+            objetsNonSupprimes += 1;
+          }
         }
 
         await tx.movement.deleteMany({
@@ -480,9 +505,11 @@ export async function updateWork(
         .map((product) => product.id);
 
       if (perimes.length > 0) {
+        // Retirée du catalogue, ce qui n'est pas la même chose qu'incomplète :
+        // elle sort de tous les calculs, mais la ligne reste pour l'historique.
         await tx.product.updateMany({
           where: { id: { in: perimes } },
-          data: { isActive: false },
+          data: { isActive: false, isRetired: true },
         });
       }
 
@@ -498,7 +525,9 @@ export async function updateWork(
               name: row.name,
               priceCents: row.priceCents,
               position: row.position,
-              isActive: true,
+              // Elle est de nouveau engendrée, elle n'est donc plus retirée.
+              // isActive sera tranché par la synchronisation, sur les pistes.
+              isRetired: false,
             },
           });
         } else {
@@ -525,6 +554,8 @@ export async function updateWork(
       voiceIdByCode,
     );
 
+    const activation = await syncProductActivation(workId);
+
     revalidateCatalog();
     if (range.failed.length > 0) {
       return {
@@ -532,6 +563,13 @@ export async function updateWork(
         error: `L'œuvre est enregistrée, mais ces pistes n'ont pas pu être rangées : ${range.failed.join(", ")}.`,
       };
     }
+    if (objetsNonSupprimes > 0) {
+      return {
+        ok: false,
+        error: `L'œuvre est enregistrée, mais ${objetsNonSupprimes} fichier(s) audio n'ont pas pu être supprimés du stockage.`,
+      };
+    }
+    void activation;
     return { ok: true, workId };
   } catch (cause) {
     return toFailure(cause);
@@ -553,15 +591,11 @@ export async function publishWork(workId: string): Promise<ActionResult> {
       id: true,
       period: true,
       voicing: true,
-      movements: {
-        select: { title: true, _count: { select: { audioFiles: true } } },
-        orderBy: { position: "asc" },
-      },
+      movements: { select: { id: true }, orderBy: { position: "asc" } },
       translations: {
         where: { locale: "en" },
         select: { shortDescription: true, description: true },
       },
-      products: { where: { isActive: true }, select: { id: true } },
     },
   });
 
@@ -599,18 +633,23 @@ export async function publishWork(workId: string): Promise<ActionResult> {
     };
   }
 
-  const sansPiste = work.movements.filter(
-    (movement) => movement._count.audioFiles === 0,
-  );
-  if (sansPiste.length > 0) {
+  // L'activation est recalculée avant de juger, sans quoi on publierait sur
+  // un état périmé si des pistes ont bougé depuis le dernier enregistrement.
+  await syncProductActivation(workId);
+  const manquantes = await summarizeMissingTracks(workId);
+
+  if (manquantes.incompleteProducts > 0) {
     return {
       ok: false,
-      error: `Aucune piste audio pour : ${sansPiste.map((movement) => movement.title).join(", ")}.`,
+      error: `Publication impossible : ${manquantes.incompleteProducts} offre(s) sont incomplètes faute de pistes audio.`,
       field: "movements",
     };
   }
 
-  if (work.products.length === 0) {
+  const actives = await prisma.product.count({
+    where: { workId, isActive: true },
+  });
+  if (actives === 0) {
     return { ok: false, error: "Cette œuvre n'a aucune offre active." };
   }
 

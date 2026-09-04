@@ -6,6 +6,7 @@ import {
   validateUpload,
   type UploadCandidate,
 } from "@/lib/admin/audio-upload";
+import { syncProductActivation } from "@/lib/admin/product-activation";
 import { prisma } from "@/lib/db/prisma";
 import {
   buildDownloadFilename,
@@ -136,12 +137,15 @@ export async function removeAudioTrack(
 
   const piste = await prisma.audioFile.findUnique({
     where: { id: audioFileId },
-    select: { storageKey: true },
+    select: { storageKey: true, movement: { select: { workId: true } } },
   });
 
   if (!piste) return { ok: false, error: "Piste introuvable." };
 
   await prisma.audioFile.delete({ where: { id: audioFileId } });
+
+  // Une piste en moins peut rendre des offres invendables, on réaligne.
+  await syncProductActivation(piste.movement.workId);
 
   const efface = await storage.deleteObject(piste.storageKey);
   if (!efface.ok) {

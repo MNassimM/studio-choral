@@ -86,6 +86,7 @@ export default async function EditWorkPage({
           coverage: true,
           priceCents: true,
           isActive: true,
+          isRetired: true,
           voiceId: true,
           voice: { select: { code: true } },
         },

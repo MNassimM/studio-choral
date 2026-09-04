@@ -4,6 +4,7 @@ import {
   extensionOf,
   type AllowedExtension,
 } from "@/lib/storage/keys";
+import { PER_VOICE_TYPES } from "@/lib/admin/track-coverage";
 import type { AudioType } from "@/types/domain";
 
 /**
@@ -20,8 +21,10 @@ export const MIME_BY_EXTENSION: Record<AllowedExtension, string[]> = {
   flac: ["audio/flac", "audio/x-flac"],
 };
 
-/** Les types de piste qui portent un pupitre. */
-export const PER_VOICE_TYPES: AudioType[] = ["SOLO", "PREDOMINANT", "PREVIEW"];
+/**
+ * Les types de piste qui portent un pupitre.
+ */
+export { PER_VOICE_TYPES } from "@/lib/admin/track-coverage";
 
 /**
  * Dit si un type de piste exige un pupitre.

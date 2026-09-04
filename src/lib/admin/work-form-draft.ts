@@ -106,6 +106,7 @@ export type WorkRow = {
     coverage: string;
     priceCents: number;
     isActive: boolean;
+    isRetired: boolean;
     voiceId: string | null;
     voice: { code: string } | null;
   }[];
@@ -127,10 +128,8 @@ export function workToDraft(work: WorkRow): WorkFormDraft {
     (translation) => translation.locale === "en",
   );
 
-  // Une offre retirée de la vente n'est pas supprimée, elle passe en inactif.
-  // Tout se dérive donc des seules offres actives, sans quoi un pupitre retiré
-  // ressusciterait au rechargement et un prix périmé pourrait ressortir.
-  const actifs = work.products.filter((product) => product.isActive);
+  const vendus = work.products.filter((product) => !product.isRetired);
+  const actifs = vendus.filter((product) => product.isActive);
 
   const prix = (scope: string, coverage: string) =>
     toEuros(
@@ -141,7 +140,7 @@ export function workToDraft(work: WorkRow): WorkFormDraft {
 
   const voiceCodes = [
     ...new Set(
-      actifs
+      vendus
         .filter((product) => product.voice !== null)
         .map((product) => product.voice!.code),
     ),

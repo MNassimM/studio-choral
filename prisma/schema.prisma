@@ -177,7 +177,13 @@ model Product {
   coverage      VoiceCoverage
   priceCents    Int           @map("price_cents")
   currency      String        @default("EUR")
+  /// Vrai quand l'offre est couverte par ses pistes audio, donc vendable.
+  /// Calculé, jamais posé à la main. Voir src/lib/admin/product-activation.ts.
   isActive      Boolean       @default(true) @map("is_active")
+  /// Vrai quand l'offre n'est plus engendrée par le catalogue, parce que son
+  /// pupitre ou son mouvement a été retiré. Elle n'est jamais supprimée, un
+  /// LibraryItem peut la référencer, mais elle sort de tous les calculs.
+  isRetired     Boolean       @default(false) @map("is_retired")
   position      Int
   stripePriceId String?       @unique @map("stripe_price_id")
   createdAt     DateTime      @default(now()) @map("created_at")
