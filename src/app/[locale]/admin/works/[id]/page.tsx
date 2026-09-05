@@ -62,7 +62,7 @@ export default async function EditWorkPage({
               type: true,
               sizeBytes: true,
               mimeType: true,
-              durationSeconds: true,
+              originalFilename: true,
               // On ne remonte que le dernier segment, jamais la clé entière.
               storageKey: true,
               voice: { select: { code: true } },
@@ -120,10 +120,12 @@ export default async function EditWorkPage({
       movement.audioFiles.map((piste) => [
         piste.id,
         {
-          filename: piste.storageKey.split("/").pop() ?? "piste",
+          filename:
+            piste.originalFilename ??
+            piste.storageKey.split("/").pop() ??
+            "piste",
           sizeBytes: piste.sizeBytes,
           mimeType: piste.mimeType,
-          durationSeconds: piste.durationSeconds,
         },
       ]),
     ),

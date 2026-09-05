@@ -148,6 +148,7 @@ model AudioFile {
   voiceId         String?   @map("voice_id")
   type            AudioType
   storageKey      String    @map("storage_key")
+  originalFilename String?  @map("original_filename")
   durationSeconds Int       @map("duration_seconds")
   mimeType        String    @map("mime_type")
   sizeBytes       Int?      @map("size_bytes")
