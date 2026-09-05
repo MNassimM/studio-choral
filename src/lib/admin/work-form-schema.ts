@@ -72,8 +72,8 @@ const movementSchema = z.object({
 const pricesSchema = z.object({
   movementSingleVoice: priceSchema.nullable(),
   movementAllVoices: priceSchema.nullable(),
-  workSingleVoice: priceSchema,
-  workAllVoices: priceSchema,
+  workSingleVoice: priceSchema.nullable(),
+  workAllVoices: priceSchema.nullable(),
 });
 
 /** Les types de piste qui portent un pupitre. */
@@ -116,22 +116,16 @@ const baseSchema = z.object({
     .trim()
     .min(1, "Le titre est obligatoire.")
     .max(200, "Ce titre est trop long."),
-  composer: z
-    .string()
-    .trim()
-    .min(1, "Le compositeur est obligatoire.")
-    .max(200, "Ce nom de compositeur est trop long."),
+  composer: z.string().trim().max(200, "Ce nom de compositeur est trop long."),
   slug: slugSchema,
   catalogueRef: optionalText(50),
   shortDescription: z
     .string()
     .trim()
-    .min(1, "L'accroche est obligatoire.")
     .max(300, "Cette accroche est trop longue."),
   description: z
     .string()
     .trim()
-    .min(1, "La description est obligatoire.")
     .max(5000, "Cette description est trop longue."),
 
   period: z
@@ -155,7 +149,6 @@ const baseSchema = z.object({
 
   voiceCodes: z
     .array(z.string().min(1))
-    .min(1, "Une œuvre doit avoir au moins un pupitre.")
     .refine(
       (codes) => new Set(codes).size === codes.length,
       "Un même pupitre ne peut pas être ajouté deux fois.",
@@ -163,7 +156,6 @@ const baseSchema = z.object({
 
   movements: z
     .array(movementSchema)
-    .min(1, "Une œuvre doit avoir au moins un mouvement.")
     .max(60, "Une œuvre ne peut pas avoir autant de mouvements."),
 
   tracks: z.array(trackSchema).max(2000),
@@ -179,19 +171,19 @@ function checkPrices(work: z.infer<typeof baseSchema>, ctx: z.RefinementCtx) {
   const movementCount = work.movements.length;
   const perMovement = movementCount > 1;
   const { movementSingleVoice, movementAllVoices } = work.prices;
+  // Un brouillon peut n'avoir aucun prix. On ne juge que ce qui est saisi,
+  // publishWork se chargera d'exiger le reste.
+  if (
+    work.prices.workSingleVoice === null ||
+    work.prices.workAllVoices === null
+  ) {
+    return;
+  }
   const workSingle = toCents(work.prices.workSingleVoice);
   const workAll = toCents(work.prices.workAllVoices);
 
   for (const champ of ["movementSingleVoice", "movementAllVoices"] as const) {
     const valeur = work.prices[champ];
-    if (perMovement && valeur === null) {
-      ctx.addIssue({
-        code: "custom",
-        message:
-          "Ce prix est obligatoire dès que l'œuvre a plusieurs mouvements.",
-        path: ["prices", champ],
-      });
-    }
     if (!perMovement && valeur !== null) {
       ctx.addIssue({
         code: "custom",

@@ -125,6 +125,32 @@ export async function syncProductActivation(
 }
 
 /**
+ * Dépublie une oeuvre devenue incomplète, au moment d'un enregistrement.
+ *
+ * @param workId - Oeuvre à examiner.
+ * @returns Vrai si l'oeuvre vient d'être dépubliée.
+ */
+export async function unpublishIfIncomplete(workId: string): Promise<boolean> {
+  const work = await prisma.work.findUnique({
+    where: { id: workId },
+    select: { isPublished: true },
+  });
+  if (!work?.isPublished) return false;
+
+  const manquantes = await summarizeMissingTracks(workId);
+  const actives = await prisma.product.count({
+    where: { workId, isActive: true, isRetired: false },
+  });
+  if (manquantes.incompleteProducts === 0 && actives > 0) return false;
+
+  await prisma.work.update({
+    where: { id: workId },
+    data: { isPublished: false },
+  });
+  return true;
+}
+
+/**
  * Résume ce qui manque à une oeuvre, pour le message de publication.
  *
  * @param workId - Oeuvre à examiner.

@@ -7,6 +7,7 @@ import { requireAdmin } from "@/lib/admin/authorization";
 import {
   summarizeMissingTracks,
   syncProductActivation,
+  unpublishIfIncomplete,
 } from "@/lib/admin/product-activation";
 import {
   workFormSchema,
@@ -181,6 +182,9 @@ async function storePendingTracks(
 
     const valeurs = {
       storageKey: cible,
+      // La clé définitive ne porte que le pupitre, on garde donc le nom
+      // d'origine pour pouvoir le réafficher dans la matrice.
+      originalFilename: track.state.filename,
       durationSeconds: track.state.durationSeconds,
       mimeType: track.state.mimeType,
       sizeBytes: track.state.sizeBytes,
@@ -304,6 +308,7 @@ export async function createWork(input: WorkFormValues): Promise<ActionResult> {
     );
 
     await syncProductActivation(work.id);
+    await unpublishIfIncomplete(work.id);
 
     revalidateCatalog();
     if (range.failed.length > 0) {
@@ -554,9 +559,17 @@ export async function updateWork(
       voiceIdByCode,
     );
 
-    const activation = await syncProductActivation(workId);
+    await syncProductActivation(workId);
+    const depubliee = await unpublishIfIncomplete(workId);
 
     revalidateCatalog();
+    if (depubliee) {
+      return {
+        ok: false,
+        error:
+          "L'œuvre est enregistrée, mais elle a été dépubliée : toutes ses offres ne sont pas couvertes par des pistes audio. Les personnes l'ayant déjà achetée gardent leur accès.",
+      };
+    }
     if (range.failed.length > 0) {
       return {
         ok: false,
@@ -569,8 +582,7 @@ export async function updateWork(
         error: `L'œuvre est enregistrée, mais ${objetsNonSupprimes} fichier(s) audio n'ont pas pu être supprimés du stockage.`,
       };
     }
-    void activation;
-    return { ok: true, workId };
+     return { ok: true, workId };
   } catch (cause) {
     return toFailure(cause);
   }
@@ -591,6 +603,10 @@ export async function publishWork(workId: string): Promise<ActionResult> {
       id: true,
       period: true,
       voicing: true,
+      title: true,
+      composer: true,
+      shortDescription: true,
+      description: true,
       movements: { select: { id: true }, orderBy: { position: "asc" } },
       translations: {
         where: { locale: "en" },
@@ -600,6 +616,19 @@ export async function publishWork(workId: string): Promise<ActionResult> {
   });
 
   if (!work) return { ok: false, error: "Œuvre introuvable." };
+
+  const vides = [
+    !work.title.trim() && "le titre",
+    !work.composer.trim() && "le compositeur",
+    !work.shortDescription?.trim() && "l'accroche",
+    !work.description?.trim() && "la description",
+  ].filter((champ): champ is string => Boolean(champ));
+  if (vides.length > 0) {
+    return {
+      ok: false,
+      error: `Publication impossible, il manque ${vides.join(", ")}.`,
+    };
+  }
 
   if (work.period === null) {
     return {

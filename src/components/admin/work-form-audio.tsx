@@ -5,20 +5,20 @@ import {
   ChevronDown,
   ChevronRight,
   Loader2,
-  Play,
   Trash2,
   Upload,
 } from "lucide-react";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useWatch } from "react-hook-form";
 
 import { Section, useWorkForm } from "@/components/admin/work-form-fields";
 import { Button } from "@/components/ui/button";
-import {
-  requestAudioPlayback,
-  removeAudioTrack,
-} from "@/lib/admin/audio-actions";
+import { removeAudioTrack } from "@/lib/admin/audio-actions";
 import { PER_VOICE_TYPES, trackCellKey } from "@/lib/admin/audio-upload";
+import {
+  deduceFilenames,
+  normalize as normalizeName,
+} from "@/lib/admin/filename-deduction";
 import type { VoiceOption } from "@/lib/admin/voice-options";
 import type { WorkFormDraft } from "@/lib/admin/work-form-draft";
 import { requestAudioUpload } from "@/lib/admin/audio-actions";
@@ -53,7 +53,6 @@ export type StoredTrackMeta = Record<
     filename: string;
     sizeBytes: number | null;
     mimeType: string;
-    durationSeconds: number;
   }
 >;
 
@@ -67,6 +66,8 @@ type Unassigned = {
   sizeBytes: number;
   durationSeconds: number;
   mimeType: string;
+  /** Pourquoi la déduction n'a pas su le placer. */
+  reason?: string;
 };
 
 /** Met une taille en octets sous une forme lisible. */
@@ -158,8 +159,10 @@ export function WorkAudioSection({
   const [deployes, setDeployes] = useState<string[]>([]);
   const [announcement, setAnnouncement] = useState("");
   const [globalError, setGlobalError] = useState<string | null>(null);
-  // Les fichiers restent en mémoire pour pouvoir les écouter avant envoi.
-  const locaux = useRef(new Map<string, string>());
+  // Marque d'affichage seulement, tenue hors du brouillon : une fois la piste
+  // enregistrée, c'est une piste comme une autre.
+  const [douteuses, setDouteuses] = useState<string[]>([]);
+  const [recap, setRecap] = useState<string | null>(null);
   const globalInputId = useId();
 
   const busy = Object.values(uploads).some((etat) => etat.error === null);
@@ -210,7 +213,10 @@ export function WorkAudioSection({
 
   /** Remplace la case visée dans le brouillon. */
   function writeTrack(next: Track) {
-    const autres = tracks.filter(
+    // On relit la valeur vive du formulaire, pas celle de la passe de rendu :
+    // un dépôt multiple écrit plusieurs pistes dans la même fermeture, et une
+    // liste figée ferait écraser chaque piste par la suivante.
+    const autres = (form.getValues("tracks") as Track[]).filter(
       (track) =>
         !(
           track.movementKey === next.movementKey &&
@@ -291,7 +297,6 @@ export function WorkAudioSection({
       return null;
     }
 
-    locaux.current.set(ticket.uploadId, URL.createObjectURL(file));
     setUploads((etat) => {
       const suite = { ...etat };
       delete suite[cellKey];
@@ -326,13 +331,83 @@ export function WorkAudioSection({
     });
   }
 
-  /** Envoie des fichiers déposés globalement, sans les placer. */
+  /**
+   * Envoie des fichiers déposés globalement, en les plaçant si le nom le dit.
+   */
   async function uploadUnassigned(files: FileList) {
     setGlobalError(null);
-    for (const file of Array.from(files)) {
-      const envoye = await upload(file, `global-${file.name}`);
-      if (envoye) setUnassigned((liste) => [...liste, envoye]);
+    setRecap(null);
+
+    const liste = Array.from(files);
+    const lot = deduceFilenames(
+      liste.map((file) => file.name),
+      {
+        movements: movements.map((movement) => ({
+          key: movement.key,
+          title: movement.title,
+        })),
+        voices: retenus,
+        hasAccompaniment: Boolean(hasAccompaniment),
+        occupied: (form.getValues("tracks") as Track[]).map((track) =>
+          trackCellKey(track.movementKey, track.voiceCode, track.type),
+        ),
+      },
+    );
+
+    const parNom = new Map(liste.map((file) => [file.name, file]));
+    let places = 0;
+    let aVerifier = 0;
+    let restants = 0;
+
+    for (const placement of lot.placed) {
+      const file = parNom.get(placement.filename);
+      if (!file) continue;
+      const cellKey = trackCellKey(
+        placement.movementKey,
+        placement.voiceCode,
+        placement.type,
+      );
+      const envoye = await upload(file, cellKey);
+      if (!envoye) continue;
+      writeTrack({
+        movementKey: placement.movementKey,
+        voiceCode: placement.voiceCode,
+        type: placement.type,
+        state: { kind: "pending", ...envoye },
+      });
+      places += 1;
+      if (placement.confidence === "probable") {
+        aVerifier += 1;
+        setDouteuses((cles) =>
+          cles.includes(cellKey) ? cles : [...cles, cellKey],
+        );
+      }
     }
+
+    for (const refus of lot.rejected) {
+      const file = parNom.get(refus.filename);
+      if (!file) continue;
+      const envoye = await upload(file, `global-${refus.filename}`);
+      if (!envoye) continue;
+      setUnassigned((autres) => [
+        ...autres,
+        { ...envoye, reason: refus.reason },
+      ]);
+      restants += 1;
+    }
+
+    const phrase = [
+      `${places} fichier${places > 1 ? "s" : ""} placé${places > 1 ? "s" : ""}`,
+      `${aVerifier} à vérifier`,
+      `${restants} à classer à la main`,
+    ].join(", ");
+    setRecap(phrase);
+    setAnnouncement(phrase);
+  }
+
+  /** Lève la marque à vérifier d'une case. */
+  function confirmer(cellKey: string) {
+    setDouteuses((cles) => cles.filter((autre) => autre !== cellKey));
   }
 
   /** Place un fichier non associé dans une case. */
@@ -346,21 +421,6 @@ export function WorkAudioSection({
     });
     setUnassigned((liste) => liste.filter((autre) => autre !== item));
     setAnnouncement(`${item.filename} placé.`);
-  }
-
-  /** Écoute une piste, déjà enregistrée ou fraîchement déposée. */
-  async function play(track: Track) {
-    if (track.state.kind === "pending") {
-      const url = locaux.current.get(track.state.uploadId);
-      if (url) new Audio(url).play();
-      return;
-    }
-    const lecture = await requestAudioPlayback(track.state.audioFileId);
-    if (!lecture.ok) {
-      setGlobalError(lecture.error);
-      return;
-    }
-    new Audio(lecture.url).play();
   }
 
   /** Retire une piste, en supprimant l'objet si elle est déjà en base. */
@@ -415,12 +475,46 @@ export function WorkAudioSection({
         </p>
       ) : (
         <>
-          <DropZone
-            id={globalInputId}
-            label="Déposer plusieurs fichiers d'un coup"
-            hint="Ils iront dans la liste ci dessous, à placer à la main."
-            onFiles={uploadUnassigned}
-          />
+          <div className="flex flex-col gap-2">
+            <DropZone
+              id={globalInputId}
+              label="Déposer plusieurs fichiers d'un coup"
+              hint="Ils se rangent tout seuls si leur nom suit la convention."
+              onFiles={uploadUnassigned}
+            />
+
+            <div className="rounded-xl border border-border bg-secondary/30 p-3 text-xs text-muted-foreground">
+              <p className="font-medium text-foreground">
+                Comment nommer les fichiers
+              </p>
+              <p className="mt-1">
+                mouvement-pupitre-type.extension, séparés par des tirets
+                simples. Exemple :{" "}
+                <span className="font-medium text-foreground">
+                  {(movements[0]?.title
+                    ? normalizeName(movements[0].title)
+                    : "kyrie") +
+                    "-" +
+                    (retenus[0] ? normalizeName(retenus[0].code) : "soprano") +
+                    "-predom.wav"}
+                </span>
+              </p>
+              <p className="mt-1">
+                {plusieurs
+                  ? "Le mouvement est obligatoire, cette œuvre en compte plusieurs."
+                  : "Le mouvement est facultatif, cette œuvre n'en a qu'un."}{" "}
+                Tutti et accompagnement s&apos;écrivent sans pupitre. Les
+                abréviations passent aussi, sop, s, ms, ct, ainsi que predom,
+                mix, apercu.
+              </p>
+            </div>
+
+            {recap ? (
+              <p role="status" className="text-xs text-muted-foreground">
+                {recap}
+              </p>
+            ) : null}
+          </div>
 
           {unassigned.length > 0 ? (
             <ul className="flex flex-col gap-2 rounded-xl border border-border p-3">
@@ -429,11 +523,18 @@ export function WorkAudioSection({
                   key={item.uploadId}
                   className="flex flex-wrap items-center gap-3 text-sm"
                 >
-                  <span className="min-w-0 flex-1 truncate">
-                    {item.filename}{" "}
-                    <span className="text-xs text-muted-foreground">
-                      {formatSize(item.sizeBytes)}
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate">
+                      {item.filename}{" "}
+                      <span className="text-xs text-muted-foreground">
+                        {formatSize(item.sizeBytes)}
+                      </span>
                     </span>
+                    {item.reason ? (
+                      <span className="block text-xs text-muted-foreground">
+                        {item.reason}
+                      </span>
+                    ) : null}
                   </span>
                   <label className="flex items-center gap-2 text-xs">
                     <span className="sr-only">Placer {item.filename}</span>
@@ -544,11 +645,18 @@ export function WorkAudioSection({
                                 ]
                               }
                               name={`${voice.label}, ${TYPE_LABELS[type]}, ${movement.title || "sans titre"}`}
+                              douteuse={douteuses.includes(
+                                trackCellKey(movement.key, voice.code, type),
+                              )}
                               onFile={(file) =>
                                 uploadInto(file, movement.key, voice.code, type)
                               }
-                              onPlay={play}
                               onRemove={remove}
+                              onConfirm={() =>
+                                confirmer(
+                                  trackCellKey(movement.key, voice.code, type),
+                                )
+                              }
                             />
                           )}
                         />
@@ -578,11 +686,16 @@ export function WorkAudioSection({
                         meta={storedMeta}
                         upload={uploads[trackCellKey(movement.key, null, type)]}
                         name={`${TYPE_LABELS[type]}, ${movement.title || "sans titre"}`}
+                        douteuse={douteuses.includes(
+                          trackCellKey(movement.key, null, type),
+                        )}
                         onFile={(file) =>
                           uploadInto(file, movement.key, null, type)
                         }
-                        onPlay={play}
                         onRemove={remove}
+                        onConfirm={() =>
+                          confirmer(trackCellKey(movement.key, null, type))
+                        }
                       />
                     )}
                   />
@@ -713,17 +826,20 @@ function Cell({
   meta,
   upload,
   name,
+  douteuse,
   onFile,
-  onPlay,
   onRemove,
+  onConfirm,
 }: {
   track: Track | undefined;
   meta: StoredTrackMeta;
   upload: UploadState | undefined;
   name: string;
+  /** Vrai quand la déduction n'était que probable. */
+  douteuse?: boolean;
   onFile: (file: File) => void;
-  onPlay: (track: Track) => void;
   onRemove: (track: Track) => void;
+  onConfirm?: () => void;
 }) {
   const inputId = useId();
 
@@ -762,11 +878,26 @@ function Cell({
           }
         : meta[state.audioFileId];
     return (
-      <div className="flex items-center gap-1">
+      <div
+        className={
+          douteuse
+            ? "flex items-center gap-1 rounded-lg border border-primary/60 bg-primary/5 p-1"
+            : "flex items-center gap-1"
+        }
+      >
         <span className="min-w-0 flex-1">
           <span className="block truncate text-xs" title={infos?.filename}>
             {infos?.filename ?? "Enregistrée"}
           </span>
+          {douteuse ? (
+            <button
+              type="button"
+              onClick={onConfirm}
+              className="block cursor-pointer text-[0.625rem] font-medium text-primary underline"
+            >
+              À vérifier, cliquez pour valider
+            </button>
+          ) : null}
           <span className="block text-[0.625rem] text-muted-foreground">
             {infos
               ? [
@@ -779,16 +910,6 @@ function Cell({
               : "déjà en base"}
           </span>
         </span>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => onPlay(track)}
-          className="size-6 shrink-0 cursor-pointer rounded-full p-0"
-        >
-          <Play className="size-3" aria-hidden="true" />
-          <span className="sr-only">Écouter {name}</span>
-        </Button>
         <Button
           type="button"
           variant="ghost"

@@ -82,6 +82,12 @@ export function buildProductRows(
   const rows: Prisma.ProductCreateManyWorkInput[] = [];
   let position = 1;
 
+  // Sans prix d'oeuvre, aucune offre n'est vendable : un brouillon peut très
+  // bien n'en avoir aucune, publishWork refusera de le publier.
+  if (prices.workSingleVoice === null || prices.workAllVoices === null) {
+    return rows;
+  }
+
   if (
     sellsPerMovement(movements.length) &&
     prices.movementSingleVoice !== null &&

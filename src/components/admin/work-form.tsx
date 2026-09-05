@@ -1,11 +1,12 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Loader2, TriangleAlert } from "lucide-react";
 import { useRef, useState } from "react";
 import {
   FormProvider,
   useForm,
+  useWatch,
   type FieldPath,
   type Resolver,
 } from "react-hook-form";
@@ -32,6 +33,7 @@ import {
   workFormSchema,
   type WorkFormValues,
 } from "@/lib/admin/work-form-schema";
+import { expectedTrackCount } from "@/lib/admin/track-coverage";
 import { slugify } from "@/lib/admin/work-products";
 import { cn } from "@/lib/utils";
 
@@ -160,9 +162,22 @@ export function WorkForm({
     }
   });
 
+  // Une oeuvre est complète quand toutes les cases de la matrice sont
+  // remplies
+  const control = form.control;
+  const mouvements = useWatch({ control, name: "movements" }) ?? [];
+  const pupitres = useWatch({ control, name: "voiceCodes" }) ?? [];
+  const pistes = useWatch({ control, name: "tracks" }) ?? [];
+  const accompagnement = useWatch({ control, name: "hasAccompaniment" });
+  const attendues = expectedTrackCount({
+    movementCount: mouvements.length,
+    voiceCount: pupitres.length,
+    hasAccompaniment: Boolean(accompagnement),
+  });
+  const incomplete = attendues === 0 || pistes.length < attendues;
+  const depubliera = Boolean(publication?.isPublished) && incomplete;
+
   const enCours = form.formState.isSubmitting;
-  // On ne compare rien avec la base, react-hook-form sait seul si l'admin a
-  // touché à quelque chose depuis le chargement.
   const modifie = form.formState.isDirty;
 
   return (
@@ -214,6 +229,28 @@ export function WorkForm({
             </Button>
           </div>
         </div>
+
+        {depubliera ? (
+          <p
+            role="status"
+            className="flex items-start gap-2 rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm"
+          >
+            <TriangleAlert
+              className="mt-0.5 size-4 shrink-0 text-primary"
+              aria-hidden="true"
+            />
+            <span>
+              Il manque {Math.max(0, attendues - pistes.length)} piste
+              {attendues - pistes.length > 1 ? "s" : ""} sur {attendues} pour
+              que toutes les offres soient vendables.{" "}
+              <span className="text-foreground">
+                Enregistrer dans cet état dépubliera cette œuvre
+              </span>
+              , elle ne sera plus accessible aux personnes ne l&apos;ayant pas
+              achetée.
+            </span>
+          </p>
+        ) : null}
 
         {erreurGlobale ? (
           <p

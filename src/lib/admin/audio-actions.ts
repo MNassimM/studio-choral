@@ -8,11 +8,7 @@ import {
 } from "@/lib/admin/audio-upload";
 import { syncProductActivation } from "@/lib/admin/product-activation";
 import { prisma } from "@/lib/db/prisma";
-import {
-  buildDownloadFilename,
-  buildPendingKey,
-  storage,
-} from "@/lib/storage/storage";
+import { buildPendingKey, storage } from "@/lib/storage/storage";
 
 /**
  * Actions de téléversement audio, le pont entre le navigateur et lib/storage.
@@ -28,10 +24,6 @@ export type UploadTicketResult =
       expiresAt: Date;
     }
   | { ok: false; error: string };
-
-/** Ce que renvoie une demande d'URL de lecture. */
-export type PlaybackResult =
-  { ok: true; url: string; expiresAt: Date } | { ok: false; error: string };
 
 /** Ce que renvoie le retrait d'une piste. */
 export type RemoveTrackResult =
@@ -72,56 +64,6 @@ export async function requestAudioUpload(
     url: signed.url,
     expiresAt: signed.expiresAt,
   };
-}
-
-/**
- * Signe la lecture d'une piste déjà enregistrée.
- *
- * @param audioFileId - Identifiant de la piste à écouter.
- * @param asDownload - Vrai pour forcer un téléchargement plutôt qu'une écoute.
- * @returns L'URL de lecture.
- */
-export async function requestAudioPlayback(
-  audioFileId: string,
-  asDownload = false,
-): Promise<PlaybackResult> {
-  await requireAdmin();
-
-  const piste = await prisma.audioFile.findUnique({
-    where: { id: audioFileId },
-    select: {
-      storageKey: true,
-      type: true,
-      voice: { select: { label: true } },
-      movement: {
-        select: { title: true, work: { select: { title: true } } },
-      },
-    },
-  });
-
-  if (!piste) return { ok: false, error: "Piste introuvable." };
-
-  const extension = piste.storageKey.split(".").pop() ?? "wav";
-  const downloadAs = asDownload
-    ? buildDownloadFilename(
-        piste.movement.work.title,
-        piste.movement.title,
-        piste.voice?.label ?? null,
-        extension,
-      )
-    : undefined;
-
-  const signed = await storage.signDownload({
-    key: piste.storageKey,
-    ...(downloadAs ? { downloadAs } : {}),
-  });
-
-  if (!signed.ok) {
-    console.error("audio-actions signDownload", signed.error);
-    return { ok: false, error: "La lecture n'a pas pu être préparée." };
-  }
-
-  return { ok: true, url: signed.url, expiresAt: signed.expiresAt };
 }
 
 /**

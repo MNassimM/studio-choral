@@ -139,12 +139,13 @@ test("une voix sur l'oeuvre moins chère que sur un mouvement est refusée", () 
   assert.ok(erreurs.includes("prices.workSingleVoice"));
 });
 
-test("plusieurs mouvements exigent les prix de mouvement", () => {
-  const erreurs = chemins({
+test("un brouillon accepte de n'avoir aucun prix de mouvement", () => {
+  // C'est publishWork qui exige des offres complètes, pas l'enregistrement.
+  const result = workFormSchema.safeParse({
     ...messe,
     prices: { ...messe.prices, movementSingleVoice: null },
   });
-  assert.ok(erreurs.includes("prices.movementSingleVoice"));
+  assert.equal(result.success, true);
 });
 
 test("un mouvement unique refuse les prix de mouvement", () => {
@@ -155,14 +156,59 @@ test("un mouvement unique refuse les prix de mouvement", () => {
   assert.ok(erreurs.includes("prices.movementAllVoices"));
 });
 
-test("une oeuvre sans mouvement est refusée", () => {
-  const erreurs = chemins({ ...messe, movements: [] });
-  assert.ok(erreurs.includes("movements"));
+test("un brouillon accepte de n'avoir aucun mouvement", () => {
+  const result = workFormSchema.safeParse({
+    ...messe,
+    movements: [],
+    tracks: [],
+    prices: {
+      ...messe.prices,
+      movementSingleVoice: null,
+      movementAllVoices: null,
+    },
+  });
+  assert.equal(result.success, true);
 });
 
-test("une oeuvre sans pupitre est refusée", () => {
-  const erreurs = chemins({ ...messe, voiceCodes: [] });
-  assert.ok(erreurs.includes("voiceCodes"));
+test("un brouillon accepte de n'avoir aucun pupitre", () => {
+  const result = workFormSchema.safeParse({
+    ...messe,
+    voiceCodes: [],
+    prices: {
+      movementSingleVoice: null,
+      movementAllVoices: null,
+      workSingleVoice: null,
+      workAllVoices: null,
+    },
+  });
+  assert.equal(result.success, true);
+});
+
+test("un brouillon presque vide passe, seul le titre est exigé", () => {
+  const result = workFormSchema.safeParse({
+    ...messe,
+    composer: "",
+    shortDescription: "",
+    description: "",
+    period: null,
+    voicing: null,
+    language: null,
+    composedYear: null,
+    voiceCodes: [],
+    movements: [],
+    tracks: [],
+    prices: {
+      movementSingleVoice: null,
+      movementAllVoices: null,
+      workSingleVoice: null,
+      workAllVoices: null,
+    },
+  });
+  assert.equal(result.success, true);
+});
+
+test("le titre reste exigé, le slug en dérive et il est unique en base", () => {
+  assert.deepEqual(chemins({ ...messe, title: "" }), ["title"]);
 });
 
 test("un pupitre en double est refusé", () => {
