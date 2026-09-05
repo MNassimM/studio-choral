@@ -185,10 +185,21 @@ export function WorkForm({
       <form onSubmit={onSubmit} noValidate className="flex flex-col gap-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-col gap-1">
-            <p className="text-xs text-muted-foreground">
-              Administration · Œuvres ·{" "}
-              {mode === "create" ? "Nouvelle" : "Modifier"}
-            </p>
+          <nav
+            className="text-sm text-muted-foreground"
+          >
+            <Link href="/admin" className="hover:text-primary !underline">
+              Administration
+            </Link>
+            <span className="mx-2">-{">"}</span>
+            <Link href="/admin/works" className="hover:text-primary !underline">
+              Liste des œuvres
+            </Link>
+            <span className="mx-2">-{">"}</span>
+            <span aria-current="page" className="text-foreground">
+               {mode === "create" ? "Nouvelle" : "Modifier"} œuvre
+            </span>
+          </nav>
             <h1 className="font-serif text-3xl tracking-tight">
               {mode === "create"
                 ? "Créer une nouvelle œuvre"
