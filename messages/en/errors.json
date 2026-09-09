@@ -3,5 +3,12 @@
     "title": "Page not found",
     "description": "The page you're looking for doesn't exist or has been moved.",
     "backHome": "Back to home"
+  },
+  "unexpected": {
+    "title": "Something went wrong",
+    "description": "This page could not be displayed. The issue may be temporary, so trying again is often enough.",
+    "retry": "Try again",
+    "backHome": "Back to home",
+    "reference": "Incident reference"
   }
 }
