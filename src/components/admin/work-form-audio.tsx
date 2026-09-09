@@ -902,7 +902,7 @@ function Cell({
             {infos
               ? [
                   infos.sizeBytes === null ? null : formatSize(infos.sizeBytes),
-                  infos.mimeType.split("/").pop(),
+                  infos.filename?.split(".").findLast((s) => s) ?? null,
                   state.kind === "stored" ? "en base" : null,
                 ]
                   .filter(Boolean)
