@@ -714,7 +714,27 @@ export async function deleteWork(workId: string): Promise<ActionResult> {
     };
   }
 
+  const pistes = await prisma.audioFile.findMany({
+    where: { movement: { workId } },
+    select: { storageKey: true },
+  });
+
+  let objetsNonSupprimes = 0;
+  for (const piste of pistes) {
+    const efface = await storage.deleteObject(piste.storageKey);
+    if (!efface.ok) {
+      console.error("work-actions deleteWork orphelin", efface.error);
+      objetsNonSupprimes += 1;
+    }
+  }
+
   await prisma.work.delete({ where: { id: workId } });
+
+  if (objetsNonSupprimes > 0) {
+    console.error(
+      `work-actions deleteWork : ${objetsNonSupprimes} objet(s) restés en place sur ${pistes.length}.`,
+    );
+  }
 
   revalidateCatalog();
   return { ok: true, workId };
