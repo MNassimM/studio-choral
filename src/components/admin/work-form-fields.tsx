@@ -150,37 +150,4 @@ function SectionAVenir({
   );
 }
 
-/** Champ de prix en euros, vide valant absence de prix. */
-function ChampPrix({
-  label,
-  name,
-}: {
-  label: string;
-  name:
-    | "prices.movementSingleVoice"
-    | "prices.movementAllVoices"
-    | "prices.workSingleVoice"
-    | "prices.workAllVoices";
-}) {
-  const form = useWorkForm();
-
-  return (
-    <Champ label={label} name={name}>
-      {(aria) => (
-        <Input
-          {...aria}
-          type="number"
-          step="0.01"
-          min="0"
-          inputMode="decimal"
-          {...form.register(name, {
-            setValueAs: (value) =>
-              value === "" || value === null ? null : Number(value),
-          })}
-        />
-      )}
-    </Champ>
-  );
-}
-
-export { Champ, ChampPrix, Section, SectionAVenir };
+export { Champ, Section, SectionAVenir };
