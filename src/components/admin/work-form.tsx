@@ -14,7 +14,7 @@ import {
 import {
   WorkAudioSection,
   type StoredTrackMeta,
-} from "@/components/admin/work-form-audio";
+} from "@/components/admin/audio-matrix/work-form-audio";
 import { SectionAVenir } from "@/components/admin/work-form-fields";
 import { WorkMovementsSection } from "@/components/admin/work-form-movements";
 import { WorkMusicSection } from "@/components/admin/work-form-music";
