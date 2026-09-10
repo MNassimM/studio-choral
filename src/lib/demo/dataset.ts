@@ -252,118 +252,20 @@ export const DEMO_VOICES: DemoVoice[] = [
   { code: "BASS", label: "Basse", position: 9 },
 ];
 
-export type DemoAudioType =
-  "TUTTI" | "PREDOMINANT" | "SOLO" | "ACCOMPANIMENT" | "PREVIEW";
-
-export type DemoAudioTrack = {
-  workSlug: string;
-  movementSlug: string;
-  voiceCode: SatbVoiceCode | null;
-  type: DemoAudioType;
-  storageKey: string;
-  durationSeconds: number;
-  mimeType: string;
-};
-
-/**
- * Construit la clé de stockage d'un fichier audio.
+/*
+ * Les pistes audio ne sont plus décrites ici.
  *
- * @param workSlug - Slug de l'oeuvre.
- * @param movementSlug - Slug du mouvement.
- * @param fileName - Nom du fichier, extension comprise.
- * @returns La clé de stockage relative.
- */
-function buildStorageKey(
-  workSlug: string,
-  movementSlug: string,
-  fileName: string,
-): string {
-  return `${workSlug}/${movementSlug}/${fileName}`;
-}
-
-/**
- * Calcule la liste complète des pistes audio de démonstration attendues.
+ * Elles l'étaient, avec des storageKey au format `<oeuvre>/<mouvement>/<fichier>`
+ * qui ne désignaient AUCUN objet réel dans le bucket. La couverture les comptait
+ * pourtant comme présentes, ce qui rendait les oeuvres de démonstration
+ * publiables sans qu'un seul fichier existe, et aurait fait signer des URL vers
+ * le vide au moment de brancher le téléchargement.
  *
- * @returns Toutes les pistes attendues par le catalogue de démonstration.
+ * Les fichiers de `public/demo-audio/` sont désormais nommés selon la convention
+ * d'import, `<mouvement>-<pupitre>-<type>.wav`, et s'importent à la main par la
+ * matrice de la page d'administration. La base ne connaît donc que des pistes
+ * réellement téléversées.
  */
-export function buildDemoAudioTracks(): DemoAudioTrack[] {
-  const tracks: DemoAudioTrack[] = [];
-
-  for (const work of DEMO_CATALOG) {
-    for (const movement of work.movements) {
-      const base = { workSlug: work.slug, movementSlug: movement.slug };
-
-      tracks.push({
-        ...base,
-        voiceCode: null,
-        type: "TUTTI",
-        storageKey: buildStorageKey(work.slug, movement.slug, "tutti.wav"),
-        durationSeconds: 12,
-        mimeType: "audio/wav",
-      });
-
-      for (const voiceCode of SATB_VOICE_CODES) {
-        const lower = voiceCode.toLowerCase();
-
-        tracks.push({
-          ...base,
-          voiceCode,
-          type: "PREDOMINANT",
-          storageKey: buildStorageKey(
-            work.slug,
-            movement.slug,
-            `${lower}-predominant.wav`,
-          ),
-          durationSeconds: 12,
-          mimeType: "audio/wav",
-        });
-
-        tracks.push({
-          ...base,
-          voiceCode,
-          type: "SOLO",
-          storageKey: buildStorageKey(
-            work.slug,
-            movement.slug,
-            `${lower}-solo.wav`,
-          ),
-          durationSeconds: 12,
-          mimeType: "audio/wav",
-        });
-
-        tracks.push({
-          ...base,
-          voiceCode,
-          type: "PREVIEW",
-          storageKey: buildStorageKey(
-            work.slug,
-            movement.slug,
-            `${lower}-preview.wav`,
-          ),
-          durationSeconds: 6,
-          mimeType: "audio/wav",
-        });
-      }
-
-      if (movement.hasAccompaniment) {
-        tracks.push({
-          ...base,
-          voiceCode: null,
-          type: "ACCOMPANIMENT",
-          storageKey: buildStorageKey(
-            work.slug,
-            movement.slug,
-            "accompaniment.wav",
-          ),
-          durationSeconds: 12,
-          mimeType: "audio/wav",
-        });
-      }
-    }
-  }
-
-  return tracks;
-}
 
 const VOICE_LABEL_BY_CODE: Record<SatbVoiceCode, string> = {
   SOPRANO: "Soprano",

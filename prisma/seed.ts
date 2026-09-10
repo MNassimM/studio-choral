@@ -2,7 +2,6 @@ import { PrismaPg } from "@prisma/adapter-pg";
 
 import { PrismaClient } from "../src/generated/prisma/client";
 import {
-  buildDemoAudioTracks,
   buildDemoProducts,
   DEMO_CATALOG,
   DEMO_LIBRARY_ITEMS,
@@ -149,105 +148,6 @@ async function seedWorkTranslations(workIdBySlug: Map<string, string>) {
         `  ${existing ? "= déjà présente" : "+ créée"} : ${work.slug} (${translation.locale})`,
       );
     }
-  }
-}
-
-async function seedAudioFiles(
-  movementIdByKey: Map<string, string>,
-  voiceIdByCode: Map<string, string>,
-) {
-  console.log("Fichiers audio (AudioFile) :");
-  const tracks = buildDemoAudioTracks();
-
-  // Compteurs par mouvement pour un résumé lisible (créés vs déjà présents),
-  // plutôt qu'une ligne par piste.
-  const summaryByMovementKey = new Map<
-    string,
-    { created: number; existing: number }
-  >();
-
-  for (const track of tracks) {
-    const movementKey = `${track.workSlug}/${track.movementSlug}`;
-    const movementId = movementIdByKey.get(movementKey);
-    if (!movementId) {
-      throw new Error(`Mouvement introuvable pour la piste "${movementKey}"`);
-    }
-
-    const voiceId = track.voiceCode
-      ? (voiceIdByCode.get(track.voiceCode) ?? null)
-      : null;
-    if (track.voiceCode && !voiceId) {
-      throw new Error(`Voix introuvable : "${track.voiceCode}"`);
-    }
-
-    const data = {
-      movementId,
-      voiceId,
-      type: track.type,
-      storageKey: track.storageKey,
-      durationSeconds: track.durationSeconds,
-      mimeType: track.mimeType,
-    };
-
-    let wasExisting: boolean;
-
-    if (voiceId) {
-      // voiceId non NULL : la contrainte @@unique([movementId, voiceId, type])
-      // fonctionne normalement avec upsert.
-      const existing = await prisma.audioFile.findUnique({
-        where: {
-          movementId_voiceId_type: {
-            movementId,
-            voiceId,
-            type: track.type,
-          },
-        },
-      });
-      wasExisting = existing !== null;
-
-      await prisma.audioFile.upsert({
-        where: {
-          movementId_voiceId_type: {
-            movementId,
-            voiceId,
-            type: track.type,
-          },
-        },
-        update: data,
-        create: data,
-      });
-    } else {
-      // voiceId NULL (TUTTI / ACCOMPANIMENT) : Postgres traite chaque NULL
-      // comme distinct, donc l'unique composite ne peut pas cibler ces lignes
-      // via upsert. On cherche à la main puis on crée ou met à jour par id.
-      const existing = await prisma.audioFile.findFirst({
-        where: { movementId, voiceId: null, type: track.type },
-      });
-      wasExisting = existing !== null;
-
-      if (existing) {
-        await prisma.audioFile.update({ where: { id: existing.id }, data });
-      } else {
-        await prisma.audioFile.create({ data });
-      }
-    }
-
-    const summary = summaryByMovementKey.get(movementKey) ?? {
-      created: 0,
-      existing: 0,
-    };
-    if (wasExisting) {
-      summary.existing++;
-    } else {
-      summary.created++;
-    }
-    summaryByMovementKey.set(movementKey, summary);
-  }
-
-  for (const [movementKey, summary] of summaryByMovementKey) {
-    console.log(
-      `  ${movementKey} : ${summary.created} créée(s), ${summary.existing} déjà présente(s)`,
-    );
   }
 }
 
@@ -457,7 +357,6 @@ async function main() {
   const voiceIdByCode = await seedVoices();
   const { workIdBySlug, movementIdByKey } = await seedWorksAndMovements();
   await seedWorkTranslations(workIdBySlug);
-  await seedAudioFiles(movementIdByKey, voiceIdByCode);
   await seedProducts(workIdBySlug, movementIdByKey, voiceIdByCode);
   const userIdByEmail = await seedUsers();
   await seedLibraryItems(
