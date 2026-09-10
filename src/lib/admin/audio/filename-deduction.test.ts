@@ -7,6 +7,10 @@ import {
   type MatrixContext,
 } from "@/lib/admin/audio/filename-deduction";
 
+console.log(
+  "▶ src/lib/admin/audio/filename-deduction.ts — déduction du placement d'un fichier depuis son nom",
+);
+
 /**
  * Déduction du placement depuis le nom de fichier.
  */

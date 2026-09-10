@@ -8,6 +8,10 @@ import {
 } from "@/lib/cart/cart-serialization";
 import type { CartItem } from "@/lib/cart/types";
 
+console.log(
+  "▶ src/lib/cart/cart-serialization.ts — écriture et relecture défensive du panier conservé",
+);
+
 const ligne: CartItem = {
   sku: "MESSE-KYRIE-ALTO",
   workId: "work-messe",

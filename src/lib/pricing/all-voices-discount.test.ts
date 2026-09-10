@@ -6,6 +6,10 @@ import {
   computeAllVoicesSaving,
 } from "@/lib/pricing/all-voices-discount";
 
+console.log(
+  "▶ src/lib/pricing/all-voices-discount.ts — remise proportionnelle et économie du pack toutes voix",
+);
+
 test("aucune voix possédée -> pas de remise", () => {
   const result = computeAllVoicesDiscount(
     { ownedUnits: 0, totalUnits: 24 },

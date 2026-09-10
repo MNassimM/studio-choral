@@ -11,6 +11,10 @@ import {
 } from "@/lib/access/rules";
 import type { Grant, WorkAccessInput } from "@/types/domain";
 
+console.log(
+  "▶ src/lib/access/rules.ts — résolution des droits, capacités par piste et absorption",
+);
+
 const SATB = ["SOPRANO", "ALTO", "TENOR", "BASS"];
 
 // Œuvre de test : 2 mouvements, 4 pupitres chacun

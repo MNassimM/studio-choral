@@ -3,6 +3,10 @@ import assert from "node:assert/strict";
 
 import { toCents, workFormSchema } from "@/lib/admin/form/work-form-schema";
 
+console.log(
+  "▶ src/lib/admin/form/work-form-schema.ts — le schéma de brouillon d'œuvre et ses règles tarifaires",
+);
+
 const SATB = ["SOPRANO", "ALTO", "TENOR", "BASS"];
 
 // Oeuvre de test : 6 mouvements, 4 pupitres, prix repris de la Messe en sol.

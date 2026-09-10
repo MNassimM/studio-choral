@@ -6,6 +6,10 @@ import {
   resolveNameToStore,
 } from "@/lib/auth/google-profile";
 
+console.log(
+  "▶ src/lib/auth/google-profile.ts — normalisation du profil Google : adresse et nom à conserver",
+);
+
 test("une adresse déjà en minuscules est laissée telle quelle", () => {
   const user = mapGoogleProfile({
     sub: "1234567890",

@@ -5,6 +5,10 @@ import { groupCartLines } from "@/lib/cart/cart-grouping";
 import type { ResolvedCartLine } from "@/lib/cart/resolved-cart";
 import type { CartItem } from "@/lib/cart/types";
 
+console.log(
+  "▶ src/lib/cart/cart-grouping.ts — regroupement des lignes du panier par œuvre puis mouvement",
+);
+
 function line(over: Partial<CartItem> & { sku: string }): CartItem {
   return {
     workId: "w1",

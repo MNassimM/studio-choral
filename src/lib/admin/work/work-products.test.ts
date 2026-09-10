@@ -8,6 +8,10 @@ import {
   uniqueSlugs,
 } from "@/lib/admin/work/work-products";
 
+console.log(
+  "▶ src/lib/admin/work/work-products.ts — génération des offres, des slugs et des références",
+);
+
 const VOICES = [
   { id: "v-s", code: "SOPRANO", label: "Soprano" },
   { id: "v-a", code: "ALTO", label: "Alto" },

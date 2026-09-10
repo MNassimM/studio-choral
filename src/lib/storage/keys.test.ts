@@ -14,6 +14,10 @@ import {
   sanitizeSegment,
 } from "@/lib/storage/keys";
 
+console.log(
+  "▶ src/lib/storage/keys.ts — construction et validation des clés d'objets",
+);
+
 // Identifiants de base d'une piste de la Messe, tels qu'ils existent vraiment.
 const WORK_ID = "cmsxmdiga0004wc3bdplkj77t";
 const MOVEMENT_ID = "cmsxmdign0005wc3bm6jxoj1p";

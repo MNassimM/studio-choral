@@ -10,6 +10,10 @@ import {
 } from "@/lib/pricing/cart-pricing";
 import type { Grant, WorkAccessInput } from "@/types/domain";
 
+console.log(
+  "▶ src/lib/pricing/cart-pricing.ts — tarification du panier : cellules, union et remises",
+);
+
 const SATB = ["S", "A", "T", "B"];
 
 const LAYOUT: WorkAccessInput = {

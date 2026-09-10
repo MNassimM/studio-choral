@@ -10,6 +10,10 @@ import {
   requiredCellsFor,
 } from "@/lib/admin/sellability/track-coverage";
 
+console.log(
+  "▶ src/lib/admin/sellability/track-coverage.ts — cases attendues d'une œuvre et couverture d'une offre",
+);
+
 test("un mouvement SATB sans accompagnement attend treize pistes", () => {
   assert.equal(
     expectedTrackCount({

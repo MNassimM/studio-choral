@@ -6,6 +6,10 @@ import {
   safeRedirectTarget,
 } from "@/lib/auth/redirect-target";
 
+console.log(
+  "▶ src/lib/auth/redirect-target.ts — sûreté d'une cible de redirection après connexion",
+);
+
 test("un chemin interne simple est accepté", () => {
   assert.equal(isSafeRedirectTarget("/compte"), true);
   assert.equal(isSafeRedirectTarget("/en/account"), true);
@@ -13,13 +17,22 @@ test("un chemin interne simple est accepté", () => {
 });
 
 test("un chemin interne avec query et fragment est accepté", () => {
-  assert.equal(isSafeRedirectTarget("/catalogue?view=list&sort=title-asc"), true);
-  assert.equal(isSafeRedirectTarget("/oeuvres/messe-en-sol-majeur#offres"), true);
+  assert.equal(
+    isSafeRedirectTarget("/catalogue?view=list&sort=title-asc"),
+    true,
+  );
+  assert.equal(
+    isSafeRedirectTarget("/oeuvres/messe-en-sol-majeur#offres"),
+    true,
+  );
 });
 
 test("une URL absolue vers un domaine externe est refusée", () => {
   assert.equal(isSafeRedirectTarget("https://exemple-malveillant.test"), false);
-  assert.equal(isSafeRedirectTarget("http://exemple-malveillant.test/x"), false);
+  assert.equal(
+    isSafeRedirectTarget("http://exemple-malveillant.test/x"),
+    false,
+  );
   assert.equal(safeRedirectTarget("https://exemple-malveillant.test"), "/");
 });
 

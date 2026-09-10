@@ -7,6 +7,10 @@ import {
   type SelectableOffer,
 } from "@/lib/works/voice-selection";
 
+console.log(
+  "▶ src/lib/works/voice-selection.ts — sélection des pupitres et bascule du pack toutes voix",
+);
+
 const soprano: SelectableOffer = { sku: "S", coverage: "SINGLE_VOICE" };
 const alto: SelectableOffer = { sku: "A", coverage: "SINGLE_VOICE" };
 const tenor: SelectableOffer = { sku: "T", coverage: "SINGLE_VOICE" };

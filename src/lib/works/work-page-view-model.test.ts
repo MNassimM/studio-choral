@@ -11,6 +11,10 @@ import {
 } from "@/lib/works/work-page-view-model";
 import type { Grant, WorkAccessInput } from "@/types/domain";
 
+console.log(
+  "▶ src/lib/works/work-page-view-model.ts — les vues de la page œuvre : accès, téléchargements, offres",
+);
+
 /**
  * Les vues de la page oeuvre, construites sans base ni traduction réelle.
  */

@@ -14,6 +14,10 @@ import { cartItemToGrant } from "@/lib/cart/cart-item";
 import type { CartItem, CartItemInput } from "@/lib/cart/types";
 import type { Grant } from "@/types/domain";
 
+console.log(
+  "▶ src/lib/cart/cart-rules.ts — ajout, retrait, remplacement et articles déjà possédés",
+);
+
 const WORK = "work-messe";
 
 // Alto sur le seul Kyrie : la portée et la couverture les plus étroites.

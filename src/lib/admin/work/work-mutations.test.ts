@@ -9,6 +9,10 @@ import {
   type ProductRow,
 } from "@/lib/admin/work/work-mutations";
 
+console.log(
+  "▶ src/lib/admin/work/work-mutations.ts — le plan de changement : mouvements, offres, purge des pistes",
+);
+
 /**
  * Le calcul du plan de changement, sans base ni stockage.
  */

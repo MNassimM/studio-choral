@@ -8,6 +8,10 @@ import {
   type WorkActivationState,
 } from "@/lib/admin/sellability/activation-plan";
 
+console.log(
+  "▶ src/lib/admin/sellability/activation-plan.ts — quelles offres activer, d'après les pistes présentes",
+);
+
 /**
  * L'activation des offres, calculée sans base ni stockage.
  */

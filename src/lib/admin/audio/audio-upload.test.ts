@@ -11,6 +11,10 @@ import {
 } from "@/lib/admin/audio/audio-upload";
 import { MAX_UPLOAD_BYTES } from "@/lib/storage/keys";
 
+console.log(
+  "▶ src/lib/admin/audio/audio-upload.ts — validation d'un dépôt : extension, taille, durée, cohérence MIME",
+);
+
 /** Un dépôt correct, que chaque cas vient dégrader sur un seul point. */
 const VALIDE: UploadCandidate = {
   filename: "kyrie-soprano.wav",
