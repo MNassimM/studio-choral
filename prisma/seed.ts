@@ -187,7 +187,6 @@ async function seedAudioFiles(
       storageKey: track.storageKey,
       durationSeconds: track.durationSeconds,
       mimeType: track.mimeType,
-      previewStartSec: track.previewStartSec,
     };
 
     let wasExisting: boolean;

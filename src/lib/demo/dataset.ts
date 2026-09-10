@@ -263,7 +263,6 @@ export type DemoAudioTrack = {
   storageKey: string;
   durationSeconds: number;
   mimeType: string;
-  previewStartSec: number | null;
 };
 
 /**
@@ -301,7 +300,6 @@ export function buildDemoAudioTracks(): DemoAudioTrack[] {
         storageKey: buildStorageKey(work.slug, movement.slug, "tutti.wav"),
         durationSeconds: 12,
         mimeType: "audio/wav",
-        previewStartSec: null,
       });
 
       for (const voiceCode of SATB_VOICE_CODES) {
@@ -318,7 +316,6 @@ export function buildDemoAudioTracks(): DemoAudioTrack[] {
           ),
           durationSeconds: 12,
           mimeType: "audio/wav",
-          previewStartSec: null,
         });
 
         tracks.push({
@@ -332,7 +329,6 @@ export function buildDemoAudioTracks(): DemoAudioTrack[] {
           ),
           durationSeconds: 12,
           mimeType: "audio/wav",
-          previewStartSec: null,
         });
 
         tracks.push({
@@ -346,7 +342,6 @@ export function buildDemoAudioTracks(): DemoAudioTrack[] {
           ),
           durationSeconds: 6,
           mimeType: "audio/wav",
-          previewStartSec: 0,
         });
       }
 
@@ -362,7 +357,6 @@ export function buildDemoAudioTracks(): DemoAudioTrack[] {
           ),
           durationSeconds: 12,
           mimeType: "audio/wav",
-          previewStartSec: null,
         });
       }
     }

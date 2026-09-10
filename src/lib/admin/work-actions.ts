@@ -222,6 +222,7 @@ export async function updateWork(
 ): Promise<ActionResult> {
   await requireAdmin();
 
+  // VALIDATION FORMULAIRE
   const parsed = workFormSchema.safeParse(input);
   if (!parsed.success) {
     const issue = parsed.error.issues[0];
@@ -248,6 +249,7 @@ export async function updateWork(
     // fichiers dont la ligne survit.
     const aEffacer: string[] = [];
 
+    // TRANSACTION : mise à jour de l'oeuvre, de ses traductions, de ses mouvements et de ses offres.
     await prisma.$transaction(async (tx) => {
       await tx.work.update({
         where: { id: workId },

@@ -70,22 +70,27 @@ function Champ({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={controlId} className="text-sm">
-        {label}
-        {required ? (
-          <>
-            <span aria-hidden="true" className="ml-1 text-primary">
-              *
-            </span>
-            <span className="sr-only"> (obligatoire)</span>
-          </>
-        ) : null}
+      {/* L'indication vit HORS du libellé : dedans, elle entrerait dans le
+          nom accessible du champ tout en étant déjà pointée par
+          aria-describedby, et serait donc annoncée deux fois. */}
+      <span className="flex items-baseline text-sm">
+        <label htmlFor={controlId}>
+          {label}
+          {required ? (
+            <>
+              <span aria-hidden="true" className="ml-1 text-primary">
+                *
+              </span>
+              <span className="sr-only"> (obligatoire)</span>
+            </>
+          ) : null}
+        </label>
         {hint ? (
           <span id={hintId} className="ml-2 text-xs text-muted-foreground">
             {hint}
           </span>
         ) : null}
-      </label>
+      </span>
 
       {children({
         id: controlId,

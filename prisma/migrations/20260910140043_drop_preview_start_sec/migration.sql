@@ -1,0 +1,11 @@
+-- Retrait de preview_start_sec.
+--
+-- Cette colonne décrivait l'extrait gratuit comme un DÉCALAGE dans une piste
+-- complète. Le projet a retenu l'autre conception : une piste PREVIEW
+-- distincte, portée par l'énumération AudioType. Les deux ne peuvent pas
+-- coexister, et laisser la colonne laissait croire que les deux mécanismes
+-- existaient.
+--
+-- Les valeurs supprimées viennent toutes du jeu de démonstration, où elles
+-- valaient 0 sur les pistes PREVIEW, donc sans information utile.
+ALTER TABLE "audio_files" DROP COLUMN "preview_start_sec";

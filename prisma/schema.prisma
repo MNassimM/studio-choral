@@ -54,6 +54,9 @@ model Work {
   catalogueRef     String?        @map("catalogue_ref")
   shortDescription String?        @map("short_description")
   description      String?
+  /// EN ATTENTE : aucune image n'est encore téléversée ni affichée. Les
+  /// cartes du catalogue et l'en tête de la page oeuvre rendent un
+  /// emplacement réservé, et le signalent par un commentaire.
   coverImageKey    String?        @map("cover_image_key")
   /// Année de composition, approximative pour l'ancien répertoire. NULL si
   /// aucune date fiable n'est établie - ne jamais deviner.
@@ -152,7 +155,6 @@ model AudioFile {
   durationSeconds Int       @map("duration_seconds")
   mimeType        String    @map("mime_type")
   sizeBytes       Int?      @map("size_bytes")
-  previewStartSec Int?      @map("preview_start_sec")
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
 
