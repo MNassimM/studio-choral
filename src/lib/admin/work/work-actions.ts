@@ -5,31 +5,31 @@ import {
   summarizeMissingTracks,
   syncProductActivation,
   unpublishIfIncomplete,
-} from "@/lib/admin/product-activation";
+} from "@/lib/admin/sellability/product-activation";
 import {
   ActionError,
   toFailure,
   type ActionResult,
-} from "@/lib/admin/work-action-errors";
+} from "@/lib/admin/work/work-action-errors";
 import {
   workFormSchema,
   type WorkFormValues,
-} from "@/lib/admin/work-form-schema";
+} from "@/lib/admin/form/work-form-schema";
 import {
   planMovements,
   planProducts,
   planRetiredVoiceTracks,
-} from "@/lib/admin/work-mutations";
+} from "@/lib/admin/work/work-mutations";
 import {
   buildProductRows,
   uniqueSlugs,
   type VoiceRow,
-} from "@/lib/admin/work-products";
-import { revalidateCatalog } from "@/lib/admin/work-revalidation";
+} from "@/lib/admin/work/work-products";
+import { revalidateCatalog } from "@/lib/admin/work/work-revalidation";
 import {
   deleteStoredObjects,
   storePendingTracks,
-} from "@/lib/admin/work-track-storage";
+} from "@/lib/admin/work/work-track-storage";
 import { prisma } from "@/lib/db/prisma";
 
 /**

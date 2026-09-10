@@ -1,4 +1,4 @@
-import { requiresVoice, trackCellKey } from "@/lib/admin/audio-upload";
+import { requiresVoice, trackCellKey } from "@/lib/admin/audio/audio-upload";
 import type { AudioType } from "@/types/domain";
 
 /**

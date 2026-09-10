@@ -4,7 +4,7 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
-import type { WorkActionResult } from "@/lib/admin/work-form-draft";
+import type { WorkActionResult } from "@/lib/admin/form/work-form-draft";
 
 /**
  * Publier ou dépublier, à côté d'Annuler et d'Enregistrer.

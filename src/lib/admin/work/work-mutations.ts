@@ -1,5 +1,5 @@
 import type { Prisma } from "@/generated/prisma/client";
-import { productKey } from "@/lib/admin/work-products";
+import { productKey } from "@/lib/admin/work/work-products";
 
 /**
  * Le calcul des changements à appliquer à une oeuvre.

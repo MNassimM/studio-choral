@@ -9,7 +9,7 @@ import {
   useWorkForm,
 } from "@/components/admin/work-form-fields";
 import { Input } from "@/components/ui/input";
-import { derivePrices } from "@/lib/admin/work-form-schema";
+import { derivePrices } from "@/lib/admin/form/work-form-schema";
 
 /**
  * Les prix catalogue.

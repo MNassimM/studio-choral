@@ -18,7 +18,7 @@ import {
 } from "@/components/admin/work-form-fields";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { newMovementKey } from "@/lib/admin/work-form-draft";
+import { newMovementKey } from "@/lib/admin/form/work-form-draft";
 
 /**
  * L'éditeur de mouvements de l'oeuvre.

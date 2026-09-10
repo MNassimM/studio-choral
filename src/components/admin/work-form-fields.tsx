@@ -7,8 +7,8 @@ import {
   type UseFormReturn,
 } from "react-hook-form";
 
-import type { WorkFormDraft } from "@/lib/admin/work-form-draft";
-import type { WorkFormValues } from "@/lib/admin/work-form-schema";
+import type { WorkFormDraft } from "@/lib/admin/form/work-form-draft";
+import type { WorkFormValues } from "@/lib/admin/form/work-form-schema";
 
 /**
  * Briques communes aux sections du formulaire d'oeuvre.

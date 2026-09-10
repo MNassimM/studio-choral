@@ -3,7 +3,7 @@ import type { z } from "zod";
 import type {
   workFormSchema,
   WorkFormValues,
-} from "@/lib/admin/work-form-schema";
+} from "@/lib/admin/form/work-form-schema";
 
 /**
  * Le brouillon manipulé par le formulaire d'oeuvre.

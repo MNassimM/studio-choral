@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { VoiceOption } from "@/lib/admin/voice-options";
+import type { VoiceOption } from "@/lib/admin/form/voice-options";
 
 /**
  * Le sélecteur de pupitres de l'oeuvre.

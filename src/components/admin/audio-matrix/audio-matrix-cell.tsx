@@ -11,7 +11,7 @@ import {
   type UploadState,
 } from "@/components/admin/audio-matrix/hooks/use-audio-upload";
 import { Button } from "@/components/ui/button";
-import { trackCellKey } from "@/lib/admin/audio-upload";
+import { trackCellKey } from "@/lib/admin/audio/audio-upload";
 import type { AudioType } from "@/types/domain";
 
 /**

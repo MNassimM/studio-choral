@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "@/i18n/navigation";
-import { computeTrackCoverage } from "@/lib/admin/track-coverage";
+import { computeTrackCoverage } from "@/lib/admin/sellability/track-coverage";
 import { prisma } from "@/lib/db/prisma";
 import { cn } from "@/lib/utils";
 

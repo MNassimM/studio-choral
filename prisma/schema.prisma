@@ -181,7 +181,7 @@ model Product {
   priceCents    Int           @map("price_cents")
   currency      String        @default("EUR")
   /// Vrai quand l'offre est couverte par ses pistes audio, donc vendable.
-  /// Calculé, jamais posé à la main. Voir src/lib/admin/product-activation.ts.
+  /// Calculé, jamais posé à la main. Voir src/lib/admin/sellability/product-activation.ts.
   isActive      Boolean       @default(true) @map("is_active")
   /// Vrai quand l'offre n'est plus engendrée par le catalogue, parce que son
   /// pupitre ou son mouvement a été retiré. Elle n'est jamais supprimée, un

@@ -1,4 +1,4 @@
-import frWork from "../../../messages/fr/work.json";
+import frWork from "../../../../messages/fr/work.json";
 
 import { prisma } from "@/lib/db/prisma";
 import { isKnownVoiceCode } from "@/lib/works/voice-label";

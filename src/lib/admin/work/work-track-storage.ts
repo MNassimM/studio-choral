@@ -1,4 +1,4 @@
-import type { WorkFormValues } from "@/lib/admin/work-form-schema";
+import type { WorkFormValues } from "@/lib/admin/form/work-form-schema";
 import {
   buildPendingKey,
   buildTrackKey,

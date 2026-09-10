@@ -19,10 +19,10 @@ import {
   type UnassignedFile,
 } from "@/components/admin/audio-matrix/unassigned-audio-list";
 import { Section, useWorkForm } from "@/components/admin/work-form-fields";
-import { removeAudioTrack } from "@/lib/admin/audio-actions";
-import { PER_VOICE_TYPES, trackCellKey } from "@/lib/admin/audio-upload";
-import { normalize as normalizeName } from "@/lib/admin/filename-deduction";
-import type { VoiceOption } from "@/lib/admin/voice-options";
+import { removeAudioTrack } from "@/lib/admin/audio/audio-actions";
+import { PER_VOICE_TYPES, trackCellKey } from "@/lib/admin/audio/audio-upload";
+import { normalize as normalizeName } from "@/lib/admin/audio/filename-deduction";
+import type { VoiceOption } from "@/lib/admin/form/voice-options";
 import type { AudioType } from "@/types/domain";
 
 /**

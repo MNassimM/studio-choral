@@ -3,7 +3,7 @@ import {
   productCoverageGap,
   type CoverageContext,
   type TrackCell,
-} from "@/lib/admin/track-coverage";
+} from "@/lib/admin/sellability/track-coverage";
 import type { AudioType } from "@/types/domain";
 
 /**

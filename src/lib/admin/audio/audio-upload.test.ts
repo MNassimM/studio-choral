@@ -8,7 +8,7 @@ import {
   trackCellKey,
   validateUpload,
   type UploadCandidate,
-} from "@/lib/admin/audio-upload";
+} from "@/lib/admin/audio/audio-upload";
 import { MAX_UPLOAD_BYTES } from "@/lib/storage/keys";
 
 /** Un dépôt correct, que chaque cas vient dégrader sur un seul point. */

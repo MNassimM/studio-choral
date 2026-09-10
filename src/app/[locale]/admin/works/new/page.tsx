@@ -2,13 +2,13 @@ import { getLocale } from "next-intl/server";
 
 import { WorkForm } from "@/components/admin/work-form";
 import { redirect } from "@/i18n/navigation";
-import { loadVoiceOptions } from "@/lib/admin/voice-options";
-import { createWork } from "@/lib/admin/work-actions";
+import { loadVoiceOptions } from "@/lib/admin/form/voice-options";
+import { createWork } from "@/lib/admin/work/work-actions";
 import {
   emptyWorkFormDraft,
   type WorkActionResult,
-} from "@/lib/admin/work-form-draft";
-import type { WorkFormValues } from "@/lib/admin/work-form-schema";
+} from "@/lib/admin/form/work-form-draft";
+import type { WorkFormValues } from "@/lib/admin/form/work-form-schema";
 
 // Elle montre des brouillons et dépend du rôle, donc jamais de cache.
 export const dynamic = "force-dynamic";

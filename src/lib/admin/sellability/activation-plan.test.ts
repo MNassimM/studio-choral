@@ -6,7 +6,7 @@ import {
   computeMissingTracks,
   type ActivationAudioFile,
   type WorkActivationState,
-} from "@/lib/admin/activation-plan";
+} from "@/lib/admin/sellability/activation-plan";
 
 /**
  * L'activation des offres, calculée sans base ni stockage.

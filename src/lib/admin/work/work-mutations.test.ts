@@ -7,7 +7,7 @@ import {
   planRetiredVoiceTracks,
   type ExistingProduct,
   type ProductRow,
-} from "@/lib/admin/work-mutations";
+} from "@/lib/admin/work/work-mutations";
 
 /**
  * Le calcul du plan de changement, sans base ni stockage.

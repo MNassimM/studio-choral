@@ -4,18 +4,18 @@ import { getLocale } from "next-intl/server";
 import { WorkAdminActions } from "@/components/admin/work-admin-actions";
 import { WorkForm } from "@/components/admin/work-form";
 import { redirect } from "@/i18n/navigation";
-import { loadVoiceOptions } from "@/lib/admin/voice-options";
+import { loadVoiceOptions } from "@/lib/admin/form/voice-options";
 import {
   deleteWork,
   publishWork,
   unpublishWork,
   updateWork,
-} from "@/lib/admin/work-actions";
+} from "@/lib/admin/work/work-actions";
 import {
   workToDraft,
   type WorkActionResult,
-} from "@/lib/admin/work-form-draft";
-import type { WorkFormValues } from "@/lib/admin/work-form-schema";
+} from "@/lib/admin/form/work-form-draft";
+import type { WorkFormValues } from "@/lib/admin/form/work-form-schema";
 import { prisma } from "@/lib/db/prisma";
 
 // Elle montre des brouillons et dépend du rôle, donc jamais de cache.

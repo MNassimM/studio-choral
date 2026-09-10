@@ -6,7 +6,7 @@ import {
   buildSku,
   sellsPerMovement,
   uniqueSlugs,
-} from "@/lib/admin/work-products";
+} from "@/lib/admin/work/work-products";
 
 const VOICES = [
   { id: "v-s", code: "SOPRANO", label: "Soprano" },

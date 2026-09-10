@@ -5,7 +5,7 @@ import { AlertCircle, Loader2, Trash2 } from "lucide-react";
 import { useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
-import type { WorkActionResult } from "@/lib/admin/work-form-draft";
+import type { WorkActionResult } from "@/lib/admin/form/work-form-draft";
 
 /**
  * Publication, dépublication et suppression d'une oeuvre.

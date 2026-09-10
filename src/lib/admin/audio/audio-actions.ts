@@ -5,8 +5,8 @@ import {
   newUploadId,
   validateUpload,
   type UploadCandidate,
-} from "@/lib/admin/audio-upload";
-import { syncProductActivation } from "@/lib/admin/product-activation";
+} from "@/lib/admin/audio/audio-upload";
+import { syncProductActivation } from "@/lib/admin/sellability/product-activation";
 import { prisma } from "@/lib/db/prisma";
 import { buildPendingKey, storage } from "@/lib/storage/storage";
 

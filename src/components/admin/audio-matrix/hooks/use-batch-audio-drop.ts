@@ -3,12 +3,12 @@
 import { useCallback, useState } from "react";
 
 import type { UploadedFile } from "@/components/admin/audio-matrix/hooks/use-audio-upload";
-import { trackCellKey } from "@/lib/admin/audio-upload";
+import { trackCellKey } from "@/lib/admin/audio/audio-upload";
 import {
   deduceFilenames,
   type DeductionMovement,
   type DeductionVoice,
-} from "@/lib/admin/filename-deduction";
+} from "@/lib/admin/audio/filename-deduction";
 import type { AudioType } from "@/types/domain";
 
 /**

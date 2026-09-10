@@ -5,7 +5,7 @@ import {
   computeMissingTracks,
   type ActivationPlan,
   type MissingTracks,
-} from "@/lib/admin/activation-plan";
+} from "@/lib/admin/sellability/activation-plan";
 import { prisma } from "@/lib/db/prisma";
 
 /**

@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { toCents, workFormSchema } from "@/lib/admin/work-form-schema";
+import { toCents, workFormSchema } from "@/lib/admin/form/work-form-schema";
 
 const SATB = ["SOPRANO", "ALTO", "TENOR", "BASS"];
 

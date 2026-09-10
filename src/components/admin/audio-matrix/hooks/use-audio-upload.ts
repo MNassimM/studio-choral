@@ -2,8 +2,8 @@
 
 import { useCallback, useState } from "react";
 
-import { requestAudioUpload } from "@/lib/admin/audio-actions";
-import type { WorkFormDraft } from "@/lib/admin/work-form-draft";
+import { requestAudioUpload } from "@/lib/admin/audio/audio-actions";
+import type { WorkFormDraft } from "@/lib/admin/form/work-form-draft";
 
 /**
  * Le téléversement audio : ses types, son état et son envoi.

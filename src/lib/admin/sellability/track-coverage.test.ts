@@ -8,7 +8,7 @@ import {
   isProductCovered,
   productCoverageGap,
   requiredCellsFor,
-} from "@/lib/admin/track-coverage";
+} from "@/lib/admin/sellability/track-coverage";
 
 test("un mouvement SATB sans accompagnement attend treize pistes", () => {
   assert.equal(

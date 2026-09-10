@@ -9,9 +9,9 @@ import type {
   Track,
   UploadState,
 } from "@/components/admin/audio-matrix/hooks/use-audio-upload";
-import { PER_VOICE_TYPES, trackCellKey } from "@/lib/admin/audio-upload";
-import type { VoiceOption } from "@/lib/admin/voice-options";
-import type { WorkFormDraft } from "@/lib/admin/work-form-draft";
+import { PER_VOICE_TYPES, trackCellKey } from "@/lib/admin/audio/audio-upload";
+import type { VoiceOption } from "@/lib/admin/form/voice-options";
+import type { WorkFormDraft } from "@/lib/admin/form/work-form-draft";
 import type { AudioType } from "@/types/domain";
 import { cn } from "@/lib/utils";
 

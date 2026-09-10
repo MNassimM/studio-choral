@@ -5,7 +5,7 @@ import {
   deduceFilenames,
   readFilename,
   type MatrixContext,
-} from "@/lib/admin/filename-deduction";
+} from "@/lib/admin/audio/filename-deduction";
 
 /**
  * Déduction du placement depuis le nom de fichier.

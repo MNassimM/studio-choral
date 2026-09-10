@@ -1,5 +1,8 @@
 import type { Prisma } from "@/generated/prisma/client";
-import { toCents, type WorkFormValues } from "@/lib/admin/work-form-schema";
+import {
+  toCents,
+  type WorkFormValues,
+} from "@/lib/admin/form/work-form-schema";
 
 /**
  * Construction des mouvements et des offres d'une oeuvre.

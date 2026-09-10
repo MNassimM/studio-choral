@@ -23,18 +23,18 @@ import { WorkPublishButtons } from "@/components/admin/work-publish-buttons";
 import { WorkVoicesSection } from "@/components/admin/work-form-voices";
 import { WorkTextsSection } from "@/components/admin/work-form-texts";
 import { Button, buttonVariants } from "@/components/ui/button";
-import type { VoiceOption } from "@/lib/admin/voice-options";
+import type { VoiceOption } from "@/lib/admin/form/voice-options";
 import { Link } from "@/i18n/navigation";
 import type {
   WorkActionResult,
   WorkFormDraft,
-} from "@/lib/admin/work-form-draft";
+} from "@/lib/admin/form/work-form-draft";
 import {
   workFormSchema,
   type WorkFormValues,
-} from "@/lib/admin/work-form-schema";
-import { expectedTrackCount } from "@/lib/admin/track-coverage";
-import { slugify } from "@/lib/admin/work-products";
+} from "@/lib/admin/form/work-form-schema";
+import { expectedTrackCount } from "@/lib/admin/sellability/track-coverage";
+import { slugify } from "@/lib/admin/work/work-products";
 import { cn } from "@/lib/utils";
 
 /**

@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { WorkFormDraft } from "@/lib/admin/work-form-draft";
+import type { WorkFormDraft } from "@/lib/admin/form/work-form-draft";
 
 /** Libellés français des périodes, dans l'ordre chronologique. */
 const PERIODES = [

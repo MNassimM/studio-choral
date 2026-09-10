@@ -4,7 +4,7 @@ import {
   extensionOf,
   type AllowedExtension,
 } from "@/lib/storage/keys";
-import { PER_VOICE_TYPES } from "@/lib/admin/track-coverage";
+import { PER_VOICE_TYPES } from "@/lib/admin/sellability/track-coverage";
 import type { AudioType } from "@/types/domain";
 
 /**
@@ -24,7 +24,7 @@ export const MIME_BY_EXTENSION: Record<AllowedExtension, string[]> = {
 /**
  * Les types de piste qui portent un pupitre.
  */
-export { PER_VOICE_TYPES } from "@/lib/admin/track-coverage";
+export { PER_VOICE_TYPES } from "@/lib/admin/sellability/track-coverage";
 
 /**
  * Dit si un type de piste exige un pupitre.

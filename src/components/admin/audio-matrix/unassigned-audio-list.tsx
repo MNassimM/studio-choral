@@ -4,7 +4,7 @@ import {
   formatSize,
   type UploadedFile,
 } from "@/components/admin/audio-matrix/hooks/use-audio-upload";
-import type { WorkFormDraft } from "@/lib/admin/work-form-draft";
+import type { WorkFormDraft } from "@/lib/admin/form/work-form-draft";
 import type { AudioType } from "@/types/domain";
 
 /**
