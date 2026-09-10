@@ -561,7 +561,7 @@ export async function updateWork(
 
     await syncProductActivation(workId);
     const depubliee = await unpublishIfIncomplete(workId);
-
+    console.log("updateWork", { depubliee, range, objetsNonSupprimes });
     revalidateCatalog();
     if (depubliee) {
       return {
@@ -676,7 +676,7 @@ export async function publishWork(workId: string): Promise<ActionResult> {
   }
 
   const actives = await prisma.product.count({
-    where: { workId, isActive: true },
+    where: { workId, isActive: true, isRetired: false },
   });
   if (actives === 0) {
     return { ok: false, error: "Cette œuvre n'a aucune offre active." };

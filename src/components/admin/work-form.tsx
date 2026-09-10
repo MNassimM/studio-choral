@@ -141,6 +141,7 @@ export function WorkForm({
   }
 
   const onSubmit = form.handleSubmit(async (values) => {
+    console.log("onSubmit", { values });
     setErreurGlobale(null);
     const result = await submitAction(values);
     if (result.ok) {

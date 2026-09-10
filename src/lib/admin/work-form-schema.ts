@@ -256,37 +256,6 @@ function checkTracks(work: z.infer<typeof baseSchema>, ctx: z.RefinementCtx) {
   const vues = new Set<string>();
 
   work.tracks.forEach((track, index) => {
-    if (!cles.has(track.movementKey)) {
-      ctx.addIssue({
-        code: "custom",
-        message: "Cette piste vise un mouvement qui n'existe plus.",
-        path: ["tracks", index],
-      });
-    }
-
-    const parPupitre = PER_VOICE_AUDIO_TYPES.includes(track.type);
-    if (parPupitre && track.voiceCode === null) {
-      ctx.addIssue({
-        code: "custom",
-        message: `Une piste ${track.type} doit porter un pupitre.`,
-        path: ["tracks", index],
-      });
-    }
-    if (!parPupitre && track.voiceCode !== null) {
-      ctx.addIssue({
-        code: "custom",
-        message: `Une piste ${track.type} ne porte pas de pupitre.`,
-        path: ["tracks", index],
-      });
-    }
-    if (track.voiceCode !== null && !pupitres.has(track.voiceCode)) {
-      ctx.addIssue({
-        code: "custom",
-        message: "Cette piste vise un pupitre qui n'est plus retenu.",
-        path: ["tracks", index],
-      });
-    }
-
     const cellule = `${track.movementKey}|${track.voiceCode ?? ""}|${track.type}`;
     if (vues.has(cellule)) {
       ctx.addIssue({
