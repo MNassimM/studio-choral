@@ -1,8 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
-import { Prisma } from "@/generated/prisma/client";
 import { requireAdmin } from "@/lib/admin/authorization";
 import {
   summarizeMissingTracks,
@@ -10,42 +7,46 @@ import {
   unpublishIfIncomplete,
 } from "@/lib/admin/product-activation";
 import {
+  ActionError,
+  toFailure,
+  type ActionResult,
+} from "@/lib/admin/work-action-errors";
+import {
   workFormSchema,
   type WorkFormValues,
 } from "@/lib/admin/work-form-schema";
 import {
+  planMovements,
+  planProducts,
+  planRetiredVoiceTracks,
+} from "@/lib/admin/work-mutations";
+import {
   buildProductRows,
-  productKey,
   uniqueSlugs,
   type VoiceRow,
 } from "@/lib/admin/work-products";
+import { revalidateCatalog } from "@/lib/admin/work-revalidation";
 import {
-  buildPendingKey,
-  buildTrackKey,
-  extensionOf,
-  storage,
-} from "@/lib/storage/storage";
+  deleteStoredObjects,
+  storePendingTracks,
+} from "@/lib/admin/work-track-storage";
 import { prisma } from "@/lib/db/prisma";
 
 /**
  * Actions d'administration du catalogue.
+ *
+ * @remarks
+ * Orchestration seulement. Ce que l'on décide de changer se calcule dans
+ * work-mutations, ce qui touche au stockage vit dans work-track-storage, et la
+ * traduction des erreurs dans work-action-errors.
  */
-
-type ActionResult =
-  { ok: true; workId: string } | { ok: false; error: string; field?: string };
-
-/** Une erreur dont le message est déjà rédigé pour l'administrateur. */
-class ActionError extends Error {
-  readonly field?: string;
-
-  constructor(message: string, field?: string) {
-    super(message);
-    this.field = field;
-  }
-}
 
 /**
  * Vérifie qu'aucune autre oeuvre n'occupe déjà ce slug.
+ *
+ * @param slug - Slug à contrôler.
+ * @param excludeWorkId - Oeuvre à ignorer, celle que l'on modifie.
+ * @returns Vrai si le slug est déjà pris.
  */
 async function isSlugTaken(
   slug: string,
@@ -67,7 +68,12 @@ async function isSlugTaken(
   return translation !== null;
 }
 
-/** Retrouve les pupitres depuis leurs codes, en gardant l'ordre saisi. */
+/**
+ * Retrouve les pupitres depuis leurs codes, en gardant l'ordre saisi.
+ *
+ * @param codes - Codes retenus par le brouillon.
+ * @returns Les pupitres, dans l'ordre des codes reçus.
+ */
 async function resolveVoices(codes: string[]): Promise<VoiceRow[]> {
   const voices = await prisma.voice.findMany({
     where: { code: { in: codes } },
@@ -84,128 +90,6 @@ async function resolveVoices(codes: string[]): Promise<VoiceRow[]> {
   }
 
   return codes.map((code) => voices.find((voice) => voice.code === code)!);
-}
-
-/**
- * Force la régénération des pages du catalogue et des oeuvres.
- */
-function revalidateCatalog(): void {
-  revalidatePath("/[locale]/admin/works", "page");
-  revalidatePath("/[locale]/catalogue", "page");
-  revalidatePath("/[locale]/works/[slug]", "page");
-}
-
-/** Traduit une erreur en résultat lisible, sans laisser fuir Prisma. */
-function toFailure(cause: unknown): ActionResult {
-  if (cause instanceof ActionError) {
-    return { ok: false, error: cause.message, field: cause.field };
-  }
-
-  if (
-    cause instanceof Prisma.PrismaClientKnownRequestError &&
-    cause.code === "P2002"
-  ) {
-    const cibles = Array.isArray(cause.meta?.target)
-      ? (cause.meta.target as string[])
-      : [];
-    if (cibles.some((cible) => cible.includes("slug"))) {
-      return { ok: false, error: "Ce slug est déjà utilisé.", field: "slug" };
-    }
-    return { ok: false, error: "Cette valeur est déjà utilisée." };
-  }
-
-  console.error("work-actions", cause);
-  return { ok: false, error: "L'enregistrement a échoué." };
-}
-
-/**
- * Range les pistes fraîchement déposées, après le commit de l'oeuvre.
- *
- * @remarks
- * Hors transaction volontairement : déplacer quatre-vingts objets dépasserait
- * de loin le délai de cinq secondes d'une transaction interactive. La clé
- * source se reconstruit ici, jamais reçue du client, et la clé définitive
- * étant déterministe, un objet resté en rade sera écrasé au prochain
- * enregistrement de la même case.
- *
- * @param workId - Oeuvre concernée.
- * @param tracks - Les cases du brouillon.
- * @param movementIdByKey - Correspondance entre clé de mouvement et id.
- * @param voiceIdByCode - Correspondance entre code de pupitre et id.
- * @returns Le nombre de pistes rangées et celles qui ont échoué.
- */
-async function storePendingTracks(
-  workId: string,
-  tracks: WorkFormValues["tracks"],
-  movementIdByKey: Map<string, string>,
-  voiceIdByCode: Map<string, string>,
-): Promise<{ stored: number; failed: string[] }> {
-  const attente = tracks.filter((track) => track.state.kind === "pending");
-  const failed: string[] = [];
-  let stored = 0;
-
-  for (const track of attente) {
-    if (track.state.kind !== "pending") continue;
-    const movementId = movementIdByKey.get(track.movementKey);
-    // undefined et non null : il faut distinguer « cette piste n'a pas de
-    // pupitre », qui est normal pour un tutti, de « son pupitre n'est plus
-    // retenu ». Retomber sur null écrirait une piste commune dont la clé de
-    // stockage porterait pourtant un code de pupitre.
-    const voiceId = track.voiceCode ? voiceIdByCode.get(track.voiceCode) : null;
-    const extension = extensionOf(track.state.filename);
-
-    if (!movementId || voiceId === undefined || extension === null) {
-      failed.push(track.state.filename);
-      continue;
-    }
-
-    const source = buildPendingKey(track.state.uploadId, track.state.filename);
-    const cible = buildTrackKey({
-      workId,
-      movementId,
-      type: track.type,
-      voiceCode: track.voiceCode,
-      extension,
-    });
-
-    const deplace = await storage.moveObject(source, cible);
-    if (!deplace.ok) {
-      console.error("work-actions moveObject", deplace.error);
-      failed.push(track.state.filename);
-      continue;
-    }
-
-    // Prisma refuse un nul dans une clé unique composée, et voiceId l'est
-    // pour un tutti. On retrouve donc la case par ses coordonnées.
-    const existante = await prisma.audioFile.findFirst({
-      where: { movementId, voiceId, type: track.type },
-      select: { id: true },
-    });
-
-    const valeurs = {
-      storageKey: cible,
-      // La clé définitive ne porte que le pupitre, on garde donc le nom
-      // d'origine pour pouvoir le réafficher dans la matrice.
-      originalFilename: track.state.filename,
-      durationSeconds: track.state.durationSeconds,
-      mimeType: track.state.mimeType,
-      sizeBytes: track.state.sizeBytes,
-    };
-
-    if (existante) {
-      await prisma.audioFile.update({
-        where: { id: existante.id },
-        data: valeurs,
-      });
-    } else {
-      await prisma.audioFile.create({
-        data: { movementId, voiceId, type: track.type, ...valeurs },
-      });
-    }
-    stored += 1;
-  }
-
-  return { stored, failed };
 }
 
 /**
@@ -359,12 +243,9 @@ export async function updateWork(
 
     // Rempli dans la transaction, relu juste après pour ranger les pistes.
     let enregistres: { id: string; slug: string; title: string }[] = [];
-    // Compté après la transaction, rapporté à l'administrateur.
-    let objetsNonSupprimes = 0;
     // Collectées dans la transaction, effacées seulement après son commit :
     // effacer pendant reviendrait, sur un retour arrière, à détruire des
-    // fichiers dont la ligne survit. Un objet resté en trop se rattrape, un
-    // fichier détruit à tort non.
+    // fichiers dont la ligne survit.
     const aEffacer: string[] = [];
 
     await prisma.$transaction(async (tx) => {
@@ -403,25 +284,29 @@ export async function updateWork(
         },
       });
 
-      const keptIds = data.movements
-        .map((movement) => movement.id)
-        .filter((id): id is string => Boolean(id));
-
-      const doomed = await tx.movement.findMany({
-        where: { workId, id: { notIn: keptIds } },
+      // ── Mouvements ────────────────────────────────────────────────────────
+      const mouvementsEnBase = await tx.movement.findMany({
+        where: { workId },
         select: { id: true, title: true },
       });
+      const plan = planMovements(
+        mouvementsEnBase,
+        data.movements,
+        movementSlugs,
+      );
 
-      if (doomed.length > 0) {
+      if (plan.doomed.length > 0) {
+        const doomedIds = plan.doomed.map((movement) => movement.id);
+
         const vendus = await tx.libraryItem.findMany({
-          where: { movementId: { in: doomed.map((movement) => movement.id) } },
+          where: { movementId: { in: doomedIds } },
           select: { movementId: true },
           distinct: ["movementId"],
         });
 
         if (vendus.length > 0) {
           const bloques = new Set(vendus.map((item) => item.movementId));
-          const titres = doomed
+          const titres = plan.doomed
             .filter((movement) => bloques.has(movement.id))
             .map((movement) => movement.title);
           throw new ActionError(
@@ -435,134 +320,89 @@ export async function updateWork(
         // cycle de vie ne les ramasserait jamais. On relève leurs clés tant
         // que les lignes existent, l'effacement a lieu après le commit.
         const orphelins = await tx.audioFile.findMany({
-          where: { movementId: { in: doomed.map((movement) => movement.id) } },
+          where: { movementId: { in: doomedIds } },
           select: { storageKey: true },
         });
         aEffacer.push(...orphelins.map((piste) => piste.storageKey));
 
-        await tx.movement.deleteMany({
-          where: { id: { in: doomed.map((movement) => movement.id) } },
-        });
+        await tx.movement.deleteMany({ where: { id: { in: doomedIds } } });
       }
 
-      for (const [index, id] of keptIds.entries()) {
+      for (const etape of plan.parking) {
         await tx.movement.update({
-          where: { id },
-          data: { position: -1 - index, slug: `tmp-${index}-${id}` },
+          where: { id: etape.id },
+          data: { position: etape.position, slug: etape.slug },
         });
       }
-
-      for (const [index, movement] of data.movements.entries()) {
-        const valeurs = {
-          slug: movementSlugs[index],
-          title: movement.title,
-          position: index,
-        };
-
-        if (movement.id) {
-          await tx.movement.update({
-            where: { id: movement.id },
-            data: valeurs,
-          });
-        } else {
-          await tx.movement.create({ data: { workId, ...valeurs } });
-        }
+      for (const { id, ...valeurs } of plan.updates) {
+        await tx.movement.update({ where: { id }, data: valeurs });
+      }
+      for (const creation of plan.creations) {
+        await tx.movement.create({ data: { workId, ...creation } });
       }
 
-      const movements = await tx.movement.findMany({
+      enregistres = await tx.movement.findMany({
         where: { workId },
         select: { id: true, slug: true, title: true },
         orderBy: { position: "asc" },
       });
-      enregistres = movements;
 
-      const rows = buildProductRows(
-        data.slug,
-        data.title,
-        movements,
-        voices,
-        data.prices,
-      );
-
-      const existants = await tx.product.findMany({
+      // ── Offres ────────────────────────────────────────────────────────────
+      const offresEnBase = await tx.product.findMany({
         where: { workId },
         select: { id: true, movementId: true, voiceId: true, coverage: true },
       });
-      const parCoordonnees = new Map(
-        existants.map((product) => [
-          productKey(product.movementId, product.voiceId, product.coverage),
-          product.id,
-        ]),
-      );
-      const voulus = new Set(
-        rows.map((row) =>
-          productKey(row.movementId ?? null, row.voiceId ?? null, row.coverage),
+      const planOffres = planProducts(
+        offresEnBase,
+        buildProductRows(
+          data.slug,
+          data.title,
+          enregistres,
+          voices,
+          data.prices,
         ),
       );
 
-      const perimes = existants
-        .filter(
-          (product) =>
-            !voulus.has(
-              productKey(product.movementId, product.voiceId, product.coverage),
-            ),
-        )
-        .map((product) => product.id);
-
-      if (perimes.length > 0) {
+      if (planOffres.retiredIds.length > 0) {
         // Retirée du catalogue, ce qui n'est pas la même chose qu'incomplète :
         // elle sort de tous les calculs, mais la ligne reste pour l'historique.
         await tx.product.updateMany({
-          where: { id: { in: perimes } },
+          where: { id: { in: planOffres.retiredIds } },
           data: { isActive: false, isRetired: true },
         });
       }
-
-      for (const row of rows) {
-        const existant = parCoordonnees.get(
-          productKey(row.movementId ?? null, row.voiceId ?? null, row.coverage),
-        );
-
-        if (existant) {
-          await tx.product.update({
-            where: { id: existant },
-            data: {
-              name: row.name,
-              priceCents: row.priceCents,
-              position: row.position,
-              // Elle est de nouveau engendrée, elle n'est donc plus retirée.
-              // isActive sera tranché par la synchronisation, sur les pistes.
-              isRetired: false,
-            },
-          });
-        } else {
-          await tx.product.create({ data: { ...row, workId } });
-        }
+      for (const offre of planOffres.updates) {
+        await tx.product.update({
+          where: { id: offre.id },
+          data: {
+            name: offre.name,
+            priceCents: offre.priceCents,
+            position: offre.position,
+            // Elle est de nouveau engendrée, elle n'est donc plus retirée.
+            // isActive sera tranché par la synchronisation, sur les pistes.
+            isRetired: false,
+          },
+        });
+      }
+      for (const creation of planOffres.creations) {
+        await tx.product.create({ data: { ...creation, workId } });
       }
 
-      // Un pupitre retiré laisse ses pistes derrière lui, la ligne comme
-      // l'objet : rien d'autre ne les ramasse, la réconciliation ci dessus ne
-      // touchant qu'aux offres. On filtre en mémoire plutôt qu'avec un notIn
-      // sur une colonne nullable, dont la sémantique SQL écarterait aussi les
-      // pistes communes, qui n'ont justement aucun pupitre.
-      const retenus = new Set(voices.map((voice) => voice.id));
-      const toutes = await tx.audioFile.findMany({
+      // ── Pistes d'un pupitre retiré ────────────────────────────────────────
+      const pistesEnBase = await tx.audioFile.findMany({
         where: { movement: { workId } },
         select: { id: true, storageKey: true, voiceId: true },
       });
-      const pistesRetirees = toutes.filter(
-        (piste) => piste.voiceId !== null && !retenus.has(piste.voiceId),
+      const purge = planRetiredVoiceTracks(
+        pistesEnBase,
+        voices.map((voice) => voice.id),
       );
 
-      if (pistesRetirees.length > 0) {
-        const idsRetires = [
-          ...new Set(pistesRetirees.map((piste) => piste.voiceId!)),
-        ];
-
+      if (purge.doomed.length > 0) {
         // Même garde que pour un mouvement supprimé : on ne détruit pas le
         // fichier d'un pupitre que quelqu'un a déjà payé.
         const vendus = await tx.libraryItem.findMany({
-          where: { workId, voiceId: { in: idsRetires } },
+          where: { workId, voiceId: { in: purge.voiceIds } },
           select: { voice: { select: { label: true } } },
           distinct: ["voiceId"],
         });
@@ -575,23 +415,15 @@ export async function updateWork(
           );
         }
 
-        aEffacer.push(...pistesRetirees.map((piste) => piste.storageKey));
+        aEffacer.push(...purge.doomed.map((piste) => piste.storageKey));
         await tx.audioFile.deleteMany({
-          where: { id: { in: pistesRetirees.map((piste) => piste.id) } },
+          where: { id: { in: purge.doomed.map((piste) => piste.id) } },
         });
       }
     });
 
     // Les fichiers partent maintenant que la base a commité.
-    for (const key of aEffacer) {
-      const efface = await storage.deleteObject(key);
-      if (!efface.ok) {
-        // Un échec ne rattrape rien : la ligne est partie, l'objet reste
-        // orphelin. On le compte pour le dire à l'administrateur.
-        console.error("work-actions deleteObject", efface.error);
-        objetsNonSupprimes += 1;
-      }
-    }
+    const objetsNonSupprimes = await deleteStoredObjects(aEffacer);
 
     // Deuxième temps, hors transaction. Les mouvements sont triés par
     // position, comme le brouillon, la clé se relie donc par rang.
@@ -614,6 +446,7 @@ export async function updateWork(
     await syncProductActivation(workId);
     const depubliee = await unpublishIfIncomplete(workId);
     revalidateCatalog();
+
     if (depubliee) {
       return {
         ok: false,
@@ -745,6 +578,11 @@ export async function publishWork(workId: string): Promise<ActionResult> {
 /**
  * Supprime une oeuvre, à condition que personne n'y ait jamais eu accès.
  *
+ * @remarks
+ * Les clés sont relevées avant la suppression, que la cascade emporterait,
+ * mais les objets ne partent qu'APRÈS elle : même règle que dans updateWork,
+ * un objet resté en trop se rattrape, un fichier détruit à tort non.
+ *
  * @param workId - Oeuvre à supprimer.
  * @returns L'identifiant de l'oeuvre, ou la raison du refus.
  */
@@ -770,17 +608,11 @@ export async function deleteWork(workId: string): Promise<ActionResult> {
     select: { storageKey: true },
   });
 
-  let objetsNonSupprimes = 0;
-  for (const piste of pistes) {
-    const efface = await storage.deleteObject(piste.storageKey);
-    if (!efface.ok) {
-      console.error("work-actions deleteWork orphelin", efface.error);
-      objetsNonSupprimes += 1;
-    }
-  }
-
   await prisma.work.delete({ where: { id: workId } });
 
+  const objetsNonSupprimes = await deleteStoredObjects(
+    pistes.map((piste) => piste.storageKey),
+  );
   if (objetsNonSupprimes > 0) {
     console.error(
       `work-actions deleteWork : ${objetsNonSupprimes} objet(s) restés en place sur ${pistes.length}.`,
