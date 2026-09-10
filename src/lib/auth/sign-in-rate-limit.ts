@@ -103,7 +103,9 @@ async function purgeExpiredAttempts(): Promise<void> {
         },
       },
     });
-  } catch {
+  } catch (cause) {
+    const reason = cause instanceof Error ? cause.message : String(cause);
+    console.warn(`[auth] Purge des tentatives échouée : ${reason}`);
   }
 }
 

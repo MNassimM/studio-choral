@@ -22,7 +22,7 @@ async function AccountSlot({ compact = false }: { compact?: boolean }) {
   const user = await getCurrentUser();
 
   if (user) {
-    return <AccountMenu name={user.name || user.email} email={user.email} admin={isAdmin(user)} />;
+    return <AccountMenu name={user.name || user.email} admin={isAdmin(user)} />;
   }
 
   return (

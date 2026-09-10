@@ -50,6 +50,7 @@ function grantKey(grant: Grant): string {
 
 /**
  * Retire les droits redondants d'une liste.
+ * NOTE : pas utilisé pour l'instant, mais pourrait servir pour nettoyer les droits d'un utilisateur avant de les stocker.
  *
  * @param grants - Droits à nettoyer, éventuellement redondants entre eux.
  * @returns La liste sans aucun droit couvert par un autre.

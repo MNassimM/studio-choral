@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
  * @param admin - Indique si l'utilisateur est administrateur.
  * @returns Le menu rendu.
  */
-function AccountMenu({ name, email, admin }: { name: string; email: string; admin: boolean }) {
+function AccountMenu({ name, admin }: { name: string; admin: boolean }) {
   const t = useTranslations("auth.account");
   const tLinks = useTranslations("navigation");
   const [isSigningOut, setIsSigningOut] = useState(false);
