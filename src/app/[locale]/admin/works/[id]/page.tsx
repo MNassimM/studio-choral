@@ -100,7 +100,6 @@ export default async function EditWorkPage({
   /** Enregistre les modifications de cette oeuvre. */
   async function enregistrer(values: WorkFormValues) {
     "use server";
-    console.log("updateWorkkkkkk", { id, values });
     return updateWork(id, values);
   }
 

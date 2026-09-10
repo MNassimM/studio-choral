@@ -273,3 +273,50 @@ test("la conversion en centimes ne dérape pas sur les flottants", () => {
   assert.equal(toCents(14.9), 1490);
   assert.equal(toCents(0.07), 7);
 });
+
+/** Une piste déjà envoyée, posée sur la case demandée. */
+function piste(voiceCode: string | null, type: string) {
+  return {
+    movementKey: "k1",
+    voiceCode,
+    type,
+    state: {
+      kind: "pending",
+      uploadId: "u1",
+      filename: "essai.wav",
+      sizeBytes: 2048,
+      durationSeconds: 12,
+      mimeType: "audio/wav",
+    },
+  };
+}
+
+test("une piste par pupitre sans pupitre est refusée", () => {
+  assert.deepEqual(chemins({ ...messe, tracks: [piste(null, "SOLO")] }), [
+    "tracks.0",
+  ]);
+});
+
+test("une piste commune portant un pupitre est refusée", () => {
+  assert.deepEqual(chemins({ ...messe, tracks: [piste("ALTO", "TUTTI")] }), [
+    "tracks.0",
+  ]);
+});
+
+test("une piste visant un mouvement supprimé passe, updateWork la purge", () => {
+  const result = workFormSchema.safeParse({
+    ...messe,
+    tracks: [{ ...piste("ALTO", "SOLO"), movementKey: "disparu" }],
+  });
+  assert.equal(result.success, true);
+});
+
+test("une piste visant un pupitre retiré passe, updateWork la purge", () => {
+  // MEZZO n'est pas dans SATB : la piste vise donc un pupitre que l'oeuvre ne
+  // retient pas, sans toucher au nombre de pupitres dont les prix dépendent.
+  const result = workFormSchema.safeParse({
+    ...messe,
+    tracks: [piste("MEZZO", "SOLO")],
+  });
+  assert.equal(result.success, true);
+});

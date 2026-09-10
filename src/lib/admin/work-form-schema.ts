@@ -251,11 +251,29 @@ function checkPrices(work: z.infer<typeof baseSchema>, ctx: z.RefinementCtx) {
  * Vérifie que les cases de la matrice se tiennent.
  */
 function checkTracks(work: z.infer<typeof baseSchema>, ctx: z.RefinementCtx) {
-  const cles = new Set(work.movements.map((movement) => movement.key));
-  const pupitres = new Set(work.voiceCodes);
   const vues = new Set<string>();
 
   work.tracks.forEach((track, index) => {
+    // Les règles de cohérence de forme restent ici, rien d'autre ne les
+    // rattrape. Celles qui portaient sur un mouvement supprimé ou un pupitre
+    // retiré ont volontairement disparu : ce n'est plus un refus, updateWork
+    // purge ces pistes et leurs fichiers.
+    const parPupitre = PER_VOICE_AUDIO_TYPES.includes(track.type);
+    if (parPupitre && track.voiceCode === null) {
+      ctx.addIssue({
+        code: "custom",
+        message: `Une piste ${track.type} doit porter un pupitre.`,
+        path: ["tracks", index],
+      });
+    }
+    if (!parPupitre && track.voiceCode !== null) {
+      ctx.addIssue({
+        code: "custom",
+        message: `Une piste ${track.type} ne porte pas de pupitre.`,
+        path: ["tracks", index],
+      });
+    }
+
     const cellule = `${track.movementKey}|${track.voiceCode ?? ""}|${track.type}`;
     if (vues.has(cellule)) {
       ctx.addIssue({

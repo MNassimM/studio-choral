@@ -147,12 +147,14 @@ async function storePendingTracks(
   for (const track of attente) {
     if (track.state.kind !== "pending") continue;
     const movementId = movementIdByKey.get(track.movementKey);
-    const voiceId = track.voiceCode
-      ? (voiceIdByCode.get(track.voiceCode) ?? null)
-      : null;
+    // undefined et non null : il faut distinguer « cette piste n'a pas de
+    // pupitre », qui est normal pour un tutti, de « son pupitre n'est plus
+    // retenu ». Retomber sur null écrirait une piste commune dont la clé de
+    // stockage porterait pourtant un code de pupitre.
+    const voiceId = track.voiceCode ? voiceIdByCode.get(track.voiceCode) : null;
     const extension = extensionOf(track.state.filename);
 
-    if (!movementId || extension === null) {
+    if (!movementId || voiceId === undefined || extension === null) {
       failed.push(track.state.filename);
       continue;
     }
@@ -357,8 +359,13 @@ export async function updateWork(
 
     // Rempli dans la transaction, relu juste après pour ranger les pistes.
     let enregistres: { id: string; slug: string; title: string }[] = [];
-    // Compté dans la transaction, rapporté après coup.
+    // Compté après la transaction, rapporté à l'administrateur.
     let objetsNonSupprimes = 0;
+    // Collectées dans la transaction, effacées seulement après son commit :
+    // effacer pendant reviendrait, sur un retour arrière, à détruire des
+    // fichiers dont la ligne survit. Un objet resté en trop se rattrape, un
+    // fichier détruit à tort non.
+    const aEffacer: string[] = [];
 
     await prisma.$transaction(async (tx) => {
       await tx.work.update({
@@ -425,20 +432,13 @@ export async function updateWork(
 
         // Les AudioFile partent en cascade avec le mouvement, mais pas les
         // objets R2, qui sont sous works et non sous pending : la règle de
-        // cycle de vie ne les ramasserait jamais. On les efface avant.
+        // cycle de vie ne les ramasserait jamais. On relève leurs clés tant
+        // que les lignes existent, l'effacement a lieu après le commit.
         const orphelins = await tx.audioFile.findMany({
           where: { movementId: { in: doomed.map((movement) => movement.id) } },
           select: { storageKey: true },
         });
-        for (const piste of orphelins) {
-          const efface = await storage.deleteObject(piste.storageKey);
-          if (!efface.ok) {
-            // Un échec ne bloque pas la suppression de la ligne, il est
-            // seulement signalé : la ligne doit partir de toute façon.
-            console.error("work-actions orphelin", efface.error);
-            objetsNonSupprimes += 1;
-          }
-        }
+        aEffacer.push(...orphelins.map((piste) => piste.storageKey));
 
         await tx.movement.deleteMany({
           where: { id: { in: doomed.map((movement) => movement.id) } },
@@ -539,7 +539,59 @@ export async function updateWork(
           await tx.product.create({ data: { ...row, workId } });
         }
       }
+
+      // Un pupitre retiré laisse ses pistes derrière lui, la ligne comme
+      // l'objet : rien d'autre ne les ramasse, la réconciliation ci dessus ne
+      // touchant qu'aux offres. On filtre en mémoire plutôt qu'avec un notIn
+      // sur une colonne nullable, dont la sémantique SQL écarterait aussi les
+      // pistes communes, qui n'ont justement aucun pupitre.
+      const retenus = new Set(voices.map((voice) => voice.id));
+      const toutes = await tx.audioFile.findMany({
+        where: { movement: { workId } },
+        select: { id: true, storageKey: true, voiceId: true },
+      });
+      const pistesRetirees = toutes.filter(
+        (piste) => piste.voiceId !== null && !retenus.has(piste.voiceId),
+      );
+
+      if (pistesRetirees.length > 0) {
+        const idsRetires = [
+          ...new Set(pistesRetirees.map((piste) => piste.voiceId!)),
+        ];
+
+        // Même garde que pour un mouvement supprimé : on ne détruit pas le
+        // fichier d'un pupitre que quelqu'un a déjà payé.
+        const vendus = await tx.libraryItem.findMany({
+          where: { workId, voiceId: { in: idsRetires } },
+          select: { voice: { select: { label: true } } },
+          distinct: ["voiceId"],
+        });
+
+        if (vendus.length > 0) {
+          const libelles = vendus.map((item) => item.voice?.label ?? "inconnu");
+          throw new ActionError(
+            `Ces pupitres ont déjà été vendus et ne peuvent pas être retirés : ${libelles.join(", ")}.`,
+            "voiceCodes",
+          );
+        }
+
+        aEffacer.push(...pistesRetirees.map((piste) => piste.storageKey));
+        await tx.audioFile.deleteMany({
+          where: { id: { in: pistesRetirees.map((piste) => piste.id) } },
+        });
+      }
     });
+
+    // Les fichiers partent maintenant que la base a commité.
+    for (const key of aEffacer) {
+      const efface = await storage.deleteObject(key);
+      if (!efface.ok) {
+        // Un échec ne rattrape rien : la ligne est partie, l'objet reste
+        // orphelin. On le compte pour le dire à l'administrateur.
+        console.error("work-actions deleteObject", efface.error);
+        objetsNonSupprimes += 1;
+      }
+    }
 
     // Deuxième temps, hors transaction. Les mouvements sont triés par
     // position, comme le brouillon, la clé se relie donc par rang.
@@ -561,7 +613,6 @@ export async function updateWork(
 
     await syncProductActivation(workId);
     const depubliee = await unpublishIfIncomplete(workId);
-    console.log("updateWork", { depubliee, range, objetsNonSupprimes });
     revalidateCatalog();
     if (depubliee) {
       return {
@@ -582,7 +633,7 @@ export async function updateWork(
         error: `L'œuvre est enregistrée, mais ${objetsNonSupprimes} fichier(s) audio n'ont pas pu être supprimés du stockage.`,
       };
     }
-     return { ok: true, workId };
+    return { ok: true, workId };
   } catch (cause) {
     return toFailure(cause);
   }
