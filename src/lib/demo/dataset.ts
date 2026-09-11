@@ -81,25 +81,25 @@ export const DEMO_CATALOG: DemoWork[] = [
       },
     ],
     movements: [
-      { slug: "kyrie", title: "Kyrie", position: 1, hasAccompaniment: true },
-      { slug: "gloria", title: "Gloria", position: 2, hasAccompaniment: true },
-      { slug: "credo", title: "Credo", position: 3, hasAccompaniment: true },
+      { slug: "kyrie", title: "Kyrie", position: 0, hasAccompaniment: true },
+      { slug: "gloria", title: "Gloria", position: 1, hasAccompaniment: true },
+      { slug: "credo", title: "Credo", position: 2, hasAccompaniment: true },
       {
         slug: "sanctus",
         title: "Sanctus",
-        position: 4,
+        position: 3,
         hasAccompaniment: true,
       },
       {
         slug: "benedictus",
         title: "Benedictus",
-        position: 5,
+        position: 4,
         hasAccompaniment: true,
       },
       {
         slug: "agnus-dei",
         title: "Agnus Dei",
-        position: 6,
+        position: 5,
         hasAccompaniment: true,
       },
     ],
@@ -139,7 +139,7 @@ export const DEMO_CATALOG: DemoWork[] = [
       {
         slug: "ce-mois-de-mai",
         title: "Ce mois de mai",
-        position: 1,
+        position: 0,
         hasAccompaniment: false,
       },
     ],
@@ -179,7 +179,7 @@ export const DEMO_CATALOG: DemoWork[] = [
       {
         slug: "il-est-bel-et-bon",
         title: "Il est bel et bon",
-        position: 1,
+        position: 0,
         hasAccompaniment: false,
       },
     ],
@@ -219,7 +219,7 @@ export const DEMO_CATALOG: DemoWork[] = [
       {
         slug: "mille-regretz",
         title: "Mille regretz",
-        position: 1,
+        position: 0,
         hasAccompaniment: false,
       },
     ],
