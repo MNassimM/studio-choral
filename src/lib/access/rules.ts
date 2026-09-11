@@ -57,7 +57,7 @@ export function resolveWorkAccess(
   const movements: Record<string, MovementAccess> = {};
 
   for (const movement of work.movements) {
-    let allVoicesOwned = false;
+    let hasAllVoicesGrant = false;
     const ownedVoiceCodes = new Set<string>();
 
     for (const grant of workGrants) {
@@ -66,12 +66,23 @@ export function resolveWorkAccess(
       if (!appliesToMovement) continue;
 
       if (grant.coverage === "ALL_VOICES") {
-        allVoicesOwned = true;
+        hasAllVoicesGrant = true;
         for (const code of movement.voiceCodes) ownedVoiceCodes.add(code);
       } else if (grant.voiceCode) {
         ownedVoiceCodes.add(grant.voiceCode);
       }
     }
+
+    // Deux routes mènent au même droit : l'offre toutes voix, ou le cumul de
+    // tous les pupitres du mouvement. Les deux coûtent le même prix, elles
+    // doivent donc ouvrir exactement les mêmes accès - l'offre toutes voix
+    // n'est qu'un achat unique, elle n'apporte aucun avantage propre.
+    // Le garde sur la longueur n'est pas décoratif : [].every() vaut vrai, et
+    // un mouvement sans pupitre enregistré ouvrirait le tutti à qui n'a rien.
+    const allVoicesOwned =
+      hasAllVoicesGrant ||
+      (movement.voiceCodes.length > 0 &&
+        movement.voiceCodes.every((code) => ownedVoiceCodes.has(code)));
 
     const unlocked = allVoicesOwned || ownedVoiceCodes.size > 0;
     const tuttiStream =
@@ -84,6 +95,7 @@ export function resolveWorkAccess(
     movements[movement.id] = {
       unlocked,
       ownedVoiceCodes: Array.from(ownedVoiceCodes),
+      allVoicesOwned,
       tuttiStream,
       tuttiDownload,
       studio,

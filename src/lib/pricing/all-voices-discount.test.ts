@@ -1,13 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import {
-  computeAllVoicesDiscount,
-  computeAllVoicesSaving,
-} from "@/lib/pricing/all-voices-discount";
+import { computeAllVoicesDiscount } from "@/lib/pricing/all-voices-discount";
 
 console.log(
-  "▶ src/lib/pricing/all-voices-discount.ts — remise proportionnelle et économie du pack toutes voix",
+  "▶ src/lib/pricing/all-voices-discount.ts — remise proportionnelle défalquant ce qui est déjà possédé",
 );
 
 test("aucune voix possédée -> pas de remise", () => {
@@ -70,10 +67,17 @@ test("discountedCents ne descend jamais sous 0", () => {
   assert.equal(result.discountedCents, 0);
 });
 
-test("l'économie du pack toutes voix est la différence avec les pupitres", () => {
-  assert.equal(computeAllVoicesSaving([190, 190, 190, 190], 390), 370);
-});
+test("prendre l'offre toutes voix ou les pupitres restants coûte le même prix", () => {
+  // L'offre toutes voix vaut exactement la somme de ses pupitres, elle ne fait
+  // économiser rien. La remise doit donc ramener son prix à celui des seules
+  // cellules encore à acheter, sinon l'un des deux chemins coûterait plus cher.
+  const pupitre = 190;
+  const toutesVoix = pupitre * 4;
 
-test("un pack plus cher que la somme des pupitres n'économise rien", () => {
-  assert.equal(computeAllVoicesSaving([100, 100], 500), 0);
+  const { discountedCents } = computeAllVoicesDiscount(
+    { ownedUnits: 2, totalUnits: 4 },
+    toutesVoix,
+  );
+
+  assert.equal(discountedCents, pupitre * 2);
 });

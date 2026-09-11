@@ -273,7 +273,16 @@ export default async function WorkPage(
   // Savoir si  l'utilisateur possède déjà le produit (pupitre ou œuvre complète) : si un Grant existant absorbe le produit.
   function isAbsorbed(product: WorkWithDetail["products"][number]): boolean {
     const candidate = productToGrant(workId, product);
-    return grants.some((grant) => absorbs(grant, candidate));
+    if (grants.some((grant) => absorbs(grant, candidate))) {
+      return true;
+    }
+
+    if (candidate.coverage !== "ALL_VOICES") {
+      return false;
+    }
+    return candidate.scope === "WORK"
+      ? access.ownsFullWork
+      : (access.movements[candidate.movementId ?? ""]?.allVoicesOwned ?? false);
   }
 
   // Construit le libellé de prix d'un produit (pupitre ou œuvre complète) pour l'affichage dans les cartes de pack.

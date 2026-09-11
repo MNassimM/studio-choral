@@ -42,9 +42,9 @@ const messe = {
   tracks: [],
   prices: {
     movementSingleVoice: 1.9,
-    movementAllVoices: 3.9,
+    movementAllVoices: 7.6,
     workSingleVoice: 8.9,
-    workAllVoices: 14.9,
+    workAllVoices: 35.6,
   },
 };
 
@@ -72,7 +72,7 @@ const milleRegretz = {
     movementSingleVoice: null,
     movementAllVoices: null,
     workSingleVoice: 2.5,
-    workAllVoices: 3.9,
+    workAllVoices: 10,
   },
 };
 
@@ -109,28 +109,37 @@ test("un prix négatif est refusé", () => {
   assert.ok(erreurs.includes("prices.workSingleVoice"));
 });
 
-test("un pack moins cher qu'une voix seule est refusé", () => {
-  const erreurs = chemins({
-    ...messe,
-    prices: { ...messe.prices, workAllVoices: 1 },
-  });
-  assert.ok(erreurs.includes("prices.workAllVoices"));
+test("un pack qui ne vaut pas exactement ses pupitres réunis est refusé", () => {
+  // 4 pupitres à 8,90 font 35,60. Ni moins, ni plus : l'offre toutes voix
+  // ouvre les mêmes droits que ses pupitres, elle vaut donc leur somme.
+  for (const workAllVoices of [1, 30, 35.5, 40]) {
+    const erreurs = chemins({
+      ...messe,
+      prices: { ...messe.prices, workAllVoices },
+    });
+    assert.ok(
+      erreurs.includes("prices.workAllVoices"),
+      `${workAllVoices} aurait dû être refusé`,
+    );
+  }
 });
 
-test("un pack plus cher que ses pupitres pris à l'unité est refusé", () => {
-  // 4 pupitres à 8,90 font 35,60 : un pack à 40 euros n'économise rien.
+test("un pack de mouvement qui ne vaut pas ses pupitres réunis est refusé", () => {
+  // 4 pupitres à 1,90 font 7,60.
   const erreurs = chemins({
     ...messe,
-    prices: { ...messe.prices, workAllVoices: 40 },
+    prices: { ...messe.prices, movementAllVoices: 5 },
   });
-  assert.ok(erreurs.includes("prices.workAllVoices"));
+  assert.ok(erreurs.includes("prices.movementAllVoices"));
 });
 
 test("un pack d'oeuvre plus cher que ses mouvements est refusé", () => {
-  // 6 mouvements à 3,90 font 23,40, le pack complet doit rester en dessous.
+  // 6 mouvements à 7,60 font 45,60, le pack complet doit rester en dessous.
+  // Les prix choisis respectent l'égalité par voix (12 x 4 = 48), pour que
+  // seule la règle de l'axe des mouvements puisse déclencher.
   const erreurs = chemins({
     ...messe,
-    prices: { ...messe.prices, workAllVoices: 25, workSingleVoice: 8.9 },
+    prices: { ...messe.prices, workSingleVoice: 12, workAllVoices: 48 },
   });
   assert.ok(erreurs.includes("prices.workAllVoices"));
 });
@@ -138,7 +147,7 @@ test("un pack d'oeuvre plus cher que ses mouvements est refusé", () => {
 test("une voix sur l'oeuvre moins chère que sur un mouvement est refusée", () => {
   const erreurs = chemins({
     ...messe,
-    prices: { ...messe.prices, workSingleVoice: 1.5, workAllVoices: 2 },
+    prices: { ...messe.prices, workSingleVoice: 1.5, workAllVoices: 6 },
   });
   assert.ok(erreurs.includes("prices.workSingleVoice"));
 });

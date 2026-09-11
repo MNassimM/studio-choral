@@ -105,9 +105,9 @@ export const DEMO_CATALOG: DemoWork[] = [
     ],
     pricing: {
       movementSingleVoiceCents: 190,
-      movementAllVoicesCents: 390,
+      movementAllVoicesCents: 760,
       workSingleVoiceCents: 890,
-      workAllVoicesCents: 1490,
+      workAllVoicesCents: 3560,
     },
   },
   {
@@ -147,7 +147,7 @@ export const DEMO_CATALOG: DemoWork[] = [
       movementSingleVoiceCents: null,
       movementAllVoicesCents: null,
       workSingleVoiceCents: 190,
-      workAllVoicesCents: 290,
+      workAllVoicesCents: 760,
     },
   },
   {
@@ -187,7 +187,7 @@ export const DEMO_CATALOG: DemoWork[] = [
       movementSingleVoiceCents: null,
       movementAllVoicesCents: null,
       workSingleVoiceCents: 220,
-      workAllVoicesCents: 350,
+      workAllVoicesCents: 880,
     },
   },
   {
@@ -227,7 +227,7 @@ export const DEMO_CATALOG: DemoWork[] = [
       movementSingleVoiceCents: null,
       movementAllVoicesCents: null,
       workSingleVoiceCents: 250,
-      workAllVoicesCents: 390,
+      workAllVoicesCents: 1000,
     },
   },
 ];

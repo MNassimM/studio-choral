@@ -225,18 +225,14 @@ test("posséder toutes les voix rend ownsFullWork vrai et les mouvements complet
   );
 });
 
-test("cumuler tous les pupitres n'ouvre PAS le téléchargement du tutti", () => {
-  // Comportement actuel, enregistré tel quel et non corrigé ici. Il y a une
-  // asymétrie dans resolveWorkAccess : ownsFullWork s'obtient par CUMUL des
-  // droits, alors que allVoicesOwned, qui commande tuttiDownload, exige un
-  // droit dont la coverage vaut littéralement ALL_VOICES. Quelqu'un qui achète
-  // les deux pupitres séparément possède donc l'oeuvre entière sans pouvoir
-  // télécharger le tutti.
+test("cumuler tous les pupitres ouvre le téléchargement du tutti", () => {
+  // Les deux chemins vers l'oeuvre entière coûtent le même prix, ils doivent
+  // donc ouvrir les mêmes droits. L'offre toutes voix n'est qu'un achat
+  // unique, pas un achat privilégié.
   const cumul = vues([droitPupitre("SOPRANO"), droitPupitre("ALTO")]);
   assert.equal(cumul.access.ownsFullWork, true);
-  assert.equal(cumul.model.hasTuttiDownload, false);
+  assert.equal(cumul.model.hasTuttiDownload, true);
 
-  // Avec un droit toutes voix explicite, le tutti s'ouvre.
   const packComplet = vues([
     {
       workId: WORK_ID,
@@ -246,6 +242,7 @@ test("cumuler tous les pupitres n'ouvre PAS le téléchargement du tutti", () =>
       coverage: "ALL_VOICES",
     },
   ]);
+  assert.equal(packComplet.access.ownsFullWork, true);
   assert.equal(packComplet.model.hasTuttiDownload, true);
 });
 
@@ -301,12 +298,12 @@ test("sans aucun droit, le pack toutes voix n'affiche aucune remise", () => {
   assert.equal(model.workAllVoicesCard?.discount, null);
 });
 
-test("le pack toutes voix annonce l'économie face aux pupitres pris séparément", () => {
+test("le pack toutes voix annonce le nombre de pupitres qu'il couvre", () => {
   const { model } = vues([]);
 
-  // Deux pupitres à 4 EUR contre un pack à 8 EUR : aucune économie.
+  // Et rien d'autre : il coûte ses pupitres réunis et ouvre leurs droits,
+  // il n'a aucun avantage propre à mettre en avant.
   assert.equal(model.workAllVoicesCard?.allVoices?.voiceCount, 2);
-  assert.equal(model.workAllVoicesCard?.allVoices?.savingLabel, null);
 });
 
 test("les noms d'offre passent par la fonction de composition injectée", () => {

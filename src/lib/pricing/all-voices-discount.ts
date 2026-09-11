@@ -2,6 +2,12 @@
  * Calcul de la remise proportionnelle sur un produit couvrant toutes les voix.
  *
  * @remarks
+ * L'offre toutes voix coûte exactement la somme de ses pupitres : elle ne fait
+ * économiser rien, elle regroupe. Cette remise-ci ne récompense donc pas le
+ * regroupement, elle défalque ce qui est déjà possédé, pour que l'acheteur ne
+ * paie jamais deux fois la même cellule. C'est elle qui rend le total
+ * identique, qu'on prenne l'offre toutes voix ou les pupitres restants.
+ *
  * TODO webhook Stripe : le futur webhook de paiement devra appeler cette même
  * fonction côté serveur au moment de calculer le montant à facturer.
  */
@@ -57,19 +63,4 @@ export function computeAllVoicesDiscount(
     originalCents,
     discountedCents,
   };
-}
-
-/**
- * Calcule ce qu'on économise en prenant toutes les voix plutôt que chaque pupitre.
- *
- * @param singleVoiceCents - Prix catalogue de chaque pupitre, en centimes.
- * @param allVoicesCents - Prix catalogue du pack toutes voix, en centimes.
- * @returns L'économie en centimes, jamais négative.
- */
-export function computeAllVoicesSaving(
-  singleVoiceCents: readonly number[],
-  allVoicesCents: number,
-): number {
-  const total = singleVoiceCents.reduce((somme, cents) => somme + cents, 0);
-  return Math.max(0, total - allVoicesCents);
 }

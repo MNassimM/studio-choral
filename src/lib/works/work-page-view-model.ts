@@ -9,7 +9,6 @@ import { canDownload } from "@/lib/access/rules";
 import { productToGrant } from "@/lib/catalog/product-grant";
 import {
   computeAllVoicesDiscount,
-  computeAllVoicesSaving,
   type AllVoicesCoverage,
 } from "@/lib/pricing/all-voices-discount";
 import {
@@ -69,12 +68,15 @@ export type AllVoicesDiscountView = {
 };
 
 /**
- * Ce que la ligne toutes voix ajoute par rapport aux pupitres.
+ * Ce que couvre la ligne toutes voix.
+ *
+ * @remarks
+ * Seulement un nombre de pupitres : cette offre coûte la somme de ses
+ * pupitres et ouvre les mêmes droits qu'eux, elle n'ajoute donc rien à
+ * annoncer. Elle regroupe un achat, elle ne l'avantage pas.
  */
 export type AllVoicesExtraView = {
   voiceCount: number;
-  /** Nul quand le pack ne fait économiser rien. */
-  savingLabel: string | null;
 };
 
 /**
@@ -404,26 +406,17 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
   }
 
   /**
-   * Construit ce que la ligne toutes voix ajoute face aux pupitres du lot.
+   * Construit ce que couvre la ligne toutes voix.
    *
-   * @param product - Produit toutes voix.
    * @param siblings - Produits pupitre du même périmètre.
-   * @returns Le nombre de voix et l'économie, ou null si le lot est vide.
+   * @returns Le nombre de voix couvertes, ou null si le lot est vide.
    */
   function buildAllVoicesExtra(
-    product: TProduct,
     siblings: TProduct[],
   ): AllVoicesExtraView | null {
     if (siblings.length === 0) return null;
 
-    const saving = computeAllVoicesSaving(
-      siblings.map((sibling) => sibling.priceCents),
-      product.priceCents,
-    );
-    return {
-      voiceCount: siblings.length,
-      savingLabel: saving > 0 ? getPriceLabel(saving, product.currency) : null,
-    };
+    return { voiceCount: siblings.length };
   }
 
   // Toutes les offres du mouvement, y compris celles déjà possédées qui s'affichent grisées avec un bandeau.
@@ -450,7 +443,6 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
           allVoices:
             product.coverage === "ALL_VOICES"
               ? buildAllVoicesExtra(
-                  product,
                   products.filter(
                     (sibling) =>
                       sibling.scope === "MOVEMENT" &&
@@ -491,7 +483,6 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
           workCoverage(),
         ),
         allVoices: buildAllVoicesExtra(
-          workAllVoicesProduct,
           workScopeProducts.filter(
             (product) => product.coverage === "SINGLE_VOICE",
           ),

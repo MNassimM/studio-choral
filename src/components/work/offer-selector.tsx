@@ -105,14 +105,7 @@ function OfferRow({
         </span>
         {offer.allVoices ? (
           <span className="text-xs text-muted-foreground">
-            {t("offersAllVoicesMeta", {
-              count: offer.allVoices.voiceCount,
-              tutti: t("extendAccessBulletTuttiDownload"),
-            })}
-            {offer.allVoices.savingLabel
-              ? " · " +
-                t("offersSaving", { amount: offer.allVoices.savingLabel })
-              : ""}
+            {t("offersAllVoicesMeta", { count: offer.allVoices.voiceCount })}
           </span>
         ) : null}
       </span>

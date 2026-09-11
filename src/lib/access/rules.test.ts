@@ -375,3 +375,64 @@ test("preuve que la politique commerciale est bien centralisée", () => {
   // Sanity check du fixture lui-même
   assert.equal(ACCESS_POLICY.ownedVoiceUnlocksTuttiDownload, false);
 });
+
+test("cumuler tous les pupitres équivaut exactement à l'offre toutes voix", () => {
+  // Les deux chemins coûtent le même prix, ils doivent donc ouvrir strictement
+  // les mêmes droits : l'offre toutes voix n'est qu'un achat unique, elle
+  // n'apporte aucun avantage propre. Comparaison capacité par capacité, pour
+  // qu'aucune divergence future ne passe.
+  const parCumul = resolveWorkAccess(
+    messe,
+    SATB.map((voiceCode) =>
+      grant({ scope: "WORK", coverage: "SINGLE_VOICE", voiceCode }),
+    ),
+  );
+  const parPack = resolveWorkAccess(messe, [grant({})]);
+
+  assert.equal(parCumul.ownsFullWork, parPack.ownsFullWork);
+  assert.equal(parCumul.ownsFullWork, true);
+
+  for (const movementId of ["kyrie", "gloria"]) {
+    const cumul = parCumul.movements[movementId];
+    const pack = parPack.movements[movementId];
+
+    assert.equal(cumul.allVoicesOwned, pack.allVoicesOwned);
+    assert.equal(cumul.unlocked, pack.unlocked);
+    assert.equal(cumul.tuttiStream, pack.tuttiStream);
+    assert.equal(cumul.tuttiDownload, pack.tuttiDownload);
+    assert.equal(cumul.studio, pack.studio);
+    assert.deepEqual(new Set(cumul.ownedVoiceCodes), new Set(SATB));
+
+    for (const type of ["TUTTI", "ACCOMPANIMENT"] as const) {
+      assert.deepEqual(
+        capabilitiesFor(parCumul, { movementId, type, voiceCode: null }),
+        capabilitiesFor(parPack, { movementId, type, voiceCode: null }),
+      );
+    }
+    for (const type of ["SOLO", "PREDOMINANT", "PREVIEW"] as const) {
+      for (const voiceCode of SATB) {
+        assert.deepEqual(
+          capabilitiesFor(parCumul, { movementId, type, voiceCode }),
+          capabilitiesFor(parPack, { movementId, type, voiceCode }),
+        );
+      }
+    }
+  }
+
+  // Et le tutti est bien téléchargeable par les deux chemins.
+  assert.equal(parCumul.movements.kyrie.tuttiDownload, true);
+});
+
+test("un mouvement sans pupitre enregistré n'ouvre rien à qui n'a aucun droit", () => {
+  // Garde-fou : [].every() vaut vrai, un mouvement vide ne doit pas être
+  // considéré comme entièrement possédé.
+  const vide: WorkAccessInput = {
+    id: "work-messe",
+    movements: [{ id: "kyrie", voiceCodes: [] }],
+  };
+  const access = resolveWorkAccess(vide, []);
+
+  assert.equal(access.movements.kyrie.allVoicesOwned, false);
+  assert.equal(access.movements.kyrie.tuttiDownload, false);
+  assert.equal(access.movements.kyrie.unlocked, false);
+});

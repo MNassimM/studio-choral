@@ -54,6 +54,12 @@ export type WorkAccessInput = {
 export type MovementAccess = {
   unlocked: boolean;
   ownedVoiceCodes: string[];
+  /**
+   * Vrai quand tous les pupitres du mouvement sont possédés, que ce soit par
+   * l'offre toutes voix ou par le cumul des pupitres pris un à un. Les deux
+   * chemins coûtent le même prix et ouvrent les mêmes droits.
+   */
+  allVoicesOwned: boolean;
   tuttiStream: boolean;
   tuttiDownload: boolean;
   studio: boolean;

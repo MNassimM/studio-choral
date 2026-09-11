@@ -194,18 +194,14 @@ function checkPrices(work: z.infer<typeof baseSchema>, ctx: z.RefinementCtx) {
     }
   }
 
-  if (workAll < workSingle) {
+  // Égalité stricte, et non un encadrement : l'offre toutes voix ouvre
+  // exactement les mêmes droits que ses pupitres réunis, elle doit donc coûter
+  // exactement le même prix. Elle n'est qu'une façon d'acheter le tout d'un
+  // seul geste, elle n'apporte aucun avantage à récompenser ni à facturer.
+  if (voiceCount >= 1 && workAll !== workSingle * voiceCount) {
     ctx.addIssue({
       code: "custom",
-      message:
-        "Le pack complet ne peut pas coûter moins qu'une voix sur l'œuvre entière.",
-      path: ["prices", "workAllVoices"],
-    });
-  }
-  if (workAll > workSingle * voiceCount) {
-    ctx.addIssue({
-      code: "custom",
-      message: `Le pack complet ne peut pas coûter plus que les ${voiceCount} pupitres pris séparément.`,
+      message: `Le pack complet doit coûter exactement les ${voiceCount} pupitres réunis, soit ${((workSingle * voiceCount) / 100).toFixed(2)} €.`,
       path: ["prices", "workAllVoices"],
     });
   }
@@ -215,18 +211,10 @@ function checkPrices(work: z.infer<typeof baseSchema>, ctx: z.RefinementCtx) {
   const mvtSingle = toCents(movementSingleVoice);
   const mvtAll = toCents(movementAllVoices);
 
-  if (mvtAll < mvtSingle) {
+  if (voiceCount >= 1 && mvtAll !== mvtSingle * voiceCount) {
     ctx.addIssue({
       code: "custom",
-      message:
-        "Le pack toutes voix ne peut pas coûter moins qu'une voix seule.",
-      path: ["prices", "movementAllVoices"],
-    });
-  }
-  if (mvtAll > mvtSingle * voiceCount) {
-    ctx.addIssue({
-      code: "custom",
-      message: `Le pack d'un mouvement ne peut pas coûter plus que les ${voiceCount} pupitres pris séparément.`,
+      message: `Le pack d'un mouvement doit coûter exactement les ${voiceCount} pupitres réunis, soit ${((mvtSingle * voiceCount) / 100).toFixed(2)} €.`,
       path: ["prices", "movementAllVoices"],
     });
   }
@@ -303,15 +291,12 @@ export const workFormSchema = baseSchema.superRefine((work, ctx) => {
 export type WorkFormValues = z.infer<typeof workFormSchema>;
 
 /**
- * Coefficient appliqué au passage de une voix à toutes les voix.
- */
-export const ALL_VOICES_FACTOR = 1;
-
-/** Coefficient appliqué au passage d'un mouvement à l'oeuvre entière. */
-export const WHOLE_WORK_FACTOR = 1;
-
-/**
  * Déduit les trois prix dérivés du seul prix saisi.
+ *
+ * @remarks
+ * Aucun coefficient nulle part : un prix se multiplie par ce qu'il couvre. Le
+ * pack toutes voix vaut ses pupitres réunis, l'oeuvre entière vaut ses
+ * mouvements réunis. Grouper un achat ne le remise pas, et ne le majore pas.
  *
  * @param source - Le prix saisi, en euros.
  * @param voiceCount - Nombre de pupitres retenus.
@@ -334,8 +319,7 @@ export function derivePrices(
 
   const cents = toCents(source);
   const enEuros = (valeur: number) => Math.round(valeur) / 100;
-  const toutesVoix = (unitaire: number) =>
-    Math.round(unitaire * voiceCount * ALL_VOICES_FACTOR);
+  const toutesVoix = (unitaire: number) => Math.round(unitaire * voiceCount);
 
   if (movementCount === 1) {
     return {
@@ -346,7 +330,7 @@ export function derivePrices(
     };
   }
 
-  const oeuvreUneVoix = Math.round(cents * movementCount * WHOLE_WORK_FACTOR);
+  const oeuvreUneVoix = Math.round(cents * movementCount);
   return {
     movementSingleVoice: enEuros(cents),
     movementAllVoices: enEuros(toutesVoix(cents)),
