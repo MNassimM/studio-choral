@@ -7,6 +7,7 @@ import { buildWorkAccessInput } from "@/lib/catalog/work-access-input";
 import { prisma } from "@/lib/db/prisma";
 import {
   buildDownloadFilename,
+  downloadPartLabel,
   extensionOf,
   storage,
 } from "@/lib/storage/storage";
@@ -118,10 +119,13 @@ export async function requestTrackDownload(
     return { ok: false, reason: "unavailable" };
   }
 
+  // Une oeuvre à mouvement unique ne répète pas son titre : son mouvement
+  // porte presque toujours le même, « ce-mois-de-mai-ce-mois-de-mai-tenor ».
+  const movementTitle = work.movements.length > 1 ? track.movement.title : null;
   const filename = buildDownloadFilename(
     work.title,
-    track.movement.title,
-    track.voice?.code ?? null,
+    movementTitle,
+    downloadPartLabel(track.type, track.voice?.code ?? null),
     extension,
   );
 

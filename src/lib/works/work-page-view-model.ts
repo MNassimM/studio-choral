@@ -29,6 +29,16 @@ export type SidebarVoiceView = { code: string; label: string };
  */
 export type DownloadableAudioType = Exclude<AudioType, "PREVIEW">;
 
+/**
+ * Rang de chaque type de piste dans la grille de téléchargements.
+ */
+const DOWNLOAD_TYPE_RANK: Record<DownloadableAudioType, number> = {
+  PREDOMINANT: 0,
+  SOLO: 0,
+  TUTTI: 1,
+  ACCOMPANIMENT: 2,
+};
+
 /** Une ligne de la grille de téléchargements, verrouillée ou non. */
 export type DownloadFileEntry = {
   audioFileId: string;
@@ -257,7 +267,7 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
 
   // Téléchargements, dérivés exclusivement de canDownload()
   const downloadGroups: MovementDownloadGroup[] = movements.map((movement) => {
-    const entries: DownloadFileEntry[] = [];
+    const lignes: { voiceCode: string | null; entry: DownloadFileEntry }[] = [];
     for (const track of movement.audioFiles) {
       if (track.type === "PREVIEW") continue;
       if (track.type === "SOLO") continue;
@@ -269,17 +279,31 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
         type: track.type,
         voiceCode,
       });
-      entries.push({
-        audioFileId: track.id,
-        audioType: track.type,
-        voiceLabel: voiceCode
-          ? (voiceLabelByCode.get(voiceCode) ?? voiceCode)
-          : null,
-        mimeType: track.mimeType,
-        sizeBytes: track.sizeBytes,
-        owned,
+      lignes.push({
+        voiceCode,
+        entry: {
+          audioFileId: track.id,
+          audioType: track.type,
+          voiceLabel: voiceCode
+            ? (voiceLabelByCode.get(voiceCode) ?? voiceCode)
+            : null,
+          mimeType: track.mimeType,
+          sizeBytes: track.sizeBytes,
+          owned,
+        },
       });
     }
+
+    // tri fichier
+    lignes.sort(
+      (a, b) =>
+        DOWNLOAD_TYPE_RANK[a.entry.audioType] -
+          DOWNLOAD_TYPE_RANK[b.entry.audioType] ||
+        (voiceOrderByCode.get(a.voiceCode ?? "") ?? Infinity) -
+          (voiceOrderByCode.get(b.voiceCode ?? "") ?? Infinity),
+    );
+    const entries = lignes.map((ligne) => ligne.entry);
+
     return {
       movementId: movement.id,
       movementTitle: movement.title,

@@ -473,6 +473,7 @@ export default async function WorkPage(
               <DownloadFileGrid
                 entries={downloadGroups[0]?.entries ?? []}
                 returnTo={downloadReturnTo}
+                movementTitle={null}
               />
             ) : (
               <MovementPanelSwitcher
@@ -485,6 +486,7 @@ export default async function WorkPage(
                     <DownloadFileGrid
                       entries={group.entries}
                       returnTo={downloadReturnTo}
+                      movementTitle={group.movementTitle}
                     />
                   ),
                 }))}

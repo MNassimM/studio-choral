@@ -127,19 +127,36 @@ export function isValidKey(key: string): boolean {
  * Fabrique un nom de fichier lisible pour un téléchargement.
  *
  * @param workTitle - Titre de l'oeuvre.
- * @param movementTitle - Titre du mouvement.
- * @param voiceLabel - Libellé du pupitre, ou null pour un tutti.
+ * @param movementTitle - Titre du mouvement, ou null pour une oeuvre à
+ * mouvement unique, dont le mouvement répéterait le plus souvent le titre.
+ * @param partLabel - Ce que contient le fichier : un pupitre, « tutti » ou
+ * « accompagnement ».
  * @param extension - Extension du fichier.
  * @returns Le nom proposé au visiteur.
  */
 export function buildDownloadFilename(
   workTitle: string,
-  movementTitle: string,
-  voiceLabel: string | null,
+  movementTitle: string | null,
+  partLabel: string,
   extension: string,
 ): string {
-  const parts = [workTitle, movementTitle, voiceLabel ?? "tutti"]
+  const parts = [workTitle, movementTitle ?? "", partLabel]
     .map((part) => sanitizeSegment(part))
     .filter((part) => part.length > 0);
   return `${parts.join("-") || "piste"}.${extension}`;
+}
+
+/**
+ * Dit ce que contient une piste, pour son nom de téléchargement.
+ *
+ * @param type - Type de la piste.
+ * @param voiceCode - Code du pupitre, nul pour une piste commune.
+ * @returns Le code du pupitre, « accompagnement » ou « tutti ».
+ */
+export function downloadPartLabel(
+  type: string,
+  voiceCode: string | null,
+): string {
+  if (voiceCode !== null) return voiceCode;
+  return type === "ACCOMPANIMENT" ? "accompagnement" : "tutti";
 }

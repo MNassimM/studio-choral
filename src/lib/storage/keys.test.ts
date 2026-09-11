@@ -7,6 +7,7 @@ import {
   PENDING_PREFIX,
   buildDownloadFilename,
   buildPendingKey,
+  downloadPartLabel,
   buildTrackKey,
   extensionOf,
   isPendingKey,
@@ -162,10 +163,25 @@ test("le nom de téléchargement reste lisible et sans accent", () => {
   );
 });
 
-test("un téléchargement sans pupitre est nommé tutti", () => {
+test("une oeuvre à mouvement unique ne répète pas son titre", () => {
   assert.equal(
-    buildDownloadFilename("Mille regretz", "Mille regretz", null, "mp3"),
-    "mille-regretz-mille-regretz-tutti.mp3",
+    buildDownloadFilename("Ce mois de mai", null, "TENOR", "wav"),
+    "ce-mois-de-mai-tenor.wav",
+  );
+});
+
+test("une piste sans pupitre est nommée tutti ou accompagnement, jamais confondus", () => {
+  assert.equal(downloadPartLabel("TUTTI", null), "tutti");
+  assert.equal(downloadPartLabel("ACCOMPANIMENT", null), "accompagnement");
+  assert.equal(downloadPartLabel("PREDOMINANT", "TENOR"), "TENOR");
+  assert.equal(
+    buildDownloadFilename(
+      "Messe en sol majeur",
+      "Kyrie",
+      downloadPartLabel("ACCOMPANIMENT", null),
+      "mp3",
+    ),
+    "messe-en-sol-majeur-kyrie-accompagnement.mp3",
   );
 });
 

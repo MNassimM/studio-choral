@@ -183,6 +183,37 @@ test("un visiteur sans droit ne possède rien, aucun téléchargement", () => {
   assert.equal(model.hasAccompanimentDownload, false);
 });
 
+test("la grille range les pupitres dans l'ordre de la table, puis tutti et accompagnement", () => {
+  const { layout, movements, products } = oeuvre(1);
+  // Pistes rendues dans le désordre, comme la base peut le faire sans ORDER
+  // BY : l'alto arrive avant le soprano, l'accompagnement avant le tutti.
+  const desordre = movements.map((movement) => ({
+    ...movement,
+    audioFiles: [...movement.audioFiles].reverse(),
+  }));
+  const access = resolveWorkAccess(layout, []);
+  const model = buildWorkPageViewModel({
+    access,
+    layout,
+    voices: VOICES,
+    movements: desordre,
+    products,
+    workId: WORK_ID,
+    workTitle: "Messe",
+    getVoiceLabel: (code) => code,
+    getPriceLabel: () => "",
+    composeProductName: () => "",
+    isAlreadyOwned: () => false,
+  });
+
+  assert.deepEqual(
+    model.downloadGroups[0].entries.map(
+      (entree) => entree.voiceLabel ?? entree.audioType,
+    ),
+    ["SOPRANO", "ALTO", "TUTTI", "ACCOMPANIMENT"],
+  );
+});
+
 test("la grille de téléchargement écarte les extraits et les voix seules", () => {
   const { model } = vues([droitPupitre("ALTO")]);
   const types = model.downloadGroups[0].entries.map(

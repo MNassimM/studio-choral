@@ -20,6 +20,7 @@ export {
   buildDownloadFilename,
   buildPendingKey,
   buildTrackKey,
+  downloadPartLabel,
   extensionOf,
   isPendingKey,
   isValidKey,

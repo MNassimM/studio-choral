@@ -16,9 +16,11 @@ import type { DownloadFileEntry } from "@/lib/works/work-page-view-model";
 async function DownloadFileGrid({
   entries,
   returnTo,
+  movementTitle,
 }: {
   entries: DownloadFileEntry[];
   returnTo: string;
+  movementTitle: string | null;
 }) {
   const t = await getTranslations("work.workPage");
 
@@ -50,8 +52,9 @@ async function DownloadFileGrid({
 
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium leading-tight">
-              {entry.voiceLabel ? `${entry.voiceLabel} - ` : ""}
-              {t(`audioType.${entry.audioType}`)}
+              {movementTitle ? `${movementTitle}_` : ""}
+              {entry.voiceLabel ? `${entry.voiceLabel}_` : ""}
+              {t(`audioType.${entry.audioType}`).replaceAll(" ", "-")}
             </p>
             <p className="text-xs text-muted-foreground">
               {formatAudioFormatLabel(entry.mimeType)}

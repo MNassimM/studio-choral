@@ -72,7 +72,7 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      className={`${geistSans.variable} ${geistMono.variable}`}
+      className={`${geistSans.variable} ${geistMono.variable}`+"overflow-auto scrollbar-thumb-primary scrollbar-track-backgroun"}
     >
       <body className="dark">
         <NextIntlClientProvider>
