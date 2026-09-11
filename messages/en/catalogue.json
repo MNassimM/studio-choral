@@ -22,6 +22,9 @@
   "resultsCount": "{count, plural, one {# work shown} other {# works shown}}",
   "paginationPreviousAriaLabel": "Previous page",
   "paginationNextAriaLabel": "Next page",
+  "paginationAriaLabel": "Catalogue pagination",
+  "paginationPageAriaLabel": "Page {page}",
+  "resultsRange": "{from}–{to} of {total, plural, one {# work} other {# works}}",
   "infoBannerText": "Every work is available by movement or in full, for a single voice part or for all voices. After your purchase, find your audio tracks in your personal library.",
   "filters": {
     "period": "Period",

@@ -3,6 +3,14 @@ import type { AppLocale } from "@/i18n/routing";
 import { resolveWorkTranslation } from "@/lib/works/resolve-translation";
 
 /**
+ * Offres qui comptent pour le prix « à partir de ».
+ */
+export const SELLABLE_PRODUCT_WHERE = {
+  isActive: true,
+  isRetired: false,
+} satisfies Prisma.ProductWhereInput;
+
+/**
  * Construit la clause include Prisma nécessaire à une carte oeuvre.
  *
  * @param locale - Locale d'interface active.
@@ -12,7 +20,7 @@ export function buildWorkCardInclude(locale: AppLocale) {
   return {
     movements: true,
     products: {
-      where: { isActive: true },
+      where: SELLABLE_PRODUCT_WHERE,
     },
     translations: {
       where: { locale },

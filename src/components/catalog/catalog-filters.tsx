@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useRouter } from "@/i18n/navigation";
+import { PAGE_PARAM } from "@/lib/catalog/catalog-params";
 import { cn } from "@/lib/utils";
 
 type FilterCategoryKey = "period" | "voicing" | "language";
@@ -74,7 +75,7 @@ type CatalogFiltersPanelProps = {
  * Panneau de filtres du catalogue.
  *
  * @remarks
- * Les cases cochées ne sont appliquées à l'URL qu'à la validation. 
+ * Les cases cochées ne sont appliquées à l'URL qu'à la validation.
  * Le panneau se ferme sur clic extérieur ou sur Échap.
  *
  * @param categories - Catégories de filtres et leurs options disponibles.
@@ -142,7 +143,15 @@ function CatalogFiltersPanel({
   function applyAndClose(next: DraftState) {
     const query: Record<string, string> = {};
     for (const [key, value] of searchParams.entries()) {
-      if (key === "period" || key === "voicing" || key === "language") continue;
+      // La page tombe avec les filtres : l'ensemble des résultats change.
+      if (
+        key === PAGE_PARAM ||
+        key === "period" ||
+        key === "voicing" ||
+        key === "language"
+      ) {
+        continue;
+      }
       query[key] = value;
     }
     for (const category of categories) {

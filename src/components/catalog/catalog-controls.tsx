@@ -14,13 +14,10 @@ import {
   SORT_OPTIONS,
   type SortValue,
 } from "@/components/catalog/catalog-options";
+import { PAGE_PARAM } from "@/lib/catalog/catalog-params";
 
 /**
  * Rend une fonction qui réécrit un paramètre de l'URL courante.
- *
- * @remarks
- * Les autres paramètres sont conservés. Écrire la valeur par défaut retire le paramètre plutôt que d'ajouter une valeur
- * sinon URL longue pour rien.
  *
  * @returns Une fonction qui prend la clé, la valeur et la valeur par défaut.
  */
@@ -36,6 +33,7 @@ function useUpdateSearchParam() {
     } else {
       params.set(key, value);
     }
+    params.delete(PAGE_PARAM);
     const query = params.toString();
     router.push(query ? `${pathname}?${query}` : pathname);
   };

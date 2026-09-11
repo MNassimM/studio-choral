@@ -3,15 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { locale as rootLocale } from "next/root-params";
 import { cookies } from "next/headers";
 import { Playfair_Display } from "next/font/google";
-import {
-  BookOpen,
-  ChevronLeft,
-  ChevronRight,
-  Headphones,
-  Info,
-  Music2,
-  Users2,
-} from "lucide-react";
+import { BookOpen, Headphones, Info, Music2, Users2 } from "lucide-react";
 
 // Import de composants partagés
 import { Container } from "@/components/layout/container";
@@ -28,38 +20,38 @@ import {
   type FilterCategory,
 } from "@/components/catalog/catalog-filters";
 import { SortSelect } from "@/components/catalog/catalog-controls";
+import { CatalogPagination } from "@/components/catalog/catalog-pagination";
 import {
   CATALOG_VIEW_COOKIE,
   DEFAULT_CATALOG_VIEW,
   parseCatalogView,
   type CatalogView,
 } from "@/lib/catalog/view-preference";
-import {
-  PERIOD_OPTIONS,
-  type PeriodValue,
-  SORT_OPTIONS,
-  type SortValue,
-} from "@/components/catalog/catalog-options";
+import { PERIOD_OPTIONS } from "@/components/catalog/catalog-options";
 import { CatalogViewToggle } from "@/components/catalog/catalog-view-toggle";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 
 // Import de fonctions utilitaires
 import { prisma } from "@/lib/db/prisma";
 import {
-  buildWorkCardInclude,
-  deriveWorkCardData,
-} from "@/lib/catalog/work-card-data";
-import { Link, getPathname } from "@/i18n/navigation";
+  PAGE_PARAM,
+  catalogHref,
+  catalogQueryForPage,
+  parseCatalogParams,
+  parsePage,
+  type RawSearchParams,
+} from "@/lib/catalog/catalog-params";
+import { findCatalogPage } from "@/lib/catalog/catalog-query";
+import { Link, getPathname, redirect } from "@/i18n/navigation";
 import { routing, type AppLocale } from "@/i18n/routing";
 import { isKnownWorkLanguageCode } from "@/lib/works/work-language";
 import { cn } from "@/lib/utils";
 
-// Page publique, peu volatile : ISR toutes les heures. Les searchParams
-// (recherche, tri, filtre) forcent de toute façon un rendu dynamique par
-// requête - cette valeur s'appliquera si la page devient un jour cacheable
-// indépendamment de ses paramètres (ex. contenu au-dessus du fil coupé du
-// reste via une future limite de streaming).
-export const revalidate = 3600;
+// Rendue à chaque requête : ses résultats viennent des paramètres d'URL, et sa
+// vue du cookie de préférence, une API liée à la requête qui interdit tout
+// rendu statique. L'ancien revalidate = 3600 ne mettait donc rien en cache ;
+// la déclaration explicite évite de laisser croire le contraire.
+export const dynamic = "force-dynamic";
 
 const playfairDisplay = Playfair_Display({
   subsets: ["latin"],
@@ -69,80 +61,38 @@ const playfairDisplay = Playfair_Display({
 /**
  * Construit les métadonnées du catalogue.
  *
+ * @remarks
+ * Chaque page de la pagination est un contenu distinct, elle se déclare donc
+ * canonique. Tri, filtres et recherche ne sont que des variantes d'une même
+ * liste, ils restent hors de l'URL canonique.
+ *
+ * @param props - Paramètres de route et paramètres de recherche.
  * @returns Le titre, la description et les liens alternatifs par locale.
  */
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata(
+  props: PageProps<"/[locale]/catalogue">,
+): Promise<Metadata> {
   const locale = ((await rootLocale()) ?? routing.defaultLocale) as AppLocale;
   const t = await getTranslations("catalogue");
 
+  const page = parsePage((await props.searchParams)[PAGE_PARAM]);
+  const href = catalogHref(catalogQueryForPage({}, page));
+
   const languages = Object.fromEntries(
-    routing.locales.map((l) => [
-      l,
-      getPathname({ href: "/catalogue", locale: l }),
-    ]),
+    routing.locales.map((l) => [l, getPathname({ href, locale: l })]),
   );
 
   return {
     title: t("metaTitle"),
     description: t("metaDescription"),
     alternates: {
-      canonical: getPathname({ href: "/catalogue", locale }),
+      canonical: getPathname({ href, locale }),
       languages: {
         ...languages,
         "x-default": languages[routing.defaultLocale],
       },
     },
   };
-}
-
-// Type guards pour valider les searchParams côté serveur
-/**
- * Vérifie qu'une valeur d'URL correspond à un tri connu.
- *
- * @param value - Valeur brute lue dans l'URL.
- * @returns Vrai si le tri est supporté.
- */
-function isSortValue(value: string): value is SortValue {
-  return SORT_OPTIONS.some((option) => option === value);
-}
-
-/**
- * Vérifie qu'une valeur d'URL correspond à une période connue.
- *
- * @param value - Valeur brute lue dans l'URL.
- * @returns Vrai si la période est supportée.
- */
-function isPeriodValue(value: string): value is PeriodValue {
-  return PERIOD_OPTIONS.some((option) => option === value);
-}
-
-/**
- * Lit un paramètre d'URL multivalué au format séparé par des virgules.
- *
- * @remarks
- * Chaque valeur est validée indépendamment. Une valeur inconnue est ignorée
- * sans erreur, et une URL entièrement invalide revient à aucun filtre de
- * cette catégorie.
- *
- * @param raw - Valeur brute du paramètre.
- * @param isValid - Garde de type appliquée à chaque valeur.
- * @returns Les valeurs valides, dédupliquées et dans leur ordre d'apparition.
- */
-function parseMultiValueParam<T extends string>(
-  raw: unknown,
-  isValid: (value: string) => value is T,
-): T[] {
-  if (typeof raw !== "string" || raw.length === 0) return [];
-  const values: T[] = [];
-  const seen = new Set<string>();
-  for (const token of raw.split(",")) {
-    const trimmed = token.trim();
-    if (trimmed && !seen.has(trimmed) && isValid(trimmed)) {
-      seen.add(trimmed);
-      values.push(trimmed);
-    }
-  }
-  return values;
 }
 
 /**
@@ -176,12 +126,13 @@ function StatBox({
 }
 
 /**
- * Page catalogue, filtrable et triable.
+ * Page catalogue, filtrable, triable et paginée.
  *
  * @remarks
- * Charge les œuvres publiées et les valeurs de filtre réellement présentes en
- * base, puis applique recherche, filtres et tri en mémoire. Tout l'état vit
- * dans l'URL, la vue grille ou tableau comprise.
+ * Couche de composition : les paramètres sont lus par catalog-params, la
+ * sélection, le tri et le découpage sont faits par catalog-query. Tout l'état
+ * des résultats vit dans l'URL ; seule la vue grille ou tableau vient d'un
+ * cookie.
  *
  * @param props - Paramètres de route et paramètres de recherche.
  * @returns La page rendue.
@@ -194,16 +145,9 @@ export default async function CataloguePage(
   const t = await getTranslations("catalogue");
   const tPeriod = await getTranslations("work.period");
   const tCommon = await getTranslations("common");
+  const tWorkLanguage = await getTranslations("work.language");
 
-  const rawSearchParams = await props.searchParams;
-  // Extraction et validation des searchParams côté serveur
-  const q =
-    typeof rawSearchParams.q === "string" ? rawSearchParams.q.trim() : "";
-  const sort: SortValue =
-    typeof rawSearchParams.sort === "string" &&
-    isSortValue(rawSearchParams.sort)
-      ? rawSearchParams.sort
-      : "featured";
+  const rawSearchParams: RawSearchParams = await props.searchParams;
   // Le mode d'affichage ne vient pas de l'URL mais du cookie posé par la
   // bascule. C'est une préférence de la personne et non une propriété du
   // document, deux visiteurs ouvrant le même lien voient donc chacun le
@@ -213,11 +157,11 @@ export default async function CataloguePage(
     parseCatalogView(cookieStore.get(CATALOG_VIEW_COOKIE)?.value) ??
     DEFAULT_CATALOG_VIEW;
 
-  // Œuvres publiées, compositeurs distincts (stat "Compositeurs") et valeurs
-  // distinctes de period/voicing/language (options du panneau de filtres) -
-  // toujours calculées depuis la base, jamais écrites en dur.
+  // Statistiques et valeurs distinctes de period/voicing/language (options du
+  // panneau de filtres), toujours calculées depuis la base, jamais écrites en
+  // dur. Tout se limite aux œuvres publiées : ces chiffres sont publics, ils
+  // ne doivent pas compter ce que le catalogue ne montre pas.
   const [
-    allWorks,
     worksCount,
     audioFilesCount,
     distinctComposerRows,
@@ -225,13 +169,10 @@ export default async function CataloguePage(
     distinctVoicingRows,
     distinctLanguageRows,
   ] = await Promise.all([
-    prisma.work.findMany({
-      where: { isPublished: true },
-      orderBy: { createdAt: "asc" },
-      include: buildWorkCardInclude(locale),
-    }),
     prisma.work.count({ where: { isPublished: true } }),
-    prisma.audioFile.count(),
+    prisma.audioFile.count({
+      where: { movement: { work: { isPublished: true } } },
+    }),
     prisma.work.findMany({
       where: { isPublished: true },
       distinct: ["composer"],
@@ -268,7 +209,6 @@ export default async function CataloguePage(
   const availableVoicings = distinctVoicingRows
     .map((row) => row.voicing!)
     .sort((a, b) => a.localeCompare(b, locale));
-  const tWorkLanguage = await getTranslations("work.language");
   // Repli sur le code brut si non répertorié dans messages/*.json (langue pas
   // encore documentée) - jamais d'erreur de type ni d'écran cassé.
   function translateWorkLanguage(code: string): string {
@@ -314,84 +254,29 @@ export default async function CataloguePage(
   }
 
   // period : validé contre l'enum MusicalPeriod. voicing/language : validés
-  // contre les valeurs réellement présentes en base (calculées ci-dessus) -
-  // dans les deux cas, un token inconnu est ignoré silencieusement.
-  const periods = parseMultiValueParam(rawSearchParams.period, isPeriodValue);
-  const voicings = parseMultiValueParam(
-    rawSearchParams.voicing,
-    (value): value is string => availableVoicings.includes(value),
-  );
-  const languages = parseMultiValueParam(
-    rawSearchParams.language,
-    (value): value is string => availableLanguages.includes(value),
-  );
-
-  let entries = allWorks.map((work) => ({
-    cardData: deriveWorkCardData(work, locale),
-    createdAt: work.createdAt,
-  }));
-
-  if (q) {
-    // Recherche dans le titre ET la description courte de la LANGUE ACTIVE
-    // (déjà résolues par deriveWorkCardData) : un anglophone qui tape "mass"
-    // doit trouver l'œuvre même si son incipit d'origine reste en français.
-    const needle = q.toLowerCase();
-    entries = entries.filter(
-      (entry) =>
-        entry.cardData.title.toLowerCase().includes(needle) ||
-        entry.cardData.composer.toLowerCase().includes(needle) ||
-        (entry.cardData.shortDescription?.toLowerCase().includes(needle) ??
-          false),
-    );
-  }
-
-  // OU à l'intérieur d'une catégorie, ET entre catégories : trois filtres
-  // indépendants appliqués en série plutôt qu'une condition combinée.
-  if (periods.length > 0) {
-    entries = entries.filter(
-      (entry) =>
-        entry.cardData.period !== null &&
-        periods.includes(entry.cardData.period),
-    );
-  }
-  if (voicings.length > 0) {
-    entries = entries.filter(
-      (entry) =>
-        entry.cardData.voicing !== null &&
-        voicings.includes(entry.cardData.voicing),
-    );
-  }
-  if (languages.length > 0) {
-    entries = entries.filter(
-      (entry) =>
-        entry.cardData.language !== null &&
-        languages.includes(entry.cardData.language),
-    );
-  }
-
-  entries = [...entries].sort((a, b) => {
-    switch (sort) {
-      case "price-asc":
-        return (
-          (a.cardData.fromPriceCents ?? Infinity) -
-          (b.cardData.fromPriceCents ?? Infinity)
-        );
-      case "price-desc":
-        return (
-          (b.cardData.fromPriceCents ?? -Infinity) -
-          (a.cardData.fromPriceCents ?? -Infinity)
-        );
-      case "title-asc":
-        return a.cardData.title.localeCompare(b.cardData.title, locale);
-      case "composer-asc":
-        return a.cardData.composer.localeCompare(b.cardData.composer, locale);
-      default:
-        return a.createdAt.getTime() - b.createdAt.getTime();
-    }
+  // contre les valeurs réellement présentes en base - dans les deux cas, un
+  // token inconnu est ignoré silencieusement.
+  const params = parseCatalogParams(rawSearchParams, {
+    voicings: availableVoicings,
+    languages: availableLanguages,
   });
+  const { q, sort, periods, voicings, languages } = params;
 
-  // Oeuvres filtrées et triées, prêtes à être affichées dans la vue choisie (grille ou tableau)
-  const works = entries.map((entry) => entry.cardData);
+  const catalogue = await findCatalogPage({ locale, ...params });
+  if (catalogue.kind === "outOfRange") {
+    // Une page vide servie en 200 serait une fausse page pour les moteurs :
+    // on ramène à la dernière page qui existe, recherche et filtres conservés.
+    // return : redirect vient d'une déstructuration, TypeScript ne sait donc
+    // pas qu'il interrompt le rendu et ne restreindrait pas catalogue.
+    return redirect({
+      href: catalogHref(
+        catalogQueryForPage(rawSearchParams, catalogue.lastPage),
+      ),
+      locale,
+    });
+  }
+  const works = catalogue.works;
+  const firstRank = (catalogue.page - 1) * catalogue.pageSize + 1;
 
   const activeFilterPills: ActiveFilterPill[] = [
     ...periods.map((value) => ({
@@ -549,40 +434,19 @@ export default async function CataloguePage(
 
           <div className="flex flex-col items-center gap-3">
             <p className="text-sm text-muted-foreground">
-              {t("resultsCount", { count: works.length })}
+              {catalogue.pageCount > 1
+                ? t("resultsRange", {
+                    from: firstRank,
+                    to: firstRank + works.length - 1,
+                    total: catalogue.total,
+                  })
+                : t("resultsCount", { count: catalogue.total })}
             </p>
-            {/* TODO : pagination non nécessaire pour l'instant - une seule
-                page (4 œuvres au catalogue). Emplacement réservé, une seule
-                page réelle : précédent/suivant désactivés. */}
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                disabled
-                aria-label={t("paginationPreviousAriaLabel")}
-                className="rounded-full"
-              >
-                <ChevronLeft className="size-4" />
-              </Button>
-              <span
-                aria-current="page"
-                className={cn(
-                  buttonVariants({ size: "icon" }),
-                  "pointer-events-none rounded-full",
-                )}
-              >
-                1
-              </span>
-              <Button
-                variant="outline"
-                size="icon"
-                disabled
-                aria-label={t("paginationNextAriaLabel")}
-                className="rounded-full"
-              >
-                <ChevronRight className="size-4" />
-              </Button>
-            </div>
+            <CatalogPagination
+              page={catalogue.page}
+              pageCount={catalogue.pageCount}
+              currentParams={rawSearchParams}
+            />
           </div>
         </Container>
       </section>

@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { X } from "lucide-react";
 
 import { Link } from "@/i18n/navigation";
+import { PAGE_PARAM, catalogHref } from "@/lib/catalog/catalog-params";
 
 type FilterCategoryKey = "period" | "voicing" | "language";
 
@@ -48,7 +49,8 @@ function buildRemoveQuery(
   const query: Record<string, string> = {};
   for (const [key, rawValue] of Object.entries(currentParams)) {
     const value = paramAsString(rawValue);
-    if (value === undefined) continue;
+    // Retirer un filtre change l'ensemble des résultats : retour en page 1.
+    if (value === undefined || key === PAGE_PARAM) continue;
     if (key === categoryKey) {
       const remaining = value.split(",").filter((v) => v !== valueToRemove);
       if (remaining.length > 0) query[key] = remaining.join(",");
@@ -71,7 +73,7 @@ function buildResetQuery(
   const query: Record<string, string> = {};
   for (const [key, rawValue] of Object.entries(currentParams)) {
     const value = paramAsString(rawValue);
-    if (value === undefined) continue;
+    if (value === undefined || key === PAGE_PARAM) continue;
     if (key === "period" || key === "voicing" || key === "language") continue;
     query[key] = value;
   }
@@ -109,14 +111,9 @@ async function CatalogActiveFilters({
         >
           {pill.label}
           <Link
-            href={{
-              pathname: "/catalogue",
-              query: buildRemoveQuery(
-                currentParams,
-                pill.categoryKey,
-                pill.value,
-              ),
-            }}
+            href={catalogHref(
+              buildRemoveQuery(currentParams, pill.categoryKey, pill.value),
+            )}
             aria-label={t("removeAriaLabel", {
               category: t(
                 pill.categoryLabel as "period" | "voicing" | "language",
@@ -130,7 +127,7 @@ async function CatalogActiveFilters({
         </span>
       ))}
       <Link
-        href={{ pathname: "/catalogue", query: buildResetQuery(currentParams) }}
+        href={catalogHref(buildResetQuery(currentParams))}
         className="font-medium text-primary hover:underline"
       >
         {t("resetAll")}

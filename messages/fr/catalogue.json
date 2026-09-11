@@ -22,6 +22,9 @@
   "resultsCount": "{count, plural, one {# œuvre affichée} other {# œuvres affichées}}",
   "paginationPreviousAriaLabel": "Page précédente",
   "paginationNextAriaLabel": "Page suivante",
+  "paginationAriaLabel": "Pagination du catalogue",
+  "paginationPageAriaLabel": "Page {page}",
+  "resultsRange": "{from}–{to} sur {total, plural, one {# œuvre} other {# œuvres}}",
   "infoBannerText": "Chaque œuvre est disponible par mouvement ou en intégralité, pour un seul pupitre ou pour l'ensemble des voix. Après votre achat, retrouvez vos pistes audio dans votre bibliothèque personnelle.",
   "filters": {
     "period": "Période",
