@@ -5,8 +5,11 @@ import type {
   WorkAccess,
   WorkAccessInput,
 } from "@/types/domain";
-import { canDownload } from "@/lib/access/rules";
 import { productToGrant } from "@/lib/catalog/product-grant";
+import {
+  buildDownloadGroups,
+  type MovementDownloadGroup,
+} from "@/lib/works/download-groups";
 import {
   computeAllVoicesDiscount,
   type AllVoicesCoverage,
@@ -24,38 +27,11 @@ import type { CartItemInput } from "@/lib/cart/types";
 /** Pupitre affiché dans le panneau "Votre accès". */
 export type SidebarVoiceView = { code: string; label: string };
 
-/**
- * Types de piste réellement téléchargeables.
- */
-export type DownloadableAudioType = Exclude<AudioType, "PREVIEW">;
-
-/**
- * Rang de chaque type de piste dans la grille de téléchargements.
- */
-const DOWNLOAD_TYPE_RANK: Record<DownloadableAudioType, number> = {
-  PREDOMINANT: 0,
-  SOLO: 0,
-  TUTTI: 1,
-  ACCOMPANIMENT: 2,
-};
-
-/** Une ligne de la grille de téléchargements, verrouillée ou non. */
-export type DownloadFileEntry = {
-  audioFileId: string;
-  audioType: DownloadableAudioType;
-  voiceLabel: string | null;
-  mimeType: string;
-  sizeBytes: number | null;
-  owned: boolean;
-};
-
-/** Les téléchargements d'un mouvement, regroupés pour le sélecteur. */
-export type MovementDownloadGroup = {
-  movementId: string;
-  movementTitle: string;
-  unlocked: boolean;
-  entries: DownloadFileEntry[];
-};
+export type {
+  DownloadableAudioType,
+  DownloadFileEntry,
+  MovementDownloadGroup,
+} from "@/lib/works/download-groups";
 
 /**
  * Offre affichée sur une card de pack, dans sa forme la plus simple.
@@ -265,51 +241,14 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
     .filter((code) => access.ownedVoiceCodes.includes(code))
     .map((code) => ({ code, label: voiceLabelByCode.get(code) ?? code }));
 
-  // Téléchargements, dérivés exclusivement de canDownload()
-  const downloadGroups: MovementDownloadGroup[] = movements.map((movement) => {
-    const lignes: { voiceCode: string | null; entry: DownloadFileEntry }[] = [];
-    for (const track of movement.audioFiles) {
-      if (track.type === "PREVIEW") continue;
-      if (track.type === "SOLO") continue;
-      const voiceCode = track.voiceId
-        ? (voiceCodeById.get(track.voiceId) ?? null)
-        : null;
-      const owned = canDownload(access, {
-        movementId: movement.id,
-        type: track.type,
-        voiceCode,
-      });
-      lignes.push({
-        voiceCode,
-        entry: {
-          audioFileId: track.id,
-          audioType: track.type,
-          voiceLabel: voiceCode
-            ? (voiceLabelByCode.get(voiceCode) ?? voiceCode)
-            : null,
-          mimeType: track.mimeType,
-          sizeBytes: track.sizeBytes,
-          owned,
-        },
-      });
-    }
-
-    // tri fichier
-    lignes.sort(
-      (a, b) =>
-        DOWNLOAD_TYPE_RANK[a.entry.audioType] -
-          DOWNLOAD_TYPE_RANK[b.entry.audioType] ||
-        (voiceOrderByCode.get(a.voiceCode ?? "") ?? Infinity) -
-          (voiceOrderByCode.get(b.voiceCode ?? "") ?? Infinity),
-    );
-    const entries = lignes.map((ligne) => ligne.entry);
-
-    return {
-      movementId: movement.id,
-      movementTitle: movement.title,
-      unlocked: access.movements[movement.id].unlocked,
-      entries,
-    };
+  // Téléchargements : même construction et même ordre que la bibliothèque,
+  // voir src/lib/works/download-groups.ts.
+  const downloadGroups = buildDownloadGroups({
+    access,
+    movements,
+    voiceCodeById,
+    voiceLabelByCode,
+    voiceOrderByCode,
   });
 
   const hasTuttiDownload = downloadGroups.some((group) =>

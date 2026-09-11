@@ -1,33 +1,30 @@
 "use client";
 
-import { useState, useTransition, type ReactNode } from "react";
+import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
+import { Download, LockKeyhole, FileHeadphone } from "lucide-react";
 
 import { useRouter } from "@/i18n/navigation";
 import { requestTrackDownload } from "@/lib/downloads/download-actions";
+import type { DownloadRowView } from "@/lib/works/download-groups";
+import { cn } from "@/lib/utils";
 
 /**
- * Enveloppe cliquable d'une piste téléchargeable.
+ * Une piste téléchargeable, cliquable.
  *
- * @param audioFileId - Piste demandée, seule donnée envoyée au serveur.
- * @param owned - Ce que la page croit savoir ; le serveur retranche.
+ * @remarks
+ * La page oeuvre et la bibliothèque passent la même ligne, et affichent donc exactement la même carte.
+ *
+ * @param row - Ligne à afficher, libellés déjà traduits.
  * @param returnTo - Chemin où revenir après connexion.
- * @param className - Classes du bouton.
- * @param children - Le contenu de la carte, rendu côté serveur.
- * @returns Le bouton rendu.
+ * @returns La carte rendue.
  */
 export function DownloadButton({
-  audioFileId,
-  owned,
+  row,
   returnTo,
-  className,
-  children,
 }: {
-  audioFileId: string;
-  owned: boolean;
+  row: DownloadRowView;
   returnTo: string;
-  className?: string;
-  children: ReactNode;
 }) {
   const t = useTranslations("work.workPage");
   const router = useRouter();
@@ -39,7 +36,7 @@ export function DownloadButton({
     startTransition(async () => {
       let ticket: Awaited<ReturnType<typeof requestTrackDownload>>;
       try {
-        ticket = await requestTrackDownload(audioFileId);
+        ticket = await requestTrackDownload(row.audioFileId);
       } catch {
         // Réseau coupé ou exception serveur : une erreur levée dans une
         // transition remonterait jusqu'à error.tsx et remplacerait toute la
@@ -67,12 +64,41 @@ export function DownloadButton({
     <div className="flex flex-col gap-1">
       <button
         type="button"
-        disabled={!owned || enCours}
+        disabled={!row.owned || enCours}
         aria-busy={enCours}
         onClick={demander}
-        className={className}
+        className={cn(
+          "flex w-full items-center gap-3 rounded-sm border px-3 py-2 text-left transition-colors",
+          row.owned
+            ? "cursor-pointer border-border hover:bg-accent"
+            : "cursor-not-allowed border-border/60 bg-muted/30 opacity-70",
+        )}
       >
-        {children}
+        <FileHeadphone
+          className="size-4 shrink-0 text-muted-foreground"
+          aria-hidden="true"
+        />
+
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-sm leading-tight font-medium">
+            {row.title}
+          </span>
+          <span className="block text-xs text-muted-foreground">
+            {row.meta}
+          </span>
+        </span>
+
+        {row.owned ? (
+          <Download
+            className="size-4 shrink-0 text-primary"
+            aria-hidden="true"
+          />
+        ) : (
+          <LockKeyhole
+            className="size-4 shrink-0 text-muted-foreground"
+            aria-hidden="true"
+          />
+        )}
       </button>
       {erreur ? (
         <p role="alert" className="px-3 text-xs text-destructive">
