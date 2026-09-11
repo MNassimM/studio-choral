@@ -71,6 +71,7 @@ const findPublishedWorkBySlug = cache(
           include: {
             audioFiles: {
               select: {
+                id: true,
                 type: true,
                 voiceId: true,
                 durationSeconds: true,
@@ -305,6 +306,13 @@ export default async function WorkPage(
     });
   }
 
+  // Où revenir si la session a expiré entre le rendu et le clic : le bouton
+  // d'une piste non possédée est grisé, seul ce cas mène à la connexion.
+  const downloadReturnTo = getPathname({
+    href: { pathname: "/works/[slug]", params: { slug } },
+    locale,
+  });
+
   const {
     downloadGroups,
     hasTuttiDownload,
@@ -462,7 +470,10 @@ export default async function WorkPage(
               {tWorkPage("downloadsHeading")}
             </h2>
             {hasSingleMovement ? (
-              <DownloadFileGrid entries={downloadGroups[0]?.entries ?? []} />
+              <DownloadFileGrid
+                entries={downloadGroups[0]?.entries ?? []}
+                returnTo={downloadReturnTo}
+              />
             ) : (
               <MovementPanelSwitcher
                 selectorLabel={tWorkPage("movementSelectorLabel")}
@@ -470,7 +481,12 @@ export default async function WorkPage(
                 movements={downloadGroups.map((group) => ({
                   id: group.movementId,
                   label: group.movementTitle,
-                  panel: <DownloadFileGrid entries={group.entries} />,
+                  panel: (
+                    <DownloadFileGrid
+                      entries={group.entries}
+                      returnTo={downloadReturnTo}
+                    />
+                  ),
                 }))}
               />
             )}

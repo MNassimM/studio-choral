@@ -109,6 +109,11 @@
     "offersDifferenceMovement": "Par mouvement : vous achetez les voix d'un seul mouvement, celui qui vous intéresse.",
     "offersDifferenceWork": "Par oeuvre : vous achetez les voix choisies sur l'oeuvre entière, tous les mouvements compris.",
     "extendAccessHeadingLead": "Choisissez la façon dont vous souhaitez accéder aux audios.",
-    "offersCoveredReason": "Ce pupitre est déjà inclus dans un article de votre panier."
+    "offersCoveredReason": "Ce pupitre est déjà inclus dans un article de votre panier.",
+    "downloadRefusal": {
+      "notFound": "Cette piste n'est pas accessible.",
+      "forbidden": "Vous n'avez pas accès à cette piste.",
+      "unavailable": "Le téléchargement n'a pu être préparé."
+    }
   }
 }

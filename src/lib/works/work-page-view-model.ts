@@ -31,6 +31,7 @@ export type DownloadableAudioType = Exclude<AudioType, "PREVIEW">;
 
 /** Une ligne de la grille de téléchargements, verrouillée ou non. */
 export type DownloadFileEntry = {
+  audioFileId: string;
   audioType: DownloadableAudioType;
   voiceLabel: string | null;
   mimeType: string;
@@ -107,6 +108,7 @@ export type ViewModelVoice = {
 };
 
 export type ViewModelAudioTrack = {
+  id: string;
   type: AudioType;
   voiceId: string | null;
   mimeType: string;
@@ -268,6 +270,7 @@ export function buildWorkPageViewModel<TProduct extends ViewModelProduct>({
         voiceCode,
       });
       entries.push({
+        audioFileId: track.id,
         audioType: track.type,
         voiceLabel: voiceCode
           ? (voiceLabelByCode.get(voiceCode) ?? voiceCode)

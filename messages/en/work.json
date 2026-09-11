@@ -109,6 +109,11 @@
     "offersDifferenceMovement": "By movement: you buy the voices of a single movement, the one you care about.",
     "offersDifferenceWork": "By work: you buy the chosen voices across the whole work, every movement included.",
     "extendAccessHeadingLead": "Choose how you want to access the audio.",
-    "offersCoveredReason": "This voice part is already included in an item in your cart."
+    "offersCoveredReason": "This voice part is already included in an item in your cart.",
+    "downloadRefusal": {
+      "notFound": "This track is not accessible.",
+      "forbidden": "You do not have access to this track.",
+      "unavailable": "The download could not be prepared."
+    }
   }
 }

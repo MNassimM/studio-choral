@@ -29,6 +29,7 @@ const VOICES = [
 function pistes(): ViewModelMovement["audioFiles"] {
   const parVoix = VOICES.flatMap((voice) =>
     (["SOLO", "PREDOMINANT", "PREVIEW"] as const).map((type) => ({
+      id: `audio-${voice.id}-${type}`,
       type,
       voiceId: voice.id,
       mimeType: "audio/wav",
@@ -37,8 +38,15 @@ function pistes(): ViewModelMovement["audioFiles"] {
   );
   return [
     ...parVoix,
-    { type: "TUTTI", voiceId: null, mimeType: "audio/wav", sizeBytes: 4096 },
     {
+      id: "audio-tutti",
+      type: "TUTTI",
+      voiceId: null,
+      mimeType: "audio/wav",
+      sizeBytes: 4096,
+    },
+    {
+      id: "audio-accompaniment",
       type: "ACCOMPANIMENT",
       voiceId: null,
       mimeType: "audio/wav",

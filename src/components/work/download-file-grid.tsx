@@ -3,15 +3,23 @@ import { Download, LockKeyhole, FileHeadphone } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { formatAudioFormatLabel, formatFileSize } from "@/lib/format/file-size";
+import { DownloadButton } from "@/components/work/download-button";
 import type { DownloadFileEntry } from "@/lib/works/work-page-view-model";
 
 /**
  * Grille des Fichiers téléchargeable d'un mouvement.
  *
  * @param entries - Pistes du mouvement, avec leur état de possession.
+ * @param returnTo - Chemin de retour après connexion.
  * @returns La grille rendue, ou un message si aucune piste n'est disponible.
  */
-async function DownloadFileGrid({ entries }: { entries: DownloadFileEntry[] }) {
+async function DownloadFileGrid({
+  entries,
+  returnTo,
+}: {
+  entries: DownloadFileEntry[];
+  returnTo: string;
+}) {
   const t = await getTranslations("work.workPage");
 
   if (entries.length === 0) {
@@ -22,15 +30,16 @@ async function DownloadFileGrid({ entries }: { entries: DownloadFileEntry[] }) {
 
   return (
     <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-      {entries.map((entry, index) => (
-        <button
-          key={`${entry.audioType}-${entry.voiceLabel ?? "all"}-${index}`}
-          type="button"
-          disabled={!entry.owned}
+      {entries.map((entry) => (
+        <DownloadButton
+          key={entry.audioFileId}
+          audioFileId={entry.audioFileId}
+          owned={entry.owned}
+          returnTo={returnTo}
           className={cn(
             "flex w-full items-center gap-3 rounded-sm border px-3 py-2 text-left transition-colors",
             entry.owned
-              ? "border-border hover:bg-accent"
+              ? "border-border hover:bg-accent cursor-pointer"
               : "cursor-not-allowed border-border/60 bg-muted/30 opacity-70",
           )}
         >
@@ -63,7 +72,7 @@ async function DownloadFileGrid({ entries }: { entries: DownloadFileEntry[] }) {
               aria-hidden="true"
             />
           )}
-        </button>
+        </DownloadButton>
       ))}
     </div>
   );
