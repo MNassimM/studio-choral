@@ -492,9 +492,12 @@ export default async function WorkPage(
 
           {/* Téléchargements */}
           <div className="flex flex-col gap-4">
-            <h2 className="text-xl font-semibold border-b border-border pb-1 border-primary">
-              {tWorkPage("downloadsHeading")}
-            </h2>
+            <div className="flex items-center gap-4">
+              <h2 className="text-xl font-semibold">
+                {tWorkPage("downloadsHeading")}
+              </h2>
+              <div className="h-[2px] w-full bg-primary"></div>
+            </div>
             {hasSingleMovement ? (
               <DownloadFileGrid
                 entries={downloadGroups[0]?.entries ?? []}

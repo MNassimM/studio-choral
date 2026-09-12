@@ -10,6 +10,9 @@ import "../globals.css";
 import { Header } from "@/components/layout/header";
 import { CartAddPanel } from "@/components/cart/cart-add-panel";
 import { CartProvider } from "@/components/cart/cart-provider";
+import { getCurrentUser } from "@/lib/auth/current-user";
+import { serializeCart } from "@/lib/cart/cart-serialization";
+import { readUserCart } from "@/lib/cart/cart-store";
 import { CartReplaceDialog } from "@/components/cart/cart-replace-dialog";
 import { Footer } from "@/components/layout/footer";
 import { ThemeSync } from "@/components/layout/theme-sync";
@@ -89,6 +92,12 @@ export default async function RootLayout({
     notFound();
   }
 
+  // Le panier d'un compte vit en base : on le charge ici pour que la première
+  // image soit déjà la bonne. getCurrentUser est mémoïsée, l'en tête la
+  // rappellera sans seconde lecture.
+  const user = await getCurrentUser();
+  const initialCart = serializeCart(user ? await readUserCart(user.id) : []);
+
   const cookieStore = await cookies();
   const theme =
     parseThemePreference(cookieStore.get(THEME_COOKIE)?.value) ?? DEFAULT_THEME;
@@ -114,7 +123,7 @@ export default async function RootLayout({
         <ThemeSync theme={theme} />
         <NextIntlClientProvider>
           <DynamicRouteAlternatesProvider>
-            <CartProvider>
+            <CartProvider userId={user?.id ?? null} initialCart={initialCart}>
               <Header />
               <main className="flex-1">{children}</main>
               <Footer />

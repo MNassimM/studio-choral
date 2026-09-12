@@ -11,7 +11,11 @@ import {
   useSyncExternalStore,
 } from "react";
 
-import { resolveCartAction } from "@/lib/cart/cart-actions";
+import {
+  mergeGuestCartAction,
+  resolveCartAction,
+  saveUserCartAction,
+} from "@/lib/cart/cart-actions";
 import {
   EMPTY_RESOLVED_CART,
   type ResolvedCart,
@@ -26,9 +30,10 @@ import {
   removeFromCart,
   replaceInCart,
 } from "@/lib/cart/cart-rules";
-import { parseCart } from "@/lib/cart/cart-serialization";
+import { parseCart, serializeCart } from "@/lib/cart/cart-serialization";
 import {
   CART_STORAGE_KEY,
+  clearStoredCart,
   readStoredCart,
   writeStoredCart,
 } from "@/lib/cart/cart-storage";
@@ -40,12 +45,28 @@ import type { CartItem, CartItemInput } from "@/lib/cart/types";
 type CartSnapshot = {
   items: CartItem[];
   hydrated: boolean;
+  /** Articles écartés au dernier enregistrement, faute d'être encore à acheter. */
+  ownedRemoved: number;
 };
 
 /**
  * Snapshot rendu pendant le rendu serveur et au premier rendu client.
  */
-const SERVER_SNAPSHOT: CartSnapshot = { items: [], hydrated: false };
+const SERVER_SNAPSHOT: CartSnapshot = {
+  items: [],
+  hydrated: false,
+  ownedRemoved: 0,
+};
+
+/**
+ * Compte auquel appartient le panier affiché, nul pour un visiteur.
+ *
+ * @remarks
+ * C'est lui qui décide où le panier est conservé : en base pour un compte,
+ * dans le navigateur pour un visiteur. Au niveau du module, comme le
+ * snapshot, parce que les mutations sont déclenchées hors de React.
+ */
+let owner: string | null = null;
 
 let snapshot: CartSnapshot = SERVER_SNAPSHOT;
 const listeners = new Set<() => void>();
@@ -56,9 +77,39 @@ const listeners = new Set<() => void>();
  * @param items - Nouvelles lignes du panier.
  * @returns Rien.
  */
-function publish(items: CartItem[]): void {
-  snapshot = { items, hydrated: true };
+function publish(items: CartItem[], ownedRemoved = 0): void {
+  snapshot = { items, hydrated: true, ownedRemoved };
   for (const listener of listeners) listener();
+}
+
+/**
+ * Conserve le panier là où il doit vivre.
+ *
+ * @remarks
+ * L'affichage a déjà été mis à jour quand cette fonction s'exécute : on
+ * enregistre derrière, sans faire attendre. Pour un compte, le serveur fait
+ * foi — il écarte ce qui est déjà possédé — et sa réponse corrige l'affichage
+ * si elle diffère.
+ *
+ * @param items - Panier à conserver.
+ * @returns Rien.
+ */
+function persist(items: CartItem[]): void {
+  if (owner === null) {
+    writeStoredCart(items);
+    return;
+  }
+
+  const pour = owner;
+  void saveUserCartAction(serializeCart(items))
+    .then((resultat) => {
+      // Un changement de compte pendant l'aller-retour rend la réponse caduque.
+      if (owner !== pour) return;
+      if (resultat.removedOwned > 0 || resultat.items.length !== items.length) {
+        publish(resultat.items, resultat.removedOwned);
+      }
+    })
+    .catch(() => {});
 }
 
 /**
@@ -68,6 +119,9 @@ function publish(items: CartItem[]): void {
  * @returns Rien.
  */
 function handleStorage(event: StorageEvent): void {
+  // Un panier de compte vit en base : ce que fait un autre onglet au stockage
+  // du navigateur ne le concerne pas.
+  if (owner !== null) return;
   if (event.key !== null && event.key !== CART_STORAGE_KEY) return;
   publish(event.key === null ? [] : parseCart(event.newValue));
 }
@@ -84,7 +138,6 @@ function handleStorage(event: StorageEvent): void {
 function subscribe(listener: () => void): () => void {
   if (listeners.size === 0) {
     window.addEventListener("storage", handleStorage);
-    snapshot = { items: readStoredCart(), hydrated: true };
   }
   listeners.add(listener);
 
@@ -123,8 +176,8 @@ function getServerSnapshot(): CartSnapshot {
 function mutate(transform: (items: CartItem[]) => CartItem[]): void {
   const next = transform(snapshot.items);
   if (next === snapshot.items) return;
-  writeStoredCart(next);
   publish(next);
+  persist(next);
 }
 
 /**
@@ -155,6 +208,10 @@ export type CartContextValue = {
   count: number;
   /** Faux tant que le panier conservé n'a pas été relu. */
   isHydrated: boolean;
+  /** Articles retirés au dernier enregistrement, faute d'être encore à acheter. */
+  ownedRemoved: number;
+  /** Acquitte l'avis de retrait. */
+  dismissOwnedNotice: () => void;
   /** Ajoute un produit au panier, ou demande confirmation s'il en couvre d'autres. */
   add: (input: CartItemInput, label?: string) => void;
   /** Ajoute plusieurs produits en une seule fois. */
@@ -211,12 +268,63 @@ const CartContext = createContext<CartContextValue | null>(null);
  * @param children - Arbre ayant accès au panier.
  * @returns Le fournisseur rendu.
  */
-function CartProvider({ children }: { children: React.ReactNode }) {
-  const { items, hydrated } = useSyncExternalStore(
+function CartProvider({
+  children,
+  userId,
+  initialCart,
+}: {
+  children: React.ReactNode;
+  /** Compte connecté, nul pour un visiteur. */
+  userId: string | null;
+  /**
+   * Panier déjà enregistré du compte, SÉRIALISÉ.
+   *
+   * @remarks
+   * Une chaîne et non un tableau : le gabarit en produit un neuf à chaque
+   * rendu, dont l'identité changeante relancerait la bascule en boucle. Une
+   * chaîne se compare par valeur.
+   */
+  initialCart: string;
+}) {
+  const { items, hydrated, ownedRemoved } = useSyncExternalStore(
     subscribe,
     getSnapshot,
     getServerSnapshot,
   );
+
+  // Bascule d'identité : connexion, déconnexion, changement de compte.
+  useEffect(() => {
+    let annule = false;
+
+    async function basculer() {
+      if (userId === null) {
+        // Déconnexion : on repasse sur le panier du visiteur, qui est vide
+        // depuis qu'il a été versé au compte. Le panier du compte reste en
+        // base, intact, prêt pour la prochaine connexion.
+        owner = null;
+        publish(readStoredCart());
+        return;
+      }
+
+      const invite = readStoredCart();
+      owner = userId;
+
+      if (invite.length === 0) {
+        publish(parseCart(initialCart));
+        return;
+      }
+
+      const resultat = await mergeGuestCartAction(serializeCart(invite));
+      if (annule || owner !== userId) return;
+      clearStoredCart();
+      publish(resultat.items, resultat.removedOwned);
+    }
+
+    void basculer();
+    return () => {
+      annule = true;
+    };
+  }, [userId, initialCart]);
 
   const [lastAddedSku, setLastAddedSku] = useState<string | null>(null);
   const [isAddOpen, setAddOpen] = useState(false);
@@ -371,6 +479,8 @@ function CartProvider({ children }: { children: React.ReactNode }) {
       items,
       count: items.length,
       isHydrated: hydrated,
+      ownedRemoved,
+      dismissOwnedNotice: () => publish(snapshot.items),
       add,
       addMany,
       remove,
@@ -404,6 +514,7 @@ function CartProvider({ children }: { children: React.ReactNode }) {
     [
       items,
       hydrated,
+      ownedRemoved,
       add,
       addMany,
       remove,

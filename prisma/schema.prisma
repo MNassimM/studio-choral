@@ -234,6 +234,7 @@ model User {
   accounts     Account[]
   sessions     Session[]
   libraryItems LibraryItem[]
+  cartLines    CartLine[]
 
   @@map("users")
 }
@@ -350,6 +351,37 @@ model LibraryItem {
   @@index([userId, workId])
   @@index([userId])
   @@map("library_items")
+}
+
+/// Le panier d'un utilisateur connecté.
+///
+/// En base et non dans le navigateur : un panier doit suivre la personne d'un
+/// appareil à l'autre, survivre à une déconnexion, et ne jamais se mélanger à
+/// celui d'un autre compte sur le même poste. Les visiteurs non connectés
+/// gardent le leur dans localStorage, faute de compte où le rattacher.
+///
+/// Ne porte AUCUN prix, exactement comme le panier du navigateur : seulement
+/// des coordonnées. Le montant est toujours recalculé côté serveur.
+model CartLine {
+  id         String        @id @default(cuid())
+  userId     String        @map("user_id")
+  /// Référence du produit. Unique par utilisateur : un bien numérique ne
+  /// s'achète qu'en un exemplaire.
+  sku        String
+  workId     String        @map("work_id")
+  /// Nul lorsque la portée est WORK.
+  movementId String?       @map("movement_id")
+  /// Nul lorsque la couverture est ALL_VOICES.
+  voiceCode  String?       @map("voice_code")
+  scope      AccessScope
+  coverage   VoiceCoverage
+  addedAt    DateTime      @map("added_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, sku])
+  @@index([userId])
+  @@map("cart_lines")
 }
 
 /// Vues d'une oeuvre, agrégées par jour.
