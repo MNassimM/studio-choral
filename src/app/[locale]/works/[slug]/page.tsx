@@ -411,15 +411,17 @@ export default async function WorkPage(
           {/* En-tête : visuel + informations */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-[240px_1fr] md:items-start">
             {work.coverImageKey ? (
-              <div className="relative aspect-square overflow-hidden rounded-2xl border border-border bg-secondary">
-                <Image
-                  src={coverUrl(work.coverImageKey)}
-                  alt=""
-                  fill
-                  sizes="(min-width: 1024px) 24rem, 100vw"
-                  className="object-cover border border-primary border-3 rounded-2xl"
-                  priority
-                />
+              <div className=" bg-gradient-to-b from-primary to-primary/60 p-[2px] rounded-2xl">
+                <div className="relative aspect-square overflow-hidden rounded-2xl">
+                  <Image
+                    src={coverUrl(work.coverImageKey)}
+                    alt=""
+                    fill
+                    sizes="(min-width: 1024px) 24rem, 100vw"
+                    className="object-cover rounded-2xl"
+                    priority
+                  />
+                </div>
               </div>
             ) : (
               <div
@@ -528,9 +530,12 @@ export default async function WorkPage(
           {!access.ownsFullWork ? (
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-1">
-                <h2 className="text-xl font-semibold border-b border-border pb-1 border-primary">
-                  {tWorkPage("extendAccessHeading")}
-                </h2>
+                <div className="flex items-center gap-4 whitespace-nowrap">
+                  <h2 className="text-xl font-semibold">
+                    {tWorkPage("extendAccessHeading")}
+                  </h2>
+                  <div className="h-[2px] w-full bg-primary"></div>
+                </div>
                 {work.movements.length > 1 ? (
                   <p className="text-sm text-muted-foreground">
                     {tWorkPage("extendAccessHeadingLead")}

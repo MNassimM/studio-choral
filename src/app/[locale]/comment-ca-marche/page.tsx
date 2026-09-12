@@ -1,5 +1,6 @@
 import { Fragment } from "react";
 import type { Metadata } from "next";
+import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { locale as rootLocale } from "next/root-params";
 import { Playfair_Display } from "next/font/google";
@@ -22,6 +23,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import library from "@/assets/library.png";
 import { Container } from "@/components/layout/container";
 import { buttonVariants } from "@/components/ui/button";
 import { Link, getPathname } from "@/i18n/navigation";
@@ -262,17 +264,16 @@ async function LibrarySection() {
       <Container className="py-16 sm:py-20">
         <SectionHeading>{t("section2Heading")}</SectionHeading>
         <div className="mt-10 grid grid-cols-1 items-center gap-10 md:grid-cols-2">
-          <div
-            className="flex aspect-[4/3] items-center justify-center rounded-xl border border-border bg-background"
-            role="img"
-            aria-label={t("libraryImageAlt")}
-          >
-            {/* TODO : remplacer par une capture réelle de la bibliothèque */}
-            <Music2
-              className="size-12 text-muted-foreground/50"
-              aria-hidden="true"
-            />
-          </div>
+          {/* Importée depuis src/ et non servie depuis public/ : Next lit
+              alors ses dimensions à la compilation, réserve la place avant le
+              chargement, et fabrique lui même le flou d'attente. */}
+          <Image
+            src={library}
+            alt={t("libraryImageAlt")}
+            placeholder="blur"
+            sizes="(min-width: 768px) 50vw, 100vw"
+            className="h-auto w-full rounded-xl border-2 border-primary/50"
+          />
           <div className="flex flex-col gap-8">
             {LIBRARY_FEATURES.map((feature) => (
               <LibraryFeatureRow key={feature.messageKey} {...feature} t={t} />
