@@ -7,6 +7,7 @@ import { Playfair_Display } from "next/font/google";
 import { Music2 } from "lucide-react";
 
 import Image from "next/image";
+import { after } from "next/server";
 
 import { Container } from "@/components/layout/container";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +25,7 @@ import { prisma } from "@/lib/db/prisma";
 import { resolveWorkTranslation } from "@/lib/works/resolve-translation";
 import { isKnownWorkLanguageCode } from "@/lib/works/work-language";
 import { coverUrl } from "@/lib/storage/cover-url";
+import { recordWorkView } from "@/lib/works/work-views";
 import { isKnownVoiceCode } from "@/lib/works/voice-label";
 import { buildWorkPageViewModel } from "@/lib/works/work-page-view-model";
 import { getCurrentUser } from "@/lib/auth/current-user";
@@ -230,6 +232,11 @@ export default async function WorkPage(
   const grants: Grant[] = currentUser
     ? await getUserGrants(currentUser.id)
     : [];
+
+  // Comptage après l'envoi de la réponse
+  if (currentUser?.role !== "ADMIN") {
+    after(() => recordWorkView(work.id));
+  }
 
   const t = await getTranslations("work");
   const tWorkPage = await getTranslations("work.workPage");

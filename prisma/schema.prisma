@@ -78,6 +78,9 @@ model Work {
   /// src/lib/works/languages.ts pour les libellés français.
   language         String?
   isPublished      Boolean        @default(false) @map("is_published")
+  /// Total des vues, dénormalisé pour trier sans agréger. La vérité détaillée
+  /// est dans WorkView, ce compteur en est la somme.
+  viewCount        Int            @default(0) @map("view_count")
   createdAt        DateTime       @default(now()) @map("created_at")
   updatedAt        DateTime       @updatedAt @map("updated_at")
 
@@ -85,8 +88,10 @@ model Work {
   products     Product[]
   translations WorkTranslation[]
   libraryItems LibraryItem[]
+  views        WorkView[]
 
   @@index([period])
+  @@index([viewCount])
   @@map("works")
 }
 
@@ -343,6 +348,28 @@ model LibraryItem {
   @@index([userId, workId])
   @@index([userId])
   @@map("library_items")
+}
+
+/// Vues d'une oeuvre, agrégées par jour.
+///
+/// Une ligne par oeuvre et par jour, et non une ligne par vue : le détail à
+/// la seconde n'intéresse personne, et l'agrégat borne la croissance de la
+/// table à une ligne par oeuvre et par jour.
+///
+/// Aucune donnée de visiteur n'est conservée, pas même une empreinte : cette
+/// table compte, elle ne trace pas.
+model WorkView {
+  id     String   @id @default(cuid())
+  workId String   @map("work_id")
+  /// Jour de l'agrégat, à minuit UTC.
+  day    DateTime @db.Date
+  count  Int      @default(0)
+
+  work Work @relation(fields: [workId], references: [id], onDelete: Cascade)
+
+  @@unique([workId, day])
+  @@index([day])
+  @@map("work_views")
 }
 
 /// Trace d'une demande de lien de connexion, servant uniquement à la
