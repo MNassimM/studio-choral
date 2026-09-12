@@ -12,7 +12,7 @@ import type {
  * Résolution des droits d'accès du projet.
  *
  * @remarks
- * Fonctions purs. 
+ * Fonctions purs.
  * Elles reçoivent des données déjà en forme domaine (src/types/domain.ts)
  */
 

@@ -9,11 +9,7 @@
 export type AccessScope = "MOVEMENT" | "WORK";
 export type VoiceCoverage = "SINGLE_VOICE" | "ALL_VOICES";
 export type AudioType =
-  | "SOLO"
-  | "PREDOMINANT"
-  | "TUTTI"
-  | "ACCOMPANIMENT"
-  | "PREVIEW";
+  "SOLO" | "PREDOMINANT" | "TUTTI" | "ACCOMPANIMENT" | "PREVIEW";
 
 /** Ce qu'une piste audio peut permettre de faire, une fois les droits résolus. */
 export type Capability = "PREVIEW" | "STREAM" | "STUDIO" | "DOWNLOAD";

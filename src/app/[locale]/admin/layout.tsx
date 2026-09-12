@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 
 import { getCurrentAdmin } from "@/lib/admin/authorization";
 
-
 export default async function AdminLayout({
   children,
 }: {

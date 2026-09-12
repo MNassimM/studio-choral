@@ -9,7 +9,7 @@ import "server-only";
 export type EmailMessage = {
   /** Adresse du destinataire */
   to: string;
-   /** Objet de l'e-mail. */
+  /** Objet de l'e-mail. */
   subject: string;
   /** Corps en texte brut, toujours requis, même quand une version html est fourni (clients sans HTML, lecteurs d'écran, antispam). */
   text: string;
@@ -37,7 +37,6 @@ export type SendEmailResult =
        */
       error: string;
     };
-
 
 /**
  * Définit le contrat que doit respecter tout transport d'e-mail.

@@ -13,13 +13,11 @@ export async function getUserGrants(userId: string): Promise<Grant[]> {
     include: { voice: true },
   });
 
-  return items.map(
-    (item): Grant => ({
-      workId: item.workId,
-      movementId: item.movementId,
-      voiceCode: item.voice?.code ?? null,
-      scope: item.scope,
-      coverage: item.coverage,
-    }),
-  );
+  return items.map((item): Grant => ({
+    workId: item.workId,
+    movementId: item.movementId,
+    voiceCode: item.voice?.code ?? null,
+    scope: item.scope,
+    coverage: item.coverage,
+  }));
 }

@@ -3,7 +3,11 @@ import "server-only";
 import { Resend } from "resend";
 
 import { emailEnv, formatSender } from "@/lib/email/env";
-import type { EmailMessage, EmailTransport, SendEmailResult } from "@/lib/email/types";
+import type {
+  EmailMessage,
+  EmailTransport,
+  SendEmailResult,
+} from "@/lib/email/types";
 
 /**
  * SEUL fichier du projet autorisé à importer la lib resend. Tout le reste
@@ -11,7 +15,6 @@ import type { EmailMessage, EmailTransport, SendEmailResult } from "@/lib/email/
  *
  * Ce module n'est chargé que lorsque EMAIL_TRANSPORT="resend"
  */
-
 
 /**
  * Crée le client Resend à partir de la configuration de l'environnement (emailEnv.EMAIL_TRANSPORT).
@@ -30,7 +33,6 @@ function createClient(): Resend {
 }
 
 const client = createClient();
-
 
 /**
  * Transport d'e-mails utilisant l'API Resend.

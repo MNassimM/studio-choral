@@ -1,6 +1,6 @@
 /**
  * Traduction des informations publiées par Google en utilisateur du site.
- * SERV ONLY !! 
+ * SERV ONLY !!
  */
 
 /**

@@ -1,6 +1,9 @@
 import { z } from "zod";
 
-import { accessScopeSchema, voiceCoverageSchema } from "@/lib/products/invariants";
+import {
+  accessScopeSchema,
+  voiceCoverageSchema,
+} from "@/lib/products/invariants";
 
 /**
  * Invariants du modèle de droit d'accès (LibraryItem).
@@ -39,13 +42,10 @@ export const libraryItemInputSchema = libraryItemShapeSchema
     message: "coverage=ALL_VOICES exige voiceId=null",
     path: ["voiceId"],
   })
-  .refine(
-    (item) => item.coverage !== "SINGLE_VOICE" || item.voiceId !== null,
-    {
-      message: "coverage=SINGLE_VOICE exige voiceId non NULL",
-      path: ["voiceId"],
-    },
-  );
+  .refine((item) => item.coverage !== "SINGLE_VOICE" || item.voiceId !== null, {
+    message: "coverage=SINGLE_VOICE exige voiceId non NULL",
+    path: ["voiceId"],
+  });
 
 export type LibraryItemInput = z.infer<typeof libraryItemInputSchema>;
 

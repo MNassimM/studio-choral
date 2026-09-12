@@ -12,7 +12,7 @@ import { PATHNAME_HEADER } from "@/proxy";
 import { routing, type AppLocale } from "@/i18n/routing";
 
 /**
- * Pour les pages qui necessitent un user connecté 
+ * Pour les pages qui necessitent un user connecté
  */
 
 /**

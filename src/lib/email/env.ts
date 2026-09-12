@@ -7,7 +7,9 @@ import { z } from "zod";
  */
 
 const baseSchema = {
-  EMAIL_FROM_ADDRESS: z.email("EMAIL_FROM_ADDRESS doit être une adresse e-mail valide"),
+  EMAIL_FROM_ADDRESS: z.email(
+    "EMAIL_FROM_ADDRESS doit être une adresse e-mail valide",
+  ),
   EMAIL_FROM_NAME: z.string().min(1).optional(),
 };
 
@@ -18,7 +20,9 @@ const emailEnvSchema = z.discriminatedUnion("EMAIL_TRANSPORT", [
   }),
   z.object({
     EMAIL_TRANSPORT: z.literal("resend"),
-    RESEND_API_KEY: z.string().min(1, "RESEND_API_KEY est requise quand EMAIL_TRANSPORT=\"resend\""),
+    RESEND_API_KEY: z
+      .string()
+      .min(1, 'RESEND_API_KEY est requise quand EMAIL_TRANSPORT="resend"'),
     ...baseSchema,
   }),
 ]);
@@ -48,7 +52,9 @@ function parseEmailEnv(): EmailEnv {
 
   if (!result.success) {
     const details = result.error.issues
-      .map((issue) => `${issue.path.join(".") || "(racine)"} : ${issue.message}`)
+      .map(
+        (issue) => `${issue.path.join(".") || "(racine)"} : ${issue.message}`,
+      )
       .join(" ; ");
     throw new Error(
       `Configuration e-mail invalide (voir .env.example) : ${details}`,

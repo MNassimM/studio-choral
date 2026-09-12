@@ -18,7 +18,7 @@ import {
  * Limitation de débit des demandes de lien de connexion.
  *
  * @remarks
- * Le contrôle a lieu côté serveur, au moment où Auth.js décide d'envoyer. 
+ * Le contrôle a lieu côté serveur, au moment où Auth.js décide d'envoyer.
  * Un controle coté client sert à rien, on peut toujours faire la requête directement.
  */
 
@@ -111,7 +111,7 @@ async function purgeExpiredAttempts(): Promise<void> {
 
 /**
  * Vérifie qu'une demande de lien soit autorisée par les limites de débit.
- * 
+ *
  * @param email - Adresse déjà normalisée par le provider.
  * @returns Le verdict, autorisant ou non l'envoi.
  */

@@ -1,10 +1,14 @@
 import "server-only";
 
 import { formatSender } from "@/lib/email/env";
-import type { EmailMessage, EmailTransport, SendEmailResult } from "@/lib/email/types";
+import type {
+  EmailMessage,
+  EmailTransport,
+  SendEmailResult,
+} from "@/lib/email/types";
 
 /**
- * Transport de développement, on ecrit juste dans logs server 
+ * Transport de développement, on ecrit juste dans logs server
  * Sert à lire un lien de connexion et à le cliquer sans attendre un e-mail réel.
  */
 
@@ -20,14 +24,13 @@ function rule(char: string): string {
   return char.repeat(RULE_WIDTH);
 }
 
-
 /**
  * Transport d'e-mail utilisé en développement.
  */
 export const consoleTransport: EmailTransport = {
   name: "console",
 
-   /**
+  /**
    * Affiche un e-mail dans les logs du serveur sans l'envoyer.
    *
    * @param message - Message e-mail à afficher.

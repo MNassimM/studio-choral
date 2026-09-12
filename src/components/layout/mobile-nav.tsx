@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { LogIn, Menu, ShoppingBag,Library, UserRound, X } from "lucide-react";
+import { LogIn, Menu, ShoppingBag, Library, UserRound, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -78,8 +78,12 @@ function MobileNav({ isSignedIn }: { isSignedIn: boolean }) {
                   <UserRound className="size-4" aria-hidden="true" />
                   {t("myAccount")}
                 </Link>
-                
-                <Link href="/bibliotheque" onClick={close} className={ITEM_CLASS}>
+
+                <Link
+                  href="/bibliotheque"
+                  onClick={close}
+                  className={ITEM_CLASS}
+                >
                   <Library className="size-4" aria-hidden="true" />
                   {t("footer.linkLibrary")}
                 </Link>

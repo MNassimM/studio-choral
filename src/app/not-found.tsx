@@ -16,7 +16,6 @@ import { Link } from "@/i18n/navigation";
  * @returns La page rendue.
  */
 export default async function LocaleNotFound() {
-
   return (
     <section className="bg-background">
       <Container className="flex flex-col items-center gap-4 py-24 text-center sm:py-32">
@@ -30,7 +29,7 @@ export default async function LocaleNotFound() {
           href="/"
           className={cn(buttonVariants({ size: "lg" }), "rounded-full px-6")}
         >
-            Retour à l&apos;accueil
+          Retour à l&apos;accueil
         </Link>
       </Container>
     </section>

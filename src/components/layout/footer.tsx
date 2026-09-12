@@ -92,8 +92,16 @@ function YoutubeIcon({ className }: { className?: string }) {
 }
 
 const socialLinks = [
-  { label: "Facebook", href: "https://www.facebook.com/people/Butterfly-Chœur-de-chambre/61579272361631/", Icon: FacebookIcon },
-  { label: "Instagram", href: "https://www.instagram.com/choeur.butterfly/", Icon: InstagramIcon },
+  {
+    label: "Facebook",
+    href: "https://www.facebook.com/people/Butterfly-Chœur-de-chambre/61579272361631/",
+    Icon: FacebookIcon,
+  },
+  {
+    label: "Instagram",
+    href: "https://www.instagram.com/choeur.butterfly/",
+    Icon: InstagramIcon,
+  },
   { label: "YouTube", href: "#", Icon: YoutubeIcon },
   {
     label: "Email",

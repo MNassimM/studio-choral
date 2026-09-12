@@ -38,7 +38,9 @@ export type RenderedEmail = {
  * @param node - Gabarit à rendre.
  * @returns Les corps HTML et texte du message.
  */
-export async function renderEmail(node: React.ReactNode): Promise<RenderedEmail> {
+export async function renderEmail(
+  node: React.ReactNode,
+): Promise<RenderedEmail> {
   const [html, text] = await Promise.all([
     render(node),
     render(node, {

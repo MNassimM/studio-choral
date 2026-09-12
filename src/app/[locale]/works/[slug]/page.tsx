@@ -506,7 +506,7 @@ export default async function WorkPage(
                   <p className="text-sm text-muted-foreground">
                     {tWorkPage("extendAccessHeadingLead")}
                   </p>
-                ) :null}
+                ) : null}
               </div>
               <OfferSelector
                 movementGroups={hasSingleMovement ? [] : movementOfferGroups}

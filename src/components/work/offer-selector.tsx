@@ -3,7 +3,12 @@
 import { Tabs } from "@base-ui/react/tabs";
 import { Tooltip } from "@base-ui/react/tooltip";
 import { useTranslations } from "next-intl";
-import { CircleHelp, ShoppingCart, CircleCheck, LockKeyhole } from "lucide-react";
+import {
+  CircleHelp,
+  ShoppingCart,
+  CircleCheck,
+  LockKeyhole,
+} from "lucide-react";
 import { useId, useMemo, useState } from "react";
 
 import { usePriceFormatter } from "@/components/cart/cart-price";
@@ -53,13 +58,19 @@ function OfferRow({
       <li className="flex items-center gap-3 px-3 py-2.5 opacity-60">
         {offer.alreadyOwned ? (
           <LockKeyhole className="size-3.5 shrink-0" />
-        ):(
+        ) : (
           <Checkbox checked disabled aria-labelledby={labelId} />
         )}
-        
+
         <span id={labelId} className="flex flex-1 items-center gap-2 text-sm">
           {offer.voiceLabel ?? t("offersAllVoicesLabel")}
-          <span className={cn("rounded-full border", offer.alreadyOwned ? "border-border" : "border-primary/50", "px-2 py-0.5 text-xs text-muted-foreground")}>
+          <span
+            className={cn(
+              "rounded-full border",
+              offer.alreadyOwned ? "border-border" : "border-primary/50",
+              "px-2 py-0.5 text-xs text-muted-foreground",
+            )}
+          >
             {offer.alreadyOwned
               ? t("extendAccessAlreadyOwnedBadge")
               : tCard("coveredByCart")}
@@ -85,7 +96,9 @@ function OfferRow({
         disabled={inCart}
         onCheckedChange={onToggle}
         aria-labelledby={labelId}
-        className={cn("mt-0.5 cursor-pointer", /*inCart && "data-checked:bg-chart-3! data-checked:border-chart-3!"*/)}
+        className={cn(
+          "mt-0.5 cursor-pointer" /*inCart && "data-checked:bg-chart-3! data-checked:border-chart-3!"*/,
+        )}
       />
       <span className="flex flex-1 flex-col gap-0.5">
         <span id={labelId} className="flex flex-wrap items-center gap-2">
@@ -181,7 +194,10 @@ function OfferTable({ offers }: { offers: OwnedOfferView[] }) {
           <p className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-border bg-card/40 px-3 py-2 text-xs tracking-wide text-muted-foreground uppercase">
             <span className="font-medium">{t("offersInclusionsHeading")}</span>
             {INCLUSION_KEYS.map((key) => (
-              <span key={key} className="inline-flex items-center gap-1 text-[0.625rem]">
+              <span
+                key={key}
+                className="inline-flex items-center gap-1 text-[0.625rem]"
+              >
                 <CircleCheck
                   className="size-3.5 shrink-0 text-primary"
                   aria-hidden="true"
@@ -214,7 +230,10 @@ function OfferTable({ offers }: { offers: OwnedOfferView[] }) {
           </ul>
           <div className="flex flex-row justify-between gap-3 p-3">
             <div className="flex items-baseline justify-between gap-3">
-              <span className="text-sm text-muted-foreground" aria-live="polite">
+              <span
+                className="text-sm text-muted-foreground"
+                aria-live="polite"
+              >
                 {t("offersSelectedCount", { count: chosen.length })}
               </span>
               <span className="text-lg font-semibold" aria-live="polite">

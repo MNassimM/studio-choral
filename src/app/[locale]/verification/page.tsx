@@ -46,7 +46,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * Page de confirmation affichée après une demande de lien.
  *
  * @remarks
- * Le texte est délibérément conditionnel et ne confirme jamais qu'un compte existe pour l'adresse saisie. 
+ * Le texte est délibérément conditionnel et ne confirme jamais qu'un compte existe pour l'adresse saisie.
  * Afficher un message différent selon que l'adresse est connue transformerait cette page en outil d'énumération de comptes.
  *
  * L'adresse saisie n'est pas reprise à l'écran, pour que la page reste sans conséquence si elle est rouverte ou partagée depuis un historique.
@@ -90,7 +90,10 @@ export default async function VerifyRequestPage() {
             </Link>
             <Link
               href="/"
-              className={cn(buttonVariants({ variant: "ghost" }), "rounded-full")}
+              className={cn(
+                buttonVariants({ variant: "ghost" }),
+                "rounded-full",
+              )}
             >
               {t("backHome")}
             </Link>

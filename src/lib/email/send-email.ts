@@ -1,8 +1,11 @@
 import "server-only";
 import { emailEnv } from "@/lib/email/env";
 import { consoleTransport } from "@/lib/email/console-transport";
-import type { EmailMessage, EmailTransport, SendEmailResult } from "@/lib/email/types";
-
+import type {
+  EmailMessage,
+  EmailTransport,
+  SendEmailResult,
+} from "@/lib/email/types";
 
 /**
  * Résout le transport d'e-mail à utiliser selon la configuration de l'environnement.
@@ -38,7 +41,9 @@ function getTransport(): Promise<EmailTransport> {
  * @param message - Message e-mail à envoyer.
  * @returns Le résultat de la tentative d'envoi.
  */
-export async function sendEmail(message: EmailMessage): Promise<SendEmailResult> {
+export async function sendEmail(
+  message: EmailMessage,
+): Promise<SendEmailResult> {
   try {
     const transport = await getTransport();
     return await transport.send(message);

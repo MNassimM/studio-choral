@@ -88,7 +88,10 @@ function CartLinePrice({
     return (
       <span className={cn(size, "flex shrink-0 flex-col items-end gap-0.5")}>
         <div className="flex items-center gap-1">
-          <span aria-hidden="true" className="text-muted-foreground line-through">
+          <span
+            aria-hidden="true"
+            className="text-muted-foreground line-through"
+          >
             {formatPrice(originalCents, currency)}
           </span>
           <span aria-hidden="true" className="font-semibold text-primary">
@@ -154,7 +157,13 @@ function CartLineItem({
     : (resolved?.voiceLabel ?? label);
 
   return (
-    <li className={cn("flex", resolved?.discount ? "items-start" : "items-center", "justify-between gap-3")}> 
+    <li
+      className={cn(
+        "flex",
+        resolved?.discount ? "items-start" : "items-center",
+        "justify-between gap-3",
+      )}
+    >
       <div className="flex min-w-0 flex-col">
         <span
           className={cn(

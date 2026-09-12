@@ -12,7 +12,6 @@ import type { User } from "@/generated/prisma/client";
  * @returns L'utilisateur connecté, ou null pour un visiteur.
  */
 export const getCurrentUser = cache(async (): Promise<User | null> => {
-
   try {
     const session = await auth();
     const userId = session?.user?.id;

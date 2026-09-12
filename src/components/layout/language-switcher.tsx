@@ -21,7 +21,7 @@ const FLAGS: Record<AppLocale, typeof FranceFlag> = {
 /**
  * Sélecteur de langue du site.
  *
- * @param showLanguageName - Affiche le nom complet de la langue plutôt que son code à deux lettres. 
+ * @param showLanguageName - Affiche le nom complet de la langue plutôt que son code à deux lettres.
  * @param onSelect - Appelé lorsqu'une langue est choisie.
  * @param triggerClassName - Remplace l'habillage du déclencheur. (surtout pour menu Mobile)
  * @returns Le sélecteur rendu.

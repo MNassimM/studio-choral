@@ -55,7 +55,6 @@ export const magicLinkProvider: EmailConfig = {
    */
   from: "(non utilisé - voir EMAIL_FROM_ADDRESS)",
 
-  
   /**
    * Normalise l'adresse e-mail utilisée par Auth.js.
    *
@@ -71,7 +70,6 @@ export const magicLinkProvider: EmailConfig = {
     return `${localPart}@${domain}`;
   },
 
-
   /**
    * Envoie le lien magique de connexion à l'utilisateur.
    *
@@ -82,7 +80,10 @@ export const magicLinkProvider: EmailConfig = {
    */
   async sendVerificationRequest({ identifier, url, request }) {
     const locale = resolveLocale(request);
-    const t = await getTranslations({ locale, namespace: "auth.magicLinkEmail" });
+    const t = await getTranslations({
+      locale,
+      namespace: "auth.magicLinkEmail",
+    });
 
     const minutes = Math.round(MAGIC_LINK_MAX_AGE_SECONDS / 60);
 
@@ -110,7 +111,9 @@ export const magicLinkProvider: EmailConfig = {
     });
 
     if (!result.ok) {
-      throw new Error(`Envoi du lien de connexion impossible : ${result.error}`);
+      throw new Error(
+        `Envoi du lien de connexion impossible : ${result.error}`,
+      );
     }
   },
 };

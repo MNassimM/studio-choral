@@ -23,8 +23,8 @@ function looksLikeEmail(value: string): boolean {
  * Formulaire de demande de lien de connexion.
  *
  * @remarks
- * Seule partie cliente de la page de connexion, Tout le reste est rendu côté serveur. 
- * 
+ * Seule partie cliente de la page de connexion, Tout le reste est rendu côté serveur.
+ *
  * @param initialError - Message d'erreur à afficher au premier rendu, transmis
  * par la page lorsqu'Auth.js a rejeté un lien.
  * @param nextTarget - Chemin interne où ramener l'utilisateur une fois connecté,

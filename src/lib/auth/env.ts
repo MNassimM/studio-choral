@@ -50,7 +50,9 @@ function parseAuthEnv(): AuthEnv {
   if (!result.success) {
     // Uniquement le chemin et le message de chaque problème
     const details = result.error.issues
-      .map((issue) => `${issue.path.join(".") || "(racine)"} : ${issue.message}`)
+      .map(
+        (issue) => `${issue.path.join(".") || "(racine)"} : ${issue.message}`,
+      )
       .join(" ; ");
     throw new Error(
       `Configuration d'authentification invalide (voir .env.example) : ${details}`,
@@ -69,7 +71,7 @@ export const authEnv: AuthEnv = parseAuthEnv();
 export const SESSION_MAX_AGE_SECONDS = 180 * 24 * 60 * 60;
 
 /**
- * Fréquence de rafraîchissement de l'expiration en base, en secondes : 24 heures. Si l'utilisateur revient avant ce délai, 
+ * Fréquence de rafraîchissement de l'expiration en base, en secondes : 24 heures. Si l'utilisateur revient avant ce délai,
  * la session est prolongée uniquement côté client, sans toucher à la base (ca ferait trop de requêtes).
  */
 export const SESSION_UPDATE_AGE_SECONDS = 24 * 60 * 60;

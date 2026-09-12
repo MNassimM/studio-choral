@@ -10,7 +10,7 @@ import {
 
 /**
  * Enregistre le mode d'affichage soumis par la switch button.
- * 
+ *
  * @param formData - Données du formulaire, dont le champ view porte le mode
  * correspondant au bouton actionné.
  * @returns Rien.

@@ -53,7 +53,7 @@ type WorkCardProps = {
  * Carte œuvre du catalogue et de la page d'accueil.
  *
  * @remarks
- * La variante par défaut est celle du catalogue (affiche badges et prix). 
+ * La variante par défaut est celle du catalogue (affiche badges et prix).
  * La variante compacte se limite au visuel, au résumé et à un lien de découverte.
  *
  * @param work - Données d'affichage de l'œuvre.
@@ -121,7 +121,13 @@ async function WorkCard({
       <Card className="hover:bg-secondary/20 focus-within:bg-secondary/20 flex h-full flex-col overflow-hidden pt-0 transition-shadow hover:shadow-md ">
         <WorkCoverPlaceholder className="h-40" />
         <CardHeader>
-          <CardTitle className={cn("flex flex-wrap items-center gap-2","text-lg", playfairDisplay.className)}>
+          <CardTitle
+            className={cn(
+              "flex flex-wrap items-center gap-2",
+              "text-lg",
+              playfairDisplay.className,
+            )}
+          >
             {work.title}
             {work.catalogueRef ? (
               <Badge variant="outline">{work.catalogueRef}</Badge>
@@ -143,7 +149,9 @@ async function WorkCard({
               </Badge>
             ) : null}
             {work.language ? (
-              <Badge variant="secondary">{translateWorkLanguage(work.language)}</Badge>
+              <Badge variant="secondary">
+                {translateWorkLanguage(work.language)}
+              </Badge>
             ) : null}
           </div>
 

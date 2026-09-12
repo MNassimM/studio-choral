@@ -8,7 +8,9 @@
  * @param target - Valeur brute du paramètre de retour.
  * @returns Vrai si la destination désigne bien une page du site.
  */
-export function isSafeRedirectTarget(target: string | undefined | null): boolean {
+export function isSafeRedirectTarget(
+  target: string | undefined | null,
+): boolean {
   if (!target) return false;
   if (!target.startsWith("/")) return false; // doit commencer par une barre oblique
   if (target.startsWith("//")) return false; // URL sans protocole

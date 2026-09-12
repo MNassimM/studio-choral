@@ -32,7 +32,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   secret: authEnv.AUTH_SECRET,
 
   /**
-   * Le lien magique est toujours présent, Google ne s'ajoute que si ses identifiants sont configurés. 
+   * Le lien magique est toujours présent, Google ne s'ajoute que si ses identifiants sont configurés.
    */
   providers: isGoogleSignInEnabled
     ? [magicLinkProvider, buildGoogleProvider()]
@@ -86,7 +86,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
      *
      * @remarks
      *
-     * Le champ session.user.id est également déclaré dans src/types/next-auth.d.ts afin que cette propriété 
+     * Le champ session.user.id est également déclaré dans src/types/next-auth.d.ts afin que cette propriété
      * soit reconnue par TypeScript dans le reste de l'application.
      *
      * @param session - Session Auth.js à enrichir.
