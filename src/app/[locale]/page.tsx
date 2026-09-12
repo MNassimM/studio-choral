@@ -9,6 +9,8 @@ import { WorkCard } from "@/components/catalog/work-card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { buttonVariants } from "@/components/ui/button";
+import { MOST_POPULAR_COUNT, resolveWorkBadge } from "@/lib/catalog/work-badge";
+import { findMostPopularWorks } from "@/lib/works/work-views";
 import { Link, getPathname } from "@/i18n/navigation";
 import { routing, type AppLocale } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
@@ -184,21 +186,33 @@ async function HowItWorksSection() {
  */
 async function FeaturedWorksSection({
   works,
+  popularIds,
 }: {
   works: ReturnType<typeof deriveWorkCardData>[];
+  popularIds: ReadonlySet<string>;
 }) {
   if (works.length === 0) {
     return null;
   }
 
   const t = await getTranslations("home");
+  const maintenant = new Date();
 
   return (
     <section className="bg-background">
       <Container className="flex flex-col items-center gap-12 pb-20 sm:pb-28">
         <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {works.map((work) => (
-            <WorkCard key={work.slug} work={work} variant="compact" />
+            <WorkCard
+              key={work.slug}
+              work={work}
+              variant="compact"
+              badge={resolveWorkBadge({
+                mostPopular: popularIds.has(work.workId),
+                publishedAt: work.publishedAt,
+                now: maintenant,
+              })}
+            />
           ))}
         </div>
         <Link
@@ -231,13 +245,18 @@ export default async function Home() {
     include: buildWorkCardInclude(locale),
   });
   const featuredWorks = works.map((work) => deriveWorkCardData(work, locale));
+  const popularIds = new Set(
+    (await findMostPopularWorks(MOST_POPULAR_COUNT)).map(
+      (entree) => entree.workId,
+    ),
+  );
 
   return (
     <>
       <Hero />
       <SearchBar locale={locale} />
       <HowItWorksSection />
-      <FeaturedWorksSection works={featuredWorks} />
+      <FeaturedWorksSection works={featuredWorks} popularIds={popularIds} />
     </>
   );
 }

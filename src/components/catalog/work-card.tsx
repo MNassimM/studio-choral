@@ -6,6 +6,8 @@ import { ChevronRight, Headphones, Music2 } from "lucide-react";
 import { coverUrl } from "@/lib/storage/cover-url";
 import { isKnownWorkLanguageCode } from "@/lib/works/work-language";
 
+import { WorkBadgeLabel } from "@/components/catalog/work-badge-label";
+import type { WorkBadge } from "@/lib/catalog/work-badge";
 import type { WorkCardData } from "@/lib/catalog/work-card-data";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -73,6 +75,8 @@ function WorkCover({
 
 type WorkCardProps = {
   work: WorkCardData;
+  /** Badge à poser au dessus du titre, s'il y en a un. */
+  badge?: WorkBadge | null;
   variant?: "default" | "compact";
   className?: string;
 };
@@ -91,6 +95,7 @@ type WorkCardProps = {
  */
 async function WorkCard({
   work,
+  badge = null,
   variant = "default",
   className,
 }: WorkCardProps) {
@@ -110,6 +115,7 @@ async function WorkCard({
           className="h-32"
         />
         <CardHeader>
+          {badge ? <WorkBadgeLabel badge={badge} /> : null}
           <CardTitle className={cn("text-lg", playfairDisplay.className)}>
             {work.title}
           </CardTitle>
@@ -157,6 +163,7 @@ async function WorkCard({
           className="h-40"
         />
         <CardHeader>
+          {badge ? <WorkBadgeLabel badge={badge} /> : null}
           <CardTitle
             className={cn(
               "flex flex-wrap items-center gap-2",

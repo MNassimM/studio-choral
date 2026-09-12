@@ -9,7 +9,9 @@
     "movementsCount": "{count, plural, one {# movement} other {# movements}}",
     "discountBadge": "-{percent}%",
     "inCart": "Already in cart",
-    "coveredByCart": "Already covered by your cart"
+    "coveredByCart": "Already covered by your cart",
+    "badgeMostPopular": "Most popular",
+    "badgeNew": "New"
   },
   "period": {
     "MEDIEVAL": "Medieval",

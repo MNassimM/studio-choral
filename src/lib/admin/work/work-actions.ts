@@ -35,6 +35,7 @@ import {
   storePendingCover,
 } from "@/lib/admin/work/work-cover-storage";
 import { prisma } from "@/lib/db/prisma";
+import { nextPublishedAt } from "@/lib/works/publication";
 
 /**
  * Actions d'administration du catalogue.
@@ -507,6 +508,7 @@ export async function publishWork(workId: string): Promise<ActionResult> {
       id: true,
       period: true,
       voicing: true,
+      publishedAt: true,
       title: true,
       composer: true,
       shortDescription: true,
@@ -588,7 +590,12 @@ export async function publishWork(workId: string): Promise<ActionResult> {
 
   await prisma.work.update({
     where: { id: workId },
-    data: { isPublished: true },
+    data: {
+      isPublished: true,
+      // Figée à la première mise en vente. Voir lib/works/publication.ts pour
+      // changer ce que fait une republication.
+      publishedAt: nextPublishedAt(work.publishedAt, new Date()),
+    },
   });
 
   revalidateCatalog();

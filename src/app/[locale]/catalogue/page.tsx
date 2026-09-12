@@ -42,6 +42,8 @@ import {
   type RawSearchParams,
 } from "@/lib/catalog/catalog-params";
 import { findCatalogPage } from "@/lib/catalog/catalog-query";
+import { MOST_POPULAR_COUNT, resolveWorkBadge } from "@/lib/catalog/work-badge";
+import { findMostPopularWorks } from "@/lib/works/work-views";
 import { Link, getPathname, redirect } from "@/i18n/navigation";
 import { routing, type AppLocale } from "@/i18n/routing";
 import { isKnownWorkLanguageCode } from "@/lib/works/work-language";
@@ -276,6 +278,20 @@ export default async function CataloguePage(
     });
   }
   const works = catalogue.works;
+
+  // Les oeuvres les plus vues sur la fenêtre glissante, pour le badge.
+  const populaires = new Set(
+    (await findMostPopularWorks(MOST_POPULAR_COUNT)).map(
+      (entree) => entree.workId,
+    ),
+  );
+  const maintenant = new Date();
+  const badgeDe = (work: (typeof works)[number]) =>
+    resolveWorkBadge({
+      mostPopular: populaires.has(work.workId),
+      publishedAt: work.publishedAt,
+      now: maintenant,
+    });
   const firstRank = (catalogue.page - 1) * catalogue.pageSize + 1;
 
   const activeFilterPills: ActiveFilterPill[] = [
@@ -399,7 +415,7 @@ export default async function CataloguePage(
           ) : view === "grid" ? (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {works.map((work) => (
-                <WorkCard key={work.slug} work={work} />
+                <WorkCard key={work.slug} work={work} badge={badgeDe(work)} />
               ))}
             </div>
           ) : (
@@ -425,7 +441,11 @@ export default async function CataloguePage(
                 </thead>
                 <tbody>
                   {works.map((work) => (
-                    <WorkTableRow key={work.slug} work={work} />
+                    <WorkTableRow
+                      key={work.slug}
+                      work={work}
+                      badge={badgeDe(work)}
+                    />
                   ))}
                 </tbody>
               </table>

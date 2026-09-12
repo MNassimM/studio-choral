@@ -78,9 +78,12 @@ model Work {
   /// src/lib/works/languages.ts pour les libellés français.
   language         String?
   isPublished      Boolean        @default(false) @map("is_published")
-  /// Total des vues, dénormalisé pour trier sans agréger. La vérité détaillée
-  /// est dans WorkView, ce compteur en est la somme.
-  viewCount        Int            @default(0) @map("view_count")
+  /// Date de PREMIÈRE mise en vente, posée par publishWork et conservée par
+  /// unpublishWork. Distincte de createdAt, qui date la saisie du brouillon :
+  /// une oeuvre préparée en mars et publiée en juin est une nouveauté en
+  /// juin. Le comportement en cas de republication se règle dans
+  /// src/lib/works/publication.ts.
+  publishedAt      DateTime?      @map("published_at")
   createdAt        DateTime       @default(now()) @map("created_at")
   updatedAt        DateTime       @updatedAt @map("updated_at")
 
@@ -91,7 +94,6 @@ model Work {
   views        WorkView[]
 
   @@index([period])
-  @@index([viewCount])
   @@map("works")
 }
 
@@ -354,7 +356,11 @@ model LibraryItem {
 ///
 /// Une ligne par oeuvre et par jour, et non une ligne par vue : le détail à
 /// la seconde n'intéresse personne, et l'agrégat borne la croissance de la
-/// table à une ligne par oeuvre et par jour.
+/// table.
+///
+/// GLISSANTE SUR 30 JOURS : les lignes plus anciennes sont purgées. C'est la
+/// seule mesure de popularité du site, et elle est volontairement oublieuse -
+/// une oeuvre populaire l'an dernier ne l'est plus aujourd'hui.
 ///
 /// Aucune donnée de visiteur n'est conservée, pas même une empreinte : cette
 /// table compte, elle ne trace pas.

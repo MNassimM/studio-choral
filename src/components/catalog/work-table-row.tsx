@@ -2,6 +2,8 @@ import { getTranslations, getFormatter } from "next-intl/server";
 import Image from "next/image";
 import { Music2 } from "lucide-react";
 
+import { WorkBadgeLabel } from "@/components/catalog/work-badge-label";
+import type { WorkBadge } from "@/lib/catalog/work-badge";
 import type { WorkCardData } from "@/lib/catalog/work-card-data";
 import { Link } from "@/i18n/navigation";
 import { coverUrl } from "@/lib/storage/cover-url";
@@ -12,7 +14,13 @@ import { coverUrl } from "@/lib/storage/cover-url";
  * @param work - Données d'affichage de l'œuvre.
  * @returns La ligne rendue.
  */
-async function WorkTableRow({ work }: { work: WorkCardData }) {
+async function WorkTableRow({
+  work,
+  badge,
+}: {
+  work: WorkCardData;
+  badge?: WorkBadge | null;
+}) {
   const t = await getTranslations("work.card");
   const format = await getFormatter();
 
@@ -45,7 +53,10 @@ async function WorkTableRow({ work }: { work: WorkCardData }) {
           className="absolute inset-0 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
           aria-label={`${t("viewWork")} ${work.title}`}
         />
-        {work.title}
+        <span className="flex flex-col gap-0.5">
+          {work.title}
+          {badge ? <WorkBadgeLabel badge={badge} withRule={false} /> : null}
+        </span>
       </td>
       <td className="py-3 pr-4 text-muted-foreground">{work.composer}</td>
       <td className="py-3 pr-4 text-muted-foreground">{work.voicing ?? "-"}</td>

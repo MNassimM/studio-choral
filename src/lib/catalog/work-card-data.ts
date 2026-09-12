@@ -39,6 +39,10 @@ export type WorkWithCardRelations = Prisma.WorkGetPayload<{
  * Données nécessaires à l'affichage d'une carte œuvre, déjà résolues.
  */
 export type WorkCardData = {
+  /** Identifiant de base, pour rapprocher la carte d'un classement. */
+  workId: string;
+  /** Date de mise en vente, pour le badge nouveauté. Nulle si jamais publiée. */
+  publishedAt: Date | null;
   slug: string;
   title: string;
   composer: string;
@@ -79,6 +83,8 @@ export function deriveWorkCardData(
   );
 
   return {
+    workId: work.id,
+    publishedAt: work.publishedAt,
     slug: resolved.slug,
     title: resolved.title,
     composer: work.composer,
