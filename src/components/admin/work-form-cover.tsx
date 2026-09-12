@@ -138,9 +138,11 @@ export function WorkCoverSection({
 
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           <p className="text-sm text-muted-foreground">
-            Formats acceptés : {COVER_EXTENSIONS.join(", ")}. Taille maximale :{" "}
-            {mo} Mo. Aucun format n&apos;est imposé, le cadrage s&apos;adapte à
-            chaque emplacement.
+            Formats acceptés : {COVER_EXTENSIONS.join(", ")}.
+            <br />
+            <br />
+            Taille maximale : <br />
+            {mo} Mo.
           </p>
 
           <input
@@ -154,57 +156,56 @@ export function WorkCoverSection({
               if (file) void deposer(file);
             }}
           />
-
-          <div className="flex flex-wrap items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={envoiEnCours}
-              onClick={() => entree.current?.click()}
-            >
-              {envoiEnCours ? (
-                <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-              ) : (
-                <Upload className="size-4" aria-hidden="true" />
-              )}
-              {source ? "Remplacer l'image" : "Choisir une image"}
-            </Button>
-
-            {source ? (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                disabled={envoiEnCours}
-                onClick={retirer}
-                className="text-destructive"
-              >
-                <Trash2 className="size-4" aria-hidden="true" />
-                Retirer
-              </Button>
-            ) : null}
-          </div>
-
-          {envoiEnCours ? (
-            <p role="status" className="text-xs text-muted-foreground">
-              Envoi en cours, {progression} %
-            </p>
-          ) : null}
-
-          {cover.kind === "pending" ? (
-            <p className="text-xs text-muted-foreground">
-              {cover.filename} — rangée à l&apos;enregistrement.
-            </p>
-          ) : null}
-
-          {erreur ? (
-            <p role="alert" className="text-xs text-destructive">
-              {erreur}
-            </p>
-          ) : null}
         </div>
       </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={envoiEnCours}
+          onClick={() => entree.current?.click()}
+        >
+          {envoiEnCours ? (
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+          ) : (
+            <Upload className="size-4" aria-hidden="true" />
+          )}
+          {source ? "Remplacer l'image" : "Choisir une image"}
+        </Button>
+
+        {source ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            disabled={envoiEnCours}
+            onClick={retirer}
+            className="text-destructive"
+          >
+            <Trash2 className="size-4" aria-hidden="true" />
+            Retirer
+          </Button>
+        ) : null}
+      </div>
+
+      {envoiEnCours ? (
+        <p role="status" className="text-xs text-muted-foreground">
+          Envoi en cours, {progression} %
+        </p>
+      ) : null}
+
+      {cover.kind === "pending" ? (
+        <p className="text-xs text-muted-foreground">
+          {cover.filename} — rangée à l&apos;enregistrement.
+        </p>
+      ) : null}
+
+      {erreur ? (
+        <p role="alert" className="text-xs text-destructive">
+          {erreur}
+        </p>
+      ) : null}
     </Section>
   );
 }
