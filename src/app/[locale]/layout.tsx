@@ -12,7 +12,7 @@ import { CartAddPanel } from "@/components/cart/cart-add-panel";
 import { CartProvider } from "@/components/cart/cart-provider";
 import { CartReplaceDialog } from "@/components/cart/cart-replace-dialog";
 import { Footer } from "@/components/layout/footer";
-import { ThemeSystemSync } from "@/components/layout/theme-system-sync";
+import { ThemeSync } from "@/components/layout/theme-sync";
 import { routing } from "@/i18n/routing";
 import { DynamicRouteAlternatesProvider } from "@/components/layout/dynamic-route-alternates";
 import {
@@ -34,7 +34,7 @@ import { cn } from "@/lib/utils";
  * mauvais thème.
  *
  * Il ne couvre que le chargement du document. Les rafraîchissements React,
- * dont celui qui suit le choix dans le menu, sont repris par ThemeSystemSync :
+ * dont celui qui suit le choix dans le menu, sont repris par ThemeSync :
  * un script inséré par mise à jour du DOM ne s'exécute pas.
  */
 const SCRIPT_THEME_SYSTEME = `(function(){try{var m=matchMedia("(prefers-color-scheme: dark)");var a=function(){var r=document.documentElement;r.classList.toggle("dark",m.matches);r.style.colorScheme=m.matches?"dark":"light"};a();m.addEventListener("change",a)}catch(e){}})()`;
@@ -111,7 +111,7 @@ export default async function RootLayout({
         </head>
       ) : null}
       <body>
-        {theme === "system" ? <ThemeSystemSync /> : null}
+        <ThemeSync theme={theme} />
         <NextIntlClientProvider>
           <DynamicRouteAlternatesProvider>
             <CartProvider>
