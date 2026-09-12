@@ -75,7 +75,7 @@ export function DownloadButton({
         )}
       >
         <FileHeadphone
-          className="size-4 shrink-0 text-muted-foreground"
+          className="size-4 shrink-0 text-primary"
           aria-hidden="true"
         />
 

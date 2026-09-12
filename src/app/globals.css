@@ -87,7 +87,12 @@ a {
   --card-foreground: #2a2620;
   --popover: #ffffff;
   --popover-foreground: #2a2620;
-  --primary: #b8863e;
+  /* Or de la marque. Volontairement plus sombre que celui du thème sombre
+     (#d9a857) : sur fond clair, le ton d'origine #b8863e ne donnait que
+     2,99:1 en texte et 3,12:1 sous un libellé, loin des 4,5:1 exigés.
+     Teinte et chroma sont inchangés, seule la clarté descend (OKLCH
+     L 0,655 -> 0,55). --ring le suit, l'anneau de focus devant tenir 3:1. */
+  --primary: #976718;
   --primary-foreground: #fffbf2;
   --secondary: #f1ebdd;
   --secondary-foreground: #2a2620;
@@ -98,7 +103,7 @@ a {
   --destructive: oklch(0.577 0.245 27.325);
   --border: #e7dfcc;
   --input: #e7dfcc;
-  --ring: #b8863e;
+  --ring: #976718;
   --public: #66be9a;
   --public-background: #2d4030;
   --chart-1: oklch(0.87 0 0);
@@ -125,7 +130,7 @@ a {
   --card-foreground: #f3ecdd;
   --popover: #2b2620;
   --popover-foreground: #f3ecdd;
-  --primary: #d9a857;
+  --primary: #D3A65E;
   --primary-foreground: #241c0f;
   --secondary: #362f26;
   --secondary-foreground: #f3ecdd;
@@ -136,7 +141,7 @@ a {
   --destructive: oklch(0.704 0.191 22.216);
   --border: #3a332b;
   --input: #3a332b;
-  --ring: #d9a857;
+  --ring: #D3A65E;
   --public: #66be9a;
   --public-background: #2d4030;
   --chart-1: oklch(0.87 0 0);

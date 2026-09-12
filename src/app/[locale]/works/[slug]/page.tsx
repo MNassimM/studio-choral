@@ -424,7 +424,7 @@ export default async function WorkPage(
 
               <div className="flex flex-wrap items-center gap-1.5">
                 {work.period ? (
-                  <Badge variant="secondary">
+                  <Badge variant="outlineSecondary">
                     {t(`period.${work.period}`)}
                   </Badge>
                 ) : null}
@@ -466,7 +466,7 @@ export default async function WorkPage(
 
           {/* Téléchargements */}
           <div className="flex flex-col gap-4">
-            <h2 className="text-xl font-semibold">
+            <h2 className="text-xl font-semibold border-b border-border pb-1 border-primary">
               {tWorkPage("downloadsHeading")}
             </h2>
             {hasSingleMovement ? (
@@ -499,7 +499,7 @@ export default async function WorkPage(
           {!access.ownsFullWork ? (
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-1">
-                <h2 className="text-xl font-semibold">
+                <h2 className="text-xl font-semibold border-b border-border pb-1 border-primary">
                   {tWorkPage("extendAccessHeading")}
                 </h2>
                 {work.movements.length > 1 ? (
