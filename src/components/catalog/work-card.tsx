@@ -1,7 +1,9 @@
 import { getTranslations, getFormatter } from "next-intl/server";
+import Image from "next/image";
 import { Playfair_Display } from "next/font/google";
 import { ChevronRight, Headphones, Music2 } from "lucide-react";
 
+import { coverUrl } from "@/lib/storage/cover-url";
 import { isKnownWorkLanguageCode } from "@/lib/works/work-language";
 
 import type { WorkCardData } from "@/lib/catalog/work-card-data";
@@ -22,23 +24,49 @@ const playfairDisplay = Playfair_Display({
 });
 
 /**
- * [PLACEHOLDER]Visuel de remplacement affiché à la place de la pochette.
+ * La pochette de l'oeuvre, ou son emplacement réservé.
  *
+ * @remarks
+ * L'image est décorative : le titre la suit immédiatement, et le lecteur
+ * d'écran l'annoncerait deux fois. D'où un `alt` vide plutôt qu'une
+ * description.
+ *
+ * @param coverImageKey - Clé de l'image, nulle tant qu'aucune n'est déposée.
+ * @param sizes - Largeurs rendues, pour que l'optimiseur choisisse la bonne.
  * @param className - Classes supplémentaires, fusionnées avec celles par défaut.
  * @returns Le visuel rendu.
  */
-function WorkCoverPlaceholder({ className }: { className?: string }) {
+function WorkCover({
+  coverImageKey,
+  sizes,
+  className,
+}: {
+  coverImageKey: string | null;
+  sizes: string;
+  className?: string;
+}) {
+  if (coverImageKey === null) {
+    return (
+      <div
+        className={cn(
+          "flex items-center justify-center bg-secondary text-primary",
+          className,
+        )}
+      >
+        <Music2 className="size-8" aria-hidden="true" />
+      </div>
+    );
+  }
+
   return (
-    <div
-      className={cn(
-        "flex items-center justify-center bg-secondary text-primary",
-        className,
-      )}
-    >
-      {/* TODO coverImageKey est vide pour l'instant : emplacement réservé au bon
-          ratio, sans référencer de fichier inexistant. Le jour où une image
-          existe, ce bloc devient un next/image pointant vers l'URL signée. */}
-      <Music2 className="size-8" aria-hidden="true" />
+    <div className={cn("relative overflow-hidden bg-secondary", className)}>
+      <Image
+        src={coverUrl(coverImageKey)}
+        alt=""
+        fill
+        sizes={sizes}
+        className="object-cover"
+      />
     </div>
   );
 }
@@ -76,7 +104,11 @@ async function WorkCard({
   if (variant === "compact") {
     return (
       <Card className={cn("overflow-hidden pt-0", className)}>
-        <WorkCoverPlaceholder className="h-32" />
+        <WorkCover
+          coverImageKey={work.coverImageKey}
+          sizes="(min-width: 1024px) 20rem, 100vw"
+          className="h-32"
+        />
         <CardHeader>
           <CardTitle className={cn("text-lg", playfairDisplay.className)}>
             {work.title}
@@ -119,7 +151,11 @@ async function WorkCard({
       )}
     >
       <Card className="hover:bg-secondary/20 focus-within:bg-secondary/20 flex h-full flex-col overflow-hidden pt-0 transition-shadow hover:shadow-md ">
-        <WorkCoverPlaceholder className="h-40" />
+        <WorkCover
+          coverImageKey={work.coverImageKey}
+          sizes="(min-width: 1024px) 24rem, (min-width: 640px) 50vw, 100vw"
+          className="h-40"
+        />
         <CardHeader>
           <CardTitle
             className={cn(
@@ -138,7 +174,9 @@ async function WorkCard({
         <CardContent className="flex flex-1 flex-col gap-4">
           <div className="flex flex-wrap items-center gap-1.5">
             {work.period ? (
-              <Badge variant="secondary">{t(`period.${work.period}`)}</Badge>
+              <Badge variant="outlineSecondary">
+                {t(`period.${work.period}`)}
+              </Badge>
             ) : null}
             {work.voicing ? (
               <Badge variant="secondary">{work.voicing}</Badge>

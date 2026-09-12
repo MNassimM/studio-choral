@@ -32,6 +32,8 @@ export type LibraryWorkInput = {
   title: string;
   composer: string;
   catalogueRef: string | null;
+  /** Clé de l'image de couverture, nulle tant qu'aucune n'est déposée. */
+  coverImageKey: string | null;
   period: string | null;
   voicing: string | null;
   language: string | null;
@@ -67,6 +69,8 @@ export type LibraryWorkRow = {
   title: string;
   composer: string;
   catalogueRef: string | null;
+  /** Clé de l'image de couverture, nulle tant qu'aucune n'est déposée. */
+  coverImageKey: string | null;
   period: string | null;
   voicing: string | null;
   language: string | null;
@@ -175,6 +179,7 @@ export function buildLibraryRows({
       title: work.title,
       composer: work.composer,
       catalogueRef: work.catalogueRef,
+      coverImageKey: work.coverImageKey,
       period: work.period,
       voicing: work.voicing,
       language: work.language,

@@ -130,7 +130,7 @@ a {
   --card-foreground: #f3ecdd;
   --popover: #2b2620;
   --popover-foreground: #f3ecdd;
-  --primary: #D3A65E;
+  --primary: #d3a65e;
   --primary-foreground: #241c0f;
   --secondary: #362f26;
   --secondary-foreground: #f3ecdd;
@@ -141,7 +141,7 @@ a {
   --destructive: oklch(0.704 0.191 22.216);
   --border: #3a332b;
   --input: #3a332b;
-  --ring: #D3A65E;
+  --ring: #d3a65e;
   --public: #66be9a;
   --public-background: #2d4030;
   --chart-1: oklch(0.87 0 0);

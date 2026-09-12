@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { ChevronDown, Music2, Trash2 } from "lucide-react";
+import Image from "next/image";
 import { useId, useState } from "react";
 
 import { usePriceFormatter } from "@/components/cart/cart-price";
@@ -23,13 +24,40 @@ type CartLineDensity = "comfortable" | "compact";
  * @param small - Vrai pour la vignette resserrée des panneaux.
  * @returns Le visuel rendu.
  */
-function CartWorkCover({ small = false }: { small?: boolean }) {
+function CartWorkCover({
+  src = null,
+  small = false,
+}: {
+  src?: string | null;
+  small?: boolean;
+}) {
+  const taille = small ? "w-14" : "w-20 sm:w-24";
+
+  if (src) {
+    return (
+      <div
+        className={cn(
+          "relative aspect-square shrink-0 overflow-hidden rounded-xl border border-border bg-secondary",
+          taille,
+        )}
+      >
+        <Image
+          src={src}
+          alt=""
+          fill
+          sizes={small ? "3.5rem" : "6rem"}
+          className="object-cover"
+        />
+      </div>
+    );
+  }
+
   return (
     <div
       aria-hidden="true"
       className={cn(
         "flex aspect-square shrink-0 items-center justify-center rounded-xl border border-border bg-secondary text-primary",
-        small ? "w-14" : "w-20 sm:w-24",
+        taille,
       )}
     >
       <Music2 className={small ? "size-5" : "size-7 sm:size-9"} />
@@ -343,7 +371,7 @@ function CartLineGroups({
                 }
                 className="flex w-full cursor-pointer items-center gap-3 text-left"
               >
-                <CartWorkCover small />
+                <CartWorkCover src={work.workCoverUrl} small />
                 <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                   <span className="truncate text-sm font-semibold">
                     {work.workTitle ?? t("unknownItem")}

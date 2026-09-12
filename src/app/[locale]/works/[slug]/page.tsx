@@ -6,6 +6,8 @@ import { locale as rootLocale } from "next/root-params";
 import { Playfair_Display } from "next/font/google";
 import { Music2 } from "lucide-react";
 
+import Image from "next/image";
+
 import { Container } from "@/components/layout/container";
 import { Badge } from "@/components/ui/badge";
 import { AccessSidebar } from "@/components/work/access-sidebar";
@@ -21,6 +23,7 @@ import { cn } from "@/lib/utils";
 import { prisma } from "@/lib/db/prisma";
 import { resolveWorkTranslation } from "@/lib/works/resolve-translation";
 import { isKnownWorkLanguageCode } from "@/lib/works/work-language";
+import { coverUrl } from "@/lib/storage/cover-url";
 import { isKnownVoiceCode } from "@/lib/works/voice-label";
 import { buildWorkPageViewModel } from "@/lib/works/work-page-view-model";
 import { getCurrentUser } from "@/lib/auth/current-user";
@@ -175,6 +178,11 @@ export async function generateMetadata(
         "x-default": languages[routing.defaultLocale],
       },
     },
+    // L'aperçu de partage n'est posé que si une pochette existe : une URL
+    // vers un objet absent vaut moins qu'une absence d'aperçu.
+    ...(work.coverImageKey
+      ? { openGraph: { images: [coverUrl(work.coverImageKey)] } }
+      : {}),
   };
 }
 
@@ -395,14 +403,25 @@ export default async function WorkPage(
 
           {/* En-tête : visuel + informations */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-[240px_1fr] md:items-start">
-            <div
-              aria-hidden="true"
-              className="flex aspect-square items-center justify-center rounded-2xl border border-border bg-secondary text-primary"
-            >
-              {/* coverImageKey est vide pour l'instant : emplacement réservé,
-                  jamais une image inexistante. */}
-              <Music2 className="size-12" />
-            </div>
+            {work.coverImageKey ? (
+              <div className="relative aspect-square overflow-hidden rounded-2xl border border-border bg-secondary">
+                <Image
+                  src={coverUrl(work.coverImageKey)}
+                  alt=""
+                  fill
+                  sizes="(min-width: 1024px) 24rem, 100vw"
+                  className="object-cover border border-primary border-3 rounded-2xl"
+                  priority
+                />
+              </div>
+            ) : (
+              <div
+                aria-hidden="true"
+                className="flex aspect-square items-center justify-center rounded-2xl border border-border bg-secondary text-primary"
+              >
+                <Music2 className="size-12" />
+              </div>
+            )}
 
             <div className="flex flex-col gap-4">
               <div className="flex flex-wrap items-end text-end gap-2 items-baseline">
@@ -415,7 +434,7 @@ export default async function WorkPage(
                   {resolved.title}
                 </h1>
                 {work.catalogueRef ? (
-                  <Badge className="text-xl p-3" variant="outline">
+                  <Badge className="text-xl p-3" variant="outlineSecondary">
                     {work.catalogueRef}
                   </Badge>
                 ) : null}

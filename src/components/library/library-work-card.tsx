@@ -1,4 +1,5 @@
 import { getFormatter, getTranslations } from "next-intl/server";
+import Image from "next/image";
 import { CheckCircle2, Music2 } from "lucide-react";
 import { Playfair_Display } from "next/font/google";
 
@@ -8,6 +9,7 @@ import { LibraryWorkDetails } from "@/components/library/library-work-details";
 import { Link } from "@/i18n/navigation";
 import type { LibraryWorkRow } from "@/lib/library/library-rows";
 import { isKnownWorkLanguageCode } from "@/lib/works/work-language";
+import { coverUrl } from "@/lib/storage/cover-url";
 import { cn } from "@/lib/utils";
 
 const playfairDisplay = Playfair_Display({
@@ -44,14 +46,24 @@ async function LibraryWorkCard({
   return (
     <article className="overflow-hidden rounded-lg bg-card ring-1 ring-foreground/10">
       <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-start">
-        <div
-          className="flex size-20 shrink-0 items-center justify-center rounded-xl bg-secondary text-primary"
-          aria-hidden="true"
-        >
-          {/* TODO coverImageKey est vide : même emplacement réservé que les
-              cartes du catalogue. */}
-          <Music2 className="size-7" />
-        </div>
+        {row.coverImageKey ? (
+          <div className="relative size-20 shrink-0 overflow-hidden rounded-xl bg-secondary">
+            <Image
+              src={coverUrl(row.coverImageKey)}
+              alt=""
+              fill
+              sizes="5rem"
+              className="object-cover"
+            />
+          </div>
+        ) : (
+          <div
+            className="flex size-20 shrink-0 items-center justify-center rounded-xl bg-secondary text-primary"
+            aria-hidden="true"
+          >
+            <Music2 className="size-7" />
+          </div>
+        )}
 
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           <h2

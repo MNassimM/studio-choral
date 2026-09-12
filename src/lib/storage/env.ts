@@ -14,8 +14,33 @@ const storageEnvSchema = z.object({
   R2_ACCESS_KEY_ID: z.string().min(1, "R2_ACCESS_KEY_ID est requise"),
   /** Secret du jeton d'API R2, jamais journalisé. */
   R2_SECRET_ACCESS_KEY: z.string().min(1, "R2_SECRET_ACCESS_KEY est requise"),
-  /** Nom du bucket. */
+  /** Nom du bucket privé, celui des fichiers audio. */
   R2_BUCKET: z.string().min(1, "R2_BUCKET est requise"),
+  /**
+   * Nom du bucket PUBLIC, celui des images de couverture.
+   *
+   * @remarks
+   * Un second bucket, et non un préfixe du premier : R2 n'ouvre l'accès
+   * public que par bucket entier. Séparer garantit qu'aucune erreur de
+   * configuration ne peut rendre une piste audio lisible sans achat.
+   */
+  R2_PUBLIC_BUCKET: z.string().min(1, "R2_PUBLIC_BUCKET est requise"),
+  /**
+   * Adresse publique du bucket de couvertures, sans barre finale.
+   *
+   * @remarks
+   * Le domaine r2.dev du bucket, ou un domaine personnalisé. C'est la racine
+   * des URL d'image rendues dans les pages, et l'hôte déclaré dans
+   * next.config.ts.
+   */
+  R2_PUBLIC_BASE_URL: z
+    .string()
+    .min(1, "R2_PUBLIC_BASE_URL est requise")
+    .url("R2_PUBLIC_BASE_URL doit être une URL absolue")
+    .refine(
+      (v) => !v.endsWith("/"),
+      "R2_PUBLIC_BASE_URL ne prend pas de barre finale",
+    ),
 });
 
 /**
@@ -36,6 +61,8 @@ function parseStorageEnv(): StorageEnv {
     R2_ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID,
     R2_SECRET_ACCESS_KEY: process.env.R2_SECRET_ACCESS_KEY,
     R2_BUCKET: process.env.R2_BUCKET,
+    R2_PUBLIC_BUCKET: process.env.R2_PUBLIC_BUCKET,
+    R2_PUBLIC_BASE_URL: process.env.R2_PUBLIC_BASE_URL,
   });
 
   if (!result.success) {

@@ -54,9 +54,14 @@ model Work {
   catalogueRef     String?        @map("catalogue_ref")
   shortDescription String?        @map("short_description")
   description      String?
-  /// EN ATTENTE : aucune image n'est encore téléversée ni affichée. Les
-  /// cartes du catalogue et l'en tête de la page oeuvre rendent un
-  /// emplacement réservé, et le signalent par un commentaire.
+  /// Clé de l'image de couverture dans le bucket PUBLIC, distinct de celui
+  /// des pistes : R2 n'ouvre l'accès public que par bucket entier, jamais par
+  /// préfixe. NULL tant qu'aucune image n'est déposée, auquel cas les cartes
+  /// et l'en tête de la page oeuvre rendent un emplacement réservé.
+  ///
+  /// La clé porte un jeton de version (works/<id>/cover/<version>.<ext>) :
+  /// remplacer l'image change son adresse, ce qui autorise un cache immuable
+  /// sans jamais avoir à l'invalider.
   coverImageKey    String?        @map("cover_image_key")
   /// Année de composition, approximative pour l'ancien répertoire. NULL si
   /// aucune date fiable n'est établie - ne jamais deviner.

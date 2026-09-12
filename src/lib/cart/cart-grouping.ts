@@ -17,6 +17,8 @@ export type CartMovementGroup = {
 export type CartWorkGroup = {
   workId: string;
   workTitle: string | null;
+  /** URL publique de la pochette, déjà composée par le serveur, ou null. */
+  workCoverUrl: string | null;
   /** Vrai lorsque l'oeuvre compte plusieurs mouvements à distinguer. */
   splitByMovement: boolean;
   groups: CartMovementGroup[];
@@ -47,12 +49,14 @@ export function groupCartLines(
       work = {
         workId,
         workTitle: resolved?.workTitle ?? null,
+        workCoverUrl: resolved?.workCoverUrl ?? null,
         splitByMovement: (resolved?.workMovementCount ?? 0) > 1,
         groups: [],
       };
       byWork.set(workId, work);
     }
     work.workTitle ??= resolved?.workTitle ?? null;
+    work.workCoverUrl ??= resolved?.workCoverUrl ?? null;
     if ((resolved?.workMovementCount ?? 0) > 1) work.splitByMovement = true;
 
     const movementId = resolved?.movementId ?? line.movementId;

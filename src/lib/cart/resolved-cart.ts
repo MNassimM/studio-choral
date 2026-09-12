@@ -26,6 +26,14 @@ export type ResolvedCartLine = {
   workTitle: string | null;
   /** Compositeur de l'oeuvre, pour l'en tête de sa carte. */
   workComposer: string | null;
+  /**
+   * URL publique de la pochette, déjà composée, ou null.
+   *
+   * @remarks
+   * L'URL et non la clé : l'affichage du panier est client, et composer
+   * l'adresse demande la racine du bucket, qui ne quitte pas le serveur.
+   */
+  workCoverUrl: string | null;
   /** Libellé du pupitre, ou la mention toutes voix. */
   voiceLabel: string | null;
   movementId: string | null;

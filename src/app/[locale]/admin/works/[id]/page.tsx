@@ -17,6 +17,7 @@ import {
 } from "@/lib/admin/form/work-form-draft";
 import type { WorkFormValues } from "@/lib/admin/form/work-form-schema";
 import { prisma } from "@/lib/db/prisma";
+import { coverUrl } from "@/lib/storage/storage";
 
 // Elle montre des brouillons et dépend du rôle, donc jamais de cache.
 export const dynamic = "force-dynamic";
@@ -50,6 +51,7 @@ export default async function EditWorkPage({
       language: true,
       composedYear: true,
       hasAccompaniment: true,
+      coverImageKey: true,
       isPublished: true,
       movements: {
         select: {
@@ -138,6 +140,9 @@ export default async function EditWorkPage({
         initialValues={workToDraft(work)}
         voices={voices}
         storedMeta={storedMeta}
+        coverPreviewUrl={
+          work.coverImageKey ? coverUrl(work.coverImageKey) : null
+        }
         submitAction={enregistrer}
         submitLabel="Enregistrer les modifications"
         publication={{

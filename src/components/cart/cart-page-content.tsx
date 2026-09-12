@@ -71,7 +71,7 @@ function CartWorkCard({
         {/*rounded-2xl border border-border bg-card/40 p-4 sm:p-6 hover:bg-card/60 transition-colors*/}
         <div className="flex flex-col gap-5 sm:flex-row sm:gap-6">
           <div className="flex items-center h-fit gap-4 sm:w-80 sm:shrink-0">
-            <CartWorkCover />
+            <CartWorkCover src={group.workCoverUrl} />
             <div className="flex min-w-0 flex-col gap-1">
               <h2
                 className={cn(

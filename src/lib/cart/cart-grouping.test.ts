@@ -29,6 +29,7 @@ function resolved(
     workId: "w1",
     workTitle: "Oeuvre 1",
     workComposer: "Compositeur 1",
+    workCoverUrl: null,
     voiceLabel: "Toutes les voix",
     movementId: null,
     movementTitle: null,

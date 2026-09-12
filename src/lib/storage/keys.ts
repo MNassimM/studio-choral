@@ -160,3 +160,99 @@ export function downloadPartLabel(
   if (voiceCode !== null) return voiceCode;
   return type === "ACCOMPANIMENT" ? "accompagnement" : "tutti";
 }
+
+/* ─── Images de couverture ────────────────────────────────────────────────
+ * Elles vivent dans un bucket PUBLIC distinct, et non sous un préfixe du
+ * bucket privé : R2 n'ouvre l'accès public que par bucket entier. Leur clé
+ * est donc lisible par tout le monde, ce qui est sans conséquence puisque ce
+ * bucket ne contient rien d'autre que des couvertures.
+ * ─────────────────────────────────────────────────────────────────────── */
+
+/** Segment qui isole les couvertures dans le bucket public. */
+export const COVER_SEGMENT = "cover";
+
+/** Extensions d'image acceptées pour une couverture. */
+export const COVER_EXTENSIONS = ["jpg", "jpeg", "png", "webp"] as const;
+
+/** Une extension d'image acceptée. */
+export type CoverExtension = (typeof COVER_EXTENSIONS)[number];
+
+/** Taille maximale d'une couverture, en octets. */
+export const MAX_COVER_BYTES = 5 * 1024 * 1024;
+
+/**
+ * Ce qui identifie une couverture, et donc sa clé définitive.
+ */
+export type CoverLocation = {
+  /** Identifiant de base de l'oeuvre, jamais son slug. */
+  workId: string;
+  /**
+   * Jeton qui change à chaque remplacement d'image.
+   *
+   * @remarks
+   * C'est lui qui rend l'URL immuable : une image remplacée porte une
+   * nouvelle clé, donc une nouvelle adresse, et le cache du navigateur comme
+   * celui du réseau de diffusion n'ont jamais à être invalidés.
+   */
+  version: string;
+  extension: CoverExtension;
+};
+
+/**
+ * Extrait l'extension d'un nom d'image, si elle est acceptée.
+ *
+ * @param filename - Nom du fichier d'origine.
+ * @returns L'extension en minuscules, ou null si elle n'est pas acceptée.
+ */
+export function coverExtensionOf(filename: string): CoverExtension | null {
+  const point = filename.lastIndexOf(".");
+  if (point === -1 || point === filename.length - 1) return null;
+  const extension = filename.slice(point + 1).toLowerCase();
+  return COVER_EXTENSIONS.includes(extension as CoverExtension)
+    ? (extension as CoverExtension)
+    : null;
+}
+
+/**
+ * Construit la clé définitive d'une couverture.
+ *
+ * @param location - L'oeuvre, la version et l'extension.
+ * @returns La clé définitive, dans le bucket public.
+ */
+export function buildCoverKey(location: CoverLocation): string {
+  const { workId, version, extension } = location;
+  return [
+    WORKS_PREFIX,
+    sanitizeSegment(workId),
+    COVER_SEGMENT,
+    `${sanitizeSegment(version)}.${extension}`,
+  ].join("/");
+}
+
+/**
+ * Dit si une clé désigne bien une couverture.
+ *
+ * @param key - Clé à examiner.
+ * @returns Vrai si la clé a la forme d'une couverture rangée.
+ */
+export function isCoverKey(key: string): boolean {
+  const parts = key.split("/");
+  return (
+    isValidKey(key) &&
+    parts.length === 4 &&
+    parts[0] === WORKS_PREFIX &&
+    parts[2] === COVER_SEGMENT &&
+    coverExtensionOf(parts[3]) !== null
+  );
+}
+
+/**
+ * Compose l'URL publique d'une couverture.
+ *
+ * @param baseUrl - Racine publique du bucket, sans barre finale.
+ * @param key - Clé de la couverture.
+ * @returns L'URL absolue à rendre dans une page.
+ */
+export function coverPublicUrl(baseUrl: string, key: string): string {
+  return `${baseUrl}/${key}`;
+}

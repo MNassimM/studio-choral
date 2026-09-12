@@ -39,6 +39,7 @@ const MESSE: LibraryWorkInput = {
   title: "Messe",
   composer: "Schubert",
   catalogueRef: "D.167",
+  coverImageKey: null,
   period: "CLASSICAL",
   voicing: "SATB",
   language: "la",

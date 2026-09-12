@@ -1,8 +1,10 @@
 import { getTranslations, getFormatter } from "next-intl/server";
+import Image from "next/image";
 import { Music2 } from "lucide-react";
 
 import type { WorkCardData } from "@/lib/catalog/work-card-data";
 import { Link } from "@/i18n/navigation";
+import { coverUrl } from "@/lib/storage/cover-url";
 
 /**
  * Ligne d'une œuvre dans la vue tableau du catalogue.
@@ -17,12 +19,24 @@ async function WorkTableRow({ work }: { work: WorkCardData }) {
   return (
     <tr className="relative border-b border-border transition-colors last:border-b-0 hover:bg-secondary/40 focus-within:bg-secondary/40">
       <td className="py-3 pr-4 pl-4">
-        <div
-          className="flex size-12 items-center justify-center rounded-md bg-secondary text-primary"
-          aria-hidden="true"
-        >
-          <Music2 className="size-5" />
-        </div>
+        {work.coverImageKey ? (
+          <div className="relative size-12 overflow-hidden rounded-md bg-secondary">
+            <Image
+              src={coverUrl(work.coverImageKey)}
+              alt=""
+              fill
+              sizes="3rem"
+              className="object-cover"
+            />
+          </div>
+        ) : (
+          <div
+            className="flex size-12 items-center justify-center rounded-md bg-secondary text-primary"
+            aria-hidden="true"
+          >
+            <Music2 className="size-5" />
+          </div>
+        )}
       </td>
       <td className="py-3 pr-4 font-medium">
         {/* Pour faire un lien étirer sur toute la ligne */}

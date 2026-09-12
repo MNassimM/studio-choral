@@ -56,6 +56,7 @@ export function emptyWorkFormDraft(): WorkFormDraft {
     voiceCodes: [],
     movements: [{ key: newMovementKey(), title: "" }],
     tracks: [],
+    cover: { kind: "none" },
     prices: {
       movementSingleVoice: null,
       movementAllVoices: null,
@@ -85,6 +86,7 @@ export type WorkRow = {
   language: string | null;
   composedYear: number | null;
   hasAccompaniment: boolean;
+  coverImageKey: string | null;
   movements: {
     id: string;
     title: string;
@@ -174,6 +176,9 @@ export function workToDraft(work: WorkRow): WorkFormDraft {
     })),
     // La clé du mouvement vaut son id pour une ligne déjà enregistrée, les
     // cases s'y rattachent donc directement.
+    cover: work.coverImageKey
+      ? ({ kind: "stored", key: work.coverImageKey } as const)
+      : ({ kind: "none" } as const),
     tracks: work.movements.flatMap((movement) =>
       movement.audioFiles.map((piste) => ({
         movementKey: movement.id,

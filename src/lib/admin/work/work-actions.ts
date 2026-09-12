@@ -30,6 +30,10 @@ import {
   deleteStoredObjects,
   storePendingTracks,
 } from "@/lib/admin/work/work-track-storage";
+import {
+  deleteCoverObject,
+  storePendingCover,
+} from "@/lib/admin/work/work-cover-storage";
 import { prisma } from "@/lib/db/prisma";
 
 /**
@@ -192,6 +196,7 @@ export async function createWork(input: WorkFormValues): Promise<ActionResult> {
       movementIdByKey,
       voiceIdByCode,
     );
+    const couverture = await storePendingCover(work.id, data.cover);
 
     await syncProductActivation(work.id);
     await unpublishIfIncomplete(work.id);
@@ -201,6 +206,12 @@ export async function createWork(input: WorkFormValues): Promise<ActionResult> {
       return {
         ok: false,
         error: `L'œuvre est enregistrée, mais ces pistes n'ont pas pu être rangées : ${range.failed.join(", ")}.`,
+      };
+    }
+    if (couverture.failed !== null) {
+      return {
+        ok: false,
+        error: `L'œuvre est enregistrée, mais l'image de couverture n'a pas pu être rangée : ${couverture.failed}.`,
       };
     }
     return { ok: true, workId: work.id };
@@ -444,6 +455,7 @@ export async function updateWork(
       movementIdByKey,
       voiceIdByCode,
     );
+    const couverture = await storePendingCover(workId, data.cover);
 
     await syncProductActivation(workId);
     const depubliee = await unpublishIfIncomplete(workId);
@@ -460,6 +472,12 @@ export async function updateWork(
       return {
         ok: false,
         error: `L'œuvre est enregistrée, mais ces pistes n'ont pas pu être rangées : ${range.failed.join(", ")}.`,
+      };
+    }
+    if (couverture.failed !== null) {
+      return {
+        ok: false,
+        error: `L'œuvre est enregistrée, mais l'image de couverture n'a pas pu être rangée : ${couverture.failed}.`,
       };
     }
     if (objetsNonSupprimes > 0) {
@@ -593,7 +611,11 @@ export async function deleteWork(workId: string): Promise<ActionResult> {
 
   const work = await prisma.work.findUnique({
     where: { id: workId },
-    select: { title: true, _count: { select: { libraryItems: true } } },
+    select: {
+      title: true,
+      coverImageKey: true,
+      _count: { select: { libraryItems: true } },
+    },
   });
 
   if (!work) return { ok: false, error: "Œuvre introuvable." };
@@ -615,6 +637,8 @@ export async function deleteWork(workId: string): Promise<ActionResult> {
   const objetsNonSupprimes = await deleteStoredObjects(
     pistes.map((piste) => piste.storageKey),
   );
+  // La couverture vit dans l'autre bucket, elle a donc sa propre suppression.
+  await deleteCoverObject(work.coverImageKey);
   if (objetsNonSupprimes > 0) {
     console.error(
       `work-actions deleteWork : ${objetsNonSupprimes} objet(s) restés en place sur ${pistes.length}.`,

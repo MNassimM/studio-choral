@@ -1,6 +1,6 @@
 import "server-only";
 
-import { r2Storage } from "@/lib/storage/r2-client";
+import { r2PublicStorage, r2Storage } from "@/lib/storage/r2-client";
 import type { ObjectStorage } from "@/lib/storage/types";
 
 /**
@@ -8,24 +8,46 @@ import type { ObjectStorage } from "@/lib/storage/types";
  */
 
 /**
- * Le stockage configuré pour ce projet.
+ * Le stockage configuré pour ce projet : le bucket PRIVÉ.
+ *
+ * @remarks
+ * Tout ce qui se vend vit ici, et rien n'en sort sans URL signée.
  */
 export const storage: ObjectStorage = r2Storage;
 
+/**
+ * Le stockage des images de couverture : le bucket PUBLIC.
+ *
+ * @remarks
+ * Volontairement distinct de `storage`, pour qu'une clé de couverture ne
+ * puisse jamais désigner un fichier payant, ni l'inverse.
+ */
+export const coverStorage: ObjectStorage = r2PublicStorage;
+
+export { coverUrl } from "@/lib/storage/cover-url";
+
 export {
   ALLOWED_EXTENSIONS,
+  COVER_EXTENSIONS,
+  COVER_SEGMENT,
+  MAX_COVER_BYTES,
   MAX_UPLOAD_BYTES,
   PENDING_PREFIX,
   WORKS_PREFIX,
   buildDownloadFilename,
+  buildCoverKey,
   buildPendingKey,
   buildTrackKey,
+  coverExtensionOf,
   downloadPartLabel,
   extensionOf,
+  isCoverKey,
   isPendingKey,
   isValidKey,
   sanitizeSegment,
   type AllowedExtension,
+  type CoverExtension,
+  type CoverLocation,
   type TrackLocation,
 } from "@/lib/storage/keys";
 

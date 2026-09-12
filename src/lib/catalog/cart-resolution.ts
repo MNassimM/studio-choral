@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/auth/current-user";
 import { getUserGrants } from "@/lib/catalog/access-grants";
 import { buildWorkAccessInput } from "@/lib/catalog/work-access-input";
 import { prisma } from "@/lib/db/prisma";
+import { coverUrl } from "@/lib/storage/cover-url";
 import {
   EMPTY_RESOLVED_CART,
   type ResolvedCart,
@@ -86,6 +87,7 @@ export async function resolveCart(
   const layouts = new Map<string, WorkAccessInput>();
   const workTitles = new Map<string, string>();
   const workComposers = new Map<string, string>();
+  const workCovers = new Map<string, string | null>();
   const movementCounts = new Map<string, number>();
 
   for (const product of products) {
@@ -103,6 +105,10 @@ export async function resolveCart(
       resolveWorkTranslation(product.work, locale).title,
     );
     workComposers.set(product.workId, product.work.composer);
+    workCovers.set(
+      product.workId,
+      product.work.coverImageKey ? coverUrl(product.work.coverImageKey) : null,
+    );
     movementCounts.set(product.workId, product.work.movements.length);
   }
 
@@ -164,6 +170,7 @@ export async function resolveCart(
       workComposer: product
         ? (workComposers.get(product.workId) ?? null)
         : null,
+      workCoverUrl: product ? (workCovers.get(product.workId) ?? null) : null,
       voiceLabel: voiceLabels.get(line.sku) ?? null,
       movementId: product?.movementId ?? null,
       movementTitle: movementTitles.get(line.sku) ?? null,

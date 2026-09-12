@@ -57,6 +57,7 @@ export async function findLibraryWorks(
         title: true,
         composer: true,
         catalogueRef: true,
+        coverImageKey: true,
         period: true,
         voicing: true,
         language: true,

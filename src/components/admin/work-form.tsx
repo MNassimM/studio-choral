@@ -15,7 +15,7 @@ import {
   WorkAudioSection,
   type StoredTrackMeta,
 } from "@/components/admin/audio-matrix/work-form-audio";
-import { SectionAVenir } from "@/components/admin/work-form-fields";
+import { WorkCoverSection } from "@/components/admin/work-form-cover";
 import { WorkMovementsSection } from "@/components/admin/work-form-movements";
 import { WorkMusicSection } from "@/components/admin/work-form-music";
 import { WorkPricesSection } from "@/components/admin/work-form-prices";
@@ -58,6 +58,7 @@ export function WorkForm({
   initialValues,
   voices,
   storedMeta = {},
+  coverPreviewUrl = null,
   submitAction,
   submitLabel = "Enregistrer le brouillon",
   publication,
@@ -66,6 +67,8 @@ export function WorkForm({
   initialValues: WorkFormDraft;
   voices: VoiceOption[];
   storedMeta?: StoredTrackMeta;
+  /** URL de la couverture deja enregistree, absente en creation. */
+  coverPreviewUrl?: string | null;
   submitAction: (values: WorkFormValues) => Promise<WorkActionResult>;
   submitLabel?: string;
   /** Absent en création : il n'y a rien à publier tant que rien n'existe. */
@@ -303,11 +306,7 @@ export function WorkForm({
           </div>
 
           <aside className="flex flex-col gap-6">
-            {/* Emplacement de l'image de couverture, prompt suivant. */}
-            <SectionAVenir
-              title="Image de couverture"
-              note="Le dépôt d'image arrive bientot !!!!"
-            />
+            <WorkCoverSection previewUrl={coverPreviewUrl} />
 
             <WorkVoicesSection
               voices={voices}

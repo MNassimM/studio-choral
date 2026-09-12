@@ -3,6 +3,10 @@ import assert from "node:assert/strict";
 
 import {
   ALLOWED_EXTENSIONS,
+  buildCoverKey,
+  coverExtensionOf,
+  coverPublicUrl,
+  isCoverKey,
   MAX_UPLOAD_BYTES,
   PENDING_PREFIX,
   buildDownloadFilename,
@@ -187,4 +191,65 @@ test("une piste sans pupitre est nommée tutti ou accompagnement, jamais confond
 
 test("la limite de téléversement vaut bien 200 Mo", () => {
   assert.equal(MAX_UPLOAD_BYTES, 209715200);
+});
+
+// ─── Images de couverture ───────────────────────────────────────────────────
+
+test("la clé d'une couverture porte l'oeuvre, la version et l'extension", () => {
+  assert.equal(
+    buildCoverKey({ workId: WORK_ID, version: "v1", extension: "webp" }),
+    `works/${WORK_ID}/cover/v1.webp`,
+  );
+});
+
+test("changer de version change la clé, donc l'URL publique", () => {
+  const premiere = buildCoverKey({
+    workId: WORK_ID,
+    version: "aaa",
+    extension: "jpg",
+  });
+  const seconde = buildCoverKey({
+    workId: WORK_ID,
+    version: "bbb",
+    extension: "jpg",
+  });
+
+  // C'est ce qui autorise un cache immuable : remplacer l'image ne réécrit
+  // jamais une adresse déjà servie.
+  assert.notEqual(premiere, seconde);
+});
+
+test("les extensions d'image acceptées sont reconnues, les autres non", () => {
+  assert.equal(coverExtensionOf("pochette.jpg"), "jpg");
+  assert.equal(coverExtensionOf("pochette.JPEG"), "jpeg");
+  assert.equal(coverExtensionOf("pochette.png"), "png");
+  assert.equal(coverExtensionOf("pochette.webp"), "webp");
+  assert.equal(coverExtensionOf("pochette.gif"), null);
+  assert.equal(coverExtensionOf("pochette.svg"), null);
+  assert.equal(coverExtensionOf("sans-extension"), null);
+});
+
+test("une extension audio n'est pas une extension d'image", () => {
+  // Les deux familles ont leur propre liste : une confusion ferait ranger un
+  // fichier payant dans le bucket public.
+  assert.equal(coverExtensionOf("piste.wav"), null);
+  assert.equal(extensionOf("pochette.jpg"), null);
+});
+
+test("isCoverKey ne reconnaît que les clés de couverture", () => {
+  assert.equal(isCoverKey(`works/${WORK_ID}/cover/v1.webp`), true);
+  assert.equal(
+    isCoverKey(`works/${WORK_ID}/movements/${MOVEMENT_ID}/SOLO/soprano.wav`),
+    false,
+  );
+  assert.equal(isCoverKey("pending/abc/pochette.jpg"), false);
+  assert.equal(isCoverKey(`works/${WORK_ID}/cover/v1.wav`), false);
+  assert.equal(isCoverKey("../../etc/passwd"), false);
+});
+
+test("l'URL publique colle la racine du bucket à la clé", () => {
+  assert.equal(
+    coverPublicUrl("https://images.example", `works/${WORK_ID}/cover/v1.webp`),
+    `https://images.example/works/${WORK_ID}/cover/v1.webp`,
+  );
 });

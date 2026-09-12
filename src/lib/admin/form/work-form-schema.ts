@@ -110,6 +110,32 @@ const trackSchema = z.object({
   ]),
 });
 
+/**
+ * L'image de couverture, dans l'un de ses trois états.
+ *
+ * @remarks
+ * Même motif que `trackSchema.state` : « stored » désigne une image déjà
+ * rangée, dont on ne connaît que la clé ; « pending » une image déposée dans
+ * le bucket public mais pas encore rattachée à l'oeuvre, l'identifiant de
+ * celle-ci n'existant pas forcément au moment du dépôt.
+ */
+const coverSchema = z.discriminatedUnion("kind", [
+  z.object({ kind: z.literal("none") }),
+  z.object({
+    kind: z.literal("stored"),
+    /** Clé dans le bucket public, telle qu'elle est en base. */
+    key: z.string().min(1).max(1024),
+  }),
+  z.object({
+    kind: z.literal("pending"),
+    /** Identifiant du téléversement, qui recompose la clé sous pending. */
+    uploadId: z.string().min(1).max(64),
+    filename: z.string().min(1).max(255),
+    sizeBytes: z.number().int().positive(),
+    mimeType: z.string().min(1).max(100),
+  }),
+]);
+
 const baseSchema = z.object({
   title: z
     .string()
@@ -159,6 +185,13 @@ const baseSchema = z.object({
     .max(60, "Une œuvre ne peut pas avoir autant de mouvements."),
 
   tracks: z.array(trackSchema).max(2000),
+
+  /**
+   * Par défaut « aucune image » : le champ est absent des brouillons plus
+   * anciens, et une action serveur doit accepter ce qu'un navigateur pas
+   * encore rechargé lui envoie.
+   */
+  cover: coverSchema.default({ kind: "none" }),
 
   prices: pricesSchema,
 });

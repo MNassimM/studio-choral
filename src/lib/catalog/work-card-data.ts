@@ -43,6 +43,8 @@ export type WorkCardData = {
   title: string;
   composer: string;
   catalogueRef: string | null;
+  /** Clé de l'image de couverture, nulle tant qu'aucune n'est déposée. */
+  coverImageKey: string | null;
   shortDescription: string | null;
   movementsCount: number;
   period: MusicalPeriod | null;
@@ -81,6 +83,7 @@ export function deriveWorkCardData(
     title: resolved.title,
     composer: work.composer,
     catalogueRef: work.catalogueRef,
+    coverImageKey: work.coverImageKey,
     shortDescription: resolved.shortDescription,
     movementsCount: work.movements.length,
     period: work.period,

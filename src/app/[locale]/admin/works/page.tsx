@@ -7,6 +7,7 @@ import {
   Search,
   X,
 } from "lucide-react";
+import Image from "next/image";
 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -14,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Link } from "@/i18n/navigation";
 import { computeTrackCoverage } from "@/lib/admin/sellability/track-coverage";
 import { prisma } from "@/lib/db/prisma";
+import { coverUrl } from "@/lib/storage/cover-url";
 import { cn } from "@/lib/utils";
 
 // Dépend du rôle et montre des brouillons, donc jamais de cache.
@@ -139,6 +141,7 @@ export default async function AdminWorksPage({
       title: true,
       composer: true,
       catalogueRef: true,
+      coverImageKey: true,
       isPublished: true,
       hasAccompaniment: true,
       updatedAt: true,
@@ -305,12 +308,24 @@ export default async function AdminWorksPage({
                 <tr key={row.id} className="align-middle">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div
-                        aria-hidden="true"
-                        className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border bg-secondary text-primary"
-                      >
-                        <Music2 className="size-4" />
-                      </div>
+                      {row.coverImageKey ? (
+                        <div className="relative size-10 shrink-0 overflow-hidden rounded-lg border border-border bg-secondary">
+                          <Image
+                            src={coverUrl(row.coverImageKey)}
+                            alt=""
+                            fill
+                            sizes="2.5rem"
+                            className="object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div
+                          aria-hidden="true"
+                          className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border bg-secondary text-primary"
+                        >
+                          <Music2 className="size-4" />
+                        </div>
+                      )}
                       <div className="flex min-w-0 flex-col">
                         <span className="flex flex-wrap items-center gap-2">
                           <span className="font-medium">{row.title}</span>

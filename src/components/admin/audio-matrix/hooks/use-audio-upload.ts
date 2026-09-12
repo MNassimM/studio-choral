@@ -2,6 +2,10 @@
 
 import { useCallback, useState } from "react";
 
+import {
+  describeUploadFailure,
+  putWithProgress,
+} from "@/components/admin/put-with-progress";
 import { requestAudioUpload } from "@/lib/admin/audio/audio-actions";
 import type { WorkFormDraft } from "@/lib/admin/form/work-form-draft";
 
@@ -66,34 +70,6 @@ function readDuration(file: File): Promise<number | null> {
       resolve(null);
     };
     audio.src = url;
-  });
-}
-
-/**
- * Envoie un fichier à l'URL signée, en suivant la progression.
- *
- * @param url - L'URL signée obtenue de l'action.
- * @param file - Le fichier à envoyer.
- * @param onProgress - Rappel de progression, en pourcentage.
- * @returns Vrai si R2 a accepté le fichier.
- */
-function putWithProgress(
-  url: string,
-  file: File,
-  onProgress: (percent: number) => void,
-): Promise<boolean> {
-  return new Promise((resolve) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open("PUT", url);
-    xhr.setRequestHeader("Content-Type", file.type);
-    xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable) {
-        onProgress(Math.round((event.loaded / event.total) * 100));
-      }
-    };
-    xhr.onload = () => resolve(xhr.status >= 200 && xhr.status < 300);
-    xhr.onerror = () => resolve(false);
-    xhr.send(file);
   });
 }
 
@@ -165,12 +141,15 @@ export function useAudioUpload(): AudioUpload {
         }));
       });
 
-      if (!envoye) {
+      if (!envoye.ok) {
         // Annonce volontairement différente des deux refus ci dessus : ici le
         // fichier était accepté, c'est le transfert qui a lâché.
         setUploads((etat) => ({
           ...etat,
-          [cellKey]: { progress: 0, error: "L'envoi a échoué, réessayez." },
+          [cellKey]: {
+            progress: 0,
+            error: describeUploadFailure(envoye.status),
+          },
         }));
         setAnnouncement(`Envoi de ${file.name} échoué.`);
         return null;
