@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { cookies } from "next/headers";
 import { UserRound } from "lucide-react";
 
 import { AccountMenu } from "@/components/auth/account-menu";
@@ -7,6 +8,11 @@ import { Link } from "@/i18n/navigation";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { cn } from "@/lib/utils";
 import { isAdmin } from "@/lib/admin/authorization";
+import {
+  DEFAULT_THEME,
+  THEME_COOKIE,
+  parseThemePreference,
+} from "@/lib/theme/theme-preference";
 
 /**
  * Emplacement compte de l'en tête, dont le contenu dépend de la session.
@@ -22,7 +28,20 @@ async function AccountSlot({ compact = false }: { compact?: boolean }) {
   const user = await getCurrentUser();
 
   if (user) {
-    return <AccountMenu name={user.name || user.email} admin={isAdmin(user)} />;
+    // Le réglage du thème vit dans ce menu, il n'est donc proposé qu'aux
+    // personnes connectées. Le cookie, lui, vaut pour tout le monde.
+    const cookieStore = await cookies();
+    const theme =
+      parseThemePreference(cookieStore.get(THEME_COOKIE)?.value) ??
+      DEFAULT_THEME;
+
+    return (
+      <AccountMenu
+        name={user.name || user.email}
+        admin={isAdmin(user)}
+        theme={theme}
+      />
+    );
   }
 
   return (

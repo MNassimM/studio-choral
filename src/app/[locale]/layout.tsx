@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { locale as rootLocale } from "next/root-params";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
@@ -11,8 +12,32 @@ import { CartAddPanel } from "@/components/cart/cart-add-panel";
 import { CartProvider } from "@/components/cart/cart-provider";
 import { CartReplaceDialog } from "@/components/cart/cart-replace-dialog";
 import { Footer } from "@/components/layout/footer";
+import { ThemeSystemSync } from "@/components/layout/theme-system-sync";
 import { routing } from "@/i18n/routing";
 import { DynamicRouteAlternatesProvider } from "@/components/layout/dynamic-route-alternates";
+import {
+  DEFAULT_THEME,
+  THEME_COOKIE,
+  parseThemePreference,
+  themeClass,
+  themeColorScheme,
+} from "@/lib/theme/theme-preference";
+import { cn } from "@/lib/utils";
+
+/**
+ * Applique le thème du système avant le premier rendu.
+ *
+ * @remarks
+ * Uniquement en « system » : le serveur ne peut pas connaître le réglage du
+ * visiteur. Le script est inséré dans le document plutôt que chargé, pour
+ * s'exécuter avant la peinture et éviter que la page apparaisse dans le
+ * mauvais thème.
+ *
+ * Il ne couvre que le chargement du document. Les rafraîchissements React,
+ * dont celui qui suit le choix dans le menu, sont repris par ThemeSystemSync :
+ * un script inséré par mise à jour du DOM ne s'exécute pas.
+ */
+const SCRIPT_THEME_SYSTEME = `(function(){try{var m=matchMedia("(prefers-color-scheme: dark)");var a=function(){var r=document.documentElement;r.classList.toggle("dark",m.matches);r.style.colorScheme=m.matches?"dark":"light"};a();m.addEventListener("change",a)}catch(e){}})()`;
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -53,11 +78,6 @@ export async function generateMetadata(): Promise<Metadata> {
 /**
  * Enveloppe commune à toutes les pages d'une locale.
  *
- * @remarks
- * Valide la locale demandée et bascule en 404 si elle est inconnue. Monte
- * ensuite les fournisseurs de traduction et de segments traduits, puis
- * l'en tête et le pied de page autour du contenu.
- *
  * @param children - Page rendue à l'intérieur du gabarit.
  * @returns Le document complet de la locale.
  */
@@ -69,12 +89,29 @@ export default async function RootLayout({
     notFound();
   }
 
+  const cookieStore = await cookies();
+  const theme =
+    parseThemePreference(cookieStore.get(THEME_COOKIE)?.value) ?? DEFAULT_THEME;
+
   return (
     <html
       lang={locale}
-      className={`${geistSans.variable} ${geistMono.variable}`+"overflow-auto scrollbar-thumb-primary scrollbar-track-backgroun"}
+      className={cn(
+        geistSans.variable,
+        geistMono.variable,
+        "overflow-auto scrollbar-thumb-primary scrollbar-track-background",
+        themeClass(theme),
+      )}
+      style={{ colorScheme: themeColorScheme(theme) }}
+      suppressHydrationWarning
     >
-      <body className="dark">
+      {theme === "system" ? (
+        <head>
+          <script dangerouslySetInnerHTML={{ __html: SCRIPT_THEME_SYSTEME }} />
+        </head>
+      ) : null}
+      <body>
+        {theme === "system" ? <ThemeSystemSync /> : null}
         <NextIntlClientProvider>
           <DynamicRouteAlternatesProvider>
             <CartProvider>
