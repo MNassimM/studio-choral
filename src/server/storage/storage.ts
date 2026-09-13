@@ -27,10 +27,14 @@ export const coverStorage: ObjectStorage = r2PublicStorage;
 export { coverUrl } from "@/server/storage/cover-url";
 
 export {
-  ALLOWED_EXTENSIONS,
   COVER_EXTENSIONS,
-  COVER_SEGMENT,
   MAX_COVER_BYTES,
+  type CoverExtension,
+} from "@/domain/cover/cover-rules";
+
+export {
+  ALLOWED_EXTENSIONS,
+  COVER_SEGMENT,
   MAX_UPLOAD_BYTES,
   PENDING_PREFIX,
   WORKS_PREFIX,
@@ -46,7 +50,6 @@ export {
   isValidKey,
   sanitizeSegment,
   type AllowedExtension,
-  type CoverExtension,
   type CoverLocation,
   type TrackLocation,
 } from "@/server/storage/keys";

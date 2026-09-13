@@ -15,7 +15,7 @@ import {
   findCatalogPage,
   type CatalogPage,
 } from "@/features/catalog/server/catalog-query";
-import { isKnownWorkLanguageCode } from "@/features/work/domain/work-language";
+import { translateWorkLanguageCode } from "@/features/work/domain/work-language";
 import { findMostPopularWorks } from "@/features/work/server/work-popularity";
 import type { AppLocale } from "@/i18n/routing";
 import { prisma } from "@/server/db/prisma";
@@ -124,7 +124,7 @@ async function loadCatalogPageData(
   // Repli sur le code brut si non répertorié dans messages/*.json (langue pas
   // encore documentée) - jamais d'erreur de type ni d'écran cassé.
   function translateWorkLanguage(code: string): string {
-    return isKnownWorkLanguageCode(code) ? tWorkLanguage(code) : code;
+    return translateWorkLanguageCode(code, (known) => tWorkLanguage(known));
   }
   const availableLanguages = distinctLanguageRows
     .map((row) => row.language!)

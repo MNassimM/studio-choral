@@ -1,3 +1,7 @@
+import {
+  COVER_EXTENSIONS,
+  type CoverExtension,
+} from "@/domain/cover/cover-rules";
 import type { AudioType } from "@/domain/types";
 
 /**
@@ -170,15 +174,6 @@ export function downloadPartLabel(
 
 /** Segment qui isole les couvertures dans le bucket public. */
 export const COVER_SEGMENT = "cover";
-
-/** Extensions d'image acceptées pour une couverture. */
-export const COVER_EXTENSIONS = ["jpg", "jpeg", "png", "webp"] as const;
-
-/** Une extension d'image acceptée. */
-export type CoverExtension = (typeof COVER_EXTENSIONS)[number];
-
-/** Taille maximale d'une couverture, en octets. */
-export const MAX_COVER_BYTES = 5 * 1024 * 1024;
 
 /**
  * Ce qui identifie une couverture, et donc sa clé définitive.

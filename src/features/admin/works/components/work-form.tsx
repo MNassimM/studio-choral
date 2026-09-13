@@ -34,7 +34,7 @@ import {
   type WorkFormValues,
 } from "@/features/admin/works/form/work-form-schema";
 import { expectedTrackCount } from "@/features/admin/works/domain/track-coverage";
-import { slugify } from "@/features/admin/works/server/work-products";
+import { slugify } from "@/shared/utils/slugify";
 import { cn } from "@/shared/utils/cn";
 
 /**

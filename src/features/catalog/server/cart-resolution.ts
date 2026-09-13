@@ -15,7 +15,7 @@ import {
 import { priceCart, type PricedProduct } from "@/domain/pricing/cart-pricing";
 import { composeProductDisplayName } from "@/domain/product/product-display-name";
 import { resolveWorkTranslation } from "@/features/work/domain/resolve-translation";
-import { isKnownVoiceCode } from "@/features/work/domain/voice-label";
+import { translateVoiceCode } from "@/features/work/domain/voice-label";
 import type { AppLocale } from "@/i18n/routing";
 import type { Grant, WorkAccessInput } from "@/domain/types";
 
@@ -119,7 +119,7 @@ export async function resolveCart(
    * @returns Le libellé affiché.
    */
   function voiceLabel(code: string): string {
-    return isKnownVoiceCode(code) ? t(`voice.${code}`) : code;
+    return translateVoiceCode(code, (known) => t(`voice.${known}`));
   }
 
   const pricedProducts = new Map<string, PricedProduct>();

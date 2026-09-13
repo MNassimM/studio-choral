@@ -12,7 +12,7 @@ import { Link, getPathname } from "@/i18n/navigation";
 import { routing, type AppLocale } from "@/i18n/routing";
 import { requireSession } from "@/features/auth/server/require-session";
 import { findLibraryWorks } from "@/features/library/server/library-works";
-import { isKnownVoiceCode } from "@/features/work/domain/voice-label";
+import { translateVoiceCode } from "@/features/work/domain/voice-label";
 import { cn } from "@/shared/utils/cn";
 
 const playfairDisplay = Playfair_Display({
@@ -80,7 +80,7 @@ export default async function LibraryPage() {
   const tWork = await getTranslations("work");
 
   const { rows, summary } = await findLibraryWorks(user.id, locale, (code) =>
-    isKnownVoiceCode(code) ? tWork(`voice.${code}`) : code,
+    translateVoiceCode(code, (known) => tWork(`voice.${known}`)),
   );
 
   const returnTo = getPathname({ href: "/bibliotheque", locale });

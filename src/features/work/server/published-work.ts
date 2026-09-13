@@ -7,12 +7,53 @@ import type { AppLocale } from "@/i18n/routing";
 import { prisma } from "@/server/db/prisma";
 
 /**
- * Résout un slug d'URL vers une œuvre publiée.
+ * Désigne l'œuvre visée par un slug d'URL.
  *
  * @remarks
  * Cherche d'abord une traduction pour la locale courante, puis retombe sur le
- * slug de référence. La clé de stockage des fichiers audio n'est jamais
- * sélectionnée, elle ne peut donc pas fuiter plus loin.
+ * slug de référence. Mémoïsée pour la requête : le layout et la page partagent
+ * cette recherche.
+ *
+ * @param slug - Slug demandé dans l'URL.
+ * @param locale - Locale d'interface active.
+ * @returns Le critère d'unicité de l'œuvre, par identifiant ou par slug.
+ */
+const findWorkWhereBySlug = cache(async (slug: string, locale: AppLocale) => {
+  const translation = await prisma.workTranslation.findFirst({
+    where: { locale, slug },
+    select: { workId: true },
+  });
+
+  return translation ? { id: translation.workId } : { slug };
+});
+
+/**
+ * Indique si un slug désigne une œuvre publiée.
+ *
+ * @remarks
+ * Vérification légère pour le layout de la fiche. Next précharge ce layout
+ * pour chaque lien visible vers une œuvre : il ne doit pas charger toute
+ * l'œuvre, seulement savoir si elle existe.
+ *
+ * @param slug - Slug demandé dans l'URL.
+ * @param locale - Locale d'interface active.
+ * @returns Vrai si l'œuvre existe et est publiée.
+ */
+const isPublishedWorkSlug = cache(async (slug: string, locale: AppLocale) => {
+  const work = await prisma.work.findUnique({
+    where: await findWorkWhereBySlug(slug, locale),
+    select: { isPublished: true },
+  });
+
+  return work?.isPublished === true;
+});
+
+/**
+ * Résout un slug d'URL vers une œuvre publiée.
+ *
+ * @remarks
+ * La clé de stockage des fichiers audio n'est jamais sélectionnée, elle ne
+ * peut donc pas fuiter plus loin.
  *
  * L'appel est mémoïsé pour la durée de la requête, les métadonnées et la page
  * partageant ainsi un seul aller retour vers la base.
@@ -23,13 +64,8 @@ import { prisma } from "@/server/db/prisma";
  */
 const findPublishedWorkBySlug = cache(
   async (slug: string, locale: AppLocale) => {
-    const translation = await prisma.workTranslation.findFirst({
-      where: { locale, slug },
-      select: { workId: true },
-    });
-
     const work = await prisma.work.findUnique({
-      where: translation ? { id: translation.workId } : { slug },
+      where: await findWorkWhereBySlug(slug, locale),
       include: {
         movements: {
           orderBy: { position: "asc" },
@@ -101,5 +137,9 @@ function resolvePublishedWorkTranslation(
   );
 }
 
-export { findPublishedWorkBySlug, resolvePublishedWorkTranslation };
+export {
+  findPublishedWorkBySlug,
+  isPublishedWorkSlug,
+  resolvePublishedWorkTranslation,
+};
 export type { WorkWithDetail };

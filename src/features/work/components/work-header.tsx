@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Playfair_Display } from "next/font/google";
 import { Music2 } from "lucide-react";
 
-import { isKnownWorkLanguageCode } from "@/features/work/domain/work-language";
+import { translateWorkLanguageCode } from "@/features/work/domain/work-language";
 import type { WorkWithDetail } from "@/features/work/server/published-work";
 import { Badge } from "@/shared/components/ui/badge";
 import { cn } from "@/shared/utils/cn";
@@ -34,7 +34,7 @@ async function WorkHeader({
   const t = await getTranslations("work");
 
   function translateWorkLanguage(code: string): string {
-    return isKnownWorkLanguageCode(code) ? t(`language.${code}`) : code;
+    return translateWorkLanguageCode(code, (known) => t(`language.${known}`));
   }
 
   return (

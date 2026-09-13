@@ -4,7 +4,7 @@ import { Playfair_Display } from "next/font/google";
 import { ChevronRight, Headphones, Music2 } from "lucide-react";
 
 import { coverUrl } from "@/server/storage/cover-url";
-import { isKnownWorkLanguageCode } from "@/features/work/domain/work-language";
+import { translateWorkLanguageCode } from "@/features/work/domain/work-language";
 
 import { WorkBadgeLabel } from "@/features/catalog/components/work-badge-label";
 import type { WorkBadge } from "@/features/catalog/domain/work-badge";
@@ -145,7 +145,7 @@ async function WorkCard({
   }
 
   function translateWorkLanguage(code: string): string {
-    return isKnownWorkLanguageCode(code) ? t(`language.${code}`) : code;
+    return translateWorkLanguageCode(code, (known) => t(`language.${known}`));
   }
 
   return (

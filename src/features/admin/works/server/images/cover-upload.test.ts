@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 import { validateCover } from "@/features/admin/works/server/images/cover-upload";
-import { MAX_COVER_BYTES } from "@/server/storage/keys";
+import { MAX_COVER_BYTES } from "@/domain/cover/cover-rules";
 
 console.log(
   "▶ src/features/admin/works/server/images/cover-upload.ts — validation d'un dépôt de couverture",

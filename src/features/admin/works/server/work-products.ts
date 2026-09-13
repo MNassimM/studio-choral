@@ -1,4 +1,5 @@
 import type { Prisma } from "@/generated/prisma/client";
+import { slugify } from "@/shared/utils/slugify";
 import {
   toCents,
   type WorkFormValues,
@@ -7,16 +8,6 @@ import {
 /**
  * Construction des mouvements et des offres d'une oeuvre.
  */
-
-/** Transforme un titre en slug d'URL, sans accent ni ponctuation. */
-export function slugify(title: string): string {
-  return title
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
 
 /** Rend des slugs uniques au sein d'une même oeuvre. */
 export function uniqueSlugs(titles: string[]): string[] {

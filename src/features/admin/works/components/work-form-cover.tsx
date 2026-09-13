@@ -13,7 +13,7 @@ import {
 } from "@/features/admin/works/components/work-form-fields";
 import { Button } from "@/shared/components/ui/button";
 import { requestCoverUpload } from "@/features/admin/works/server/images/cover-actions";
-import { COVER_EXTENSIONS, MAX_COVER_BYTES } from "@/server/storage/keys";
+import { COVER_EXTENSIONS, MAX_COVER_BYTES } from "@/domain/cover/cover-rules";
 import { cn } from "@/shared/utils/cn";
 
 /**

@@ -7,7 +7,7 @@ import { getUserGrants } from "@/features/catalog/server/access-grants";
 import { productToGrant } from "@/features/catalog/server/product-grant";
 import { buildWorkAccessInput } from "@/features/catalog/server/work-access-input";
 import type { AccessSidebar } from "@/features/work/components/access-sidebar";
-import { isKnownVoiceCode } from "@/features/work/domain/voice-label";
+import { translateVoiceCode } from "@/features/work/domain/voice-label";
 import {
   resolvePublishedWorkTranslation,
   type WorkWithDetail,
@@ -105,7 +105,7 @@ async function buildWorkDetailsData({
   // Libellé traduit d'un pupitre (repli sur le code brut si non connu) -
   // callback injecté dans le view-model, pas d'import direct de next-intl là-bas.
   function getVoiceLabel(code: string): string {
-    return isKnownVoiceCode(code) ? t(`voice.${code}`) : code;
+    return translateVoiceCode(code, (known) => t(`voice.${known}`));
   }
 
   const workId = work.id;

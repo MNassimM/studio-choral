@@ -16,7 +16,7 @@ import {
   toDownloadRow,
   type DownloadRowView,
 } from "@/features/work/domain/download-groups";
-import { isKnownVoiceCode } from "@/features/work/domain/voice-label";
+import { translateVoiceCode } from "@/features/work/domain/voice-label";
 
 /**
  * Chargement à la demande des fichiers d'une oeuvre de la bibliothèque.
@@ -94,7 +94,7 @@ export async function loadLibraryDownloads(
 
   const voiceCodeById = new Map(voices.map((voice) => [voice.id, voice.code]));
   const getVoiceLabel = (code: string) =>
-    isKnownVoiceCode(code) ? tWork(`voice.${code}`) : code;
+    translateVoiceCode(code, (known) => tWork(`voice.${known}`));
 
   // Les droits sont relus ici, jamais repris de la page : elle a pu être
   // rendue avant une révocation.

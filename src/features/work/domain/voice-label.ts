@@ -16,3 +16,18 @@ export function isKnownVoiceCode(
 ): code is keyof typeof frWork.voice {
   return KNOWN_VOICE_CODES.has(code);
 }
+
+/**
+ * Libellé affiché d'un pupitre : sa traduction si elle existe, sinon le
+ * code brut, pour qu'un pupitre pas encore traduit ne casse pas l'écran.
+ *
+ * @param code - Code du pupitre, tel que stocké en base.
+ * @param translate - Traduit un code connu.
+ * @returns Le libellé à afficher.
+ */
+export function translateVoiceCode(
+  code: string,
+  translate: (knownCode: keyof typeof frWork.voice) => string,
+): string {
+  return isKnownVoiceCode(code) ? translate(code) : code;
+}

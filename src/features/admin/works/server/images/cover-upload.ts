@@ -1,9 +1,9 @@
 import {
   COVER_EXTENSIONS,
   MAX_COVER_BYTES,
-  coverExtensionOf,
   type CoverExtension,
-} from "@/server/storage/keys";
+} from "@/domain/cover/cover-rules";
+import { coverExtensionOf } from "@/server/storage/keys";
 
 /**
  * Règles de validation d'un dépôt d'image de couverture, en fonctions pures
