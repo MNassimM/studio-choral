@@ -7,25 +7,25 @@ import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import "../globals.css";
 
-import { Header } from "@/components/layout/header";
-import { CartAddPanel } from "@/components/cart/cart-add-panel";
-import { CartProvider } from "@/components/cart/cart-provider";
-import { getCurrentUser } from "@/lib/auth/current-user";
-import { serializeCart } from "@/lib/cart/cart-serialization";
-import { readUserCart } from "@/lib/cart/cart-store";
-import { CartReplaceDialog } from "@/components/cart/cart-replace-dialog";
-import { Footer } from "@/components/layout/footer";
-import { ThemeSync } from "@/components/layout/theme-sync";
+import { Header } from "@/shared/components/site/header";
+import { CartAddPanel } from "@/features/cart/components/cart-add-panel";
+import { CartProvider } from "@/features/cart/components/cart-provider";
+import { getCurrentUser } from "@/features/auth/server/current-user";
+import { serializeCart } from "@/features/cart/domain/serialization";
+import { readUserCart } from "@/features/cart/server/store";
+import { CartReplaceDialog } from "@/features/cart/components/cart-replace-dialog";
+import { Footer } from "@/shared/components/site/footer";
+import { ThemeSync } from "@/shared/components/site/theme-dom-sync";
 import { routing } from "@/i18n/routing";
-import { DynamicRouteAlternatesProvider } from "@/components/layout/dynamic-route-alternates";
+import { DynamicRouteAlternatesProvider } from "@/shared/i18n/route-alternates-context";
 import {
   DEFAULT_THEME,
   THEME_COOKIE,
   parseThemePreference,
   themeClass,
   themeColorScheme,
-} from "@/lib/theme/theme-preference";
-import { cn } from "@/lib/utils";
+} from "@/shared/theme/theme-preference";
+import { cn } from "@/shared/utils/cn";
 
 /**
  * Applique le thème du système avant le premier rendu.

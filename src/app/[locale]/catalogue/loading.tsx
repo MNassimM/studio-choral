@@ -1,6 +1,6 @@
-import { Container } from "@/components/layout/container";
-import { LoadingStatus } from "@/components/layout/loading-status";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Container } from "@/shared/components/site/container";
+import { LoadingStatus } from "@/shared/components/site/loading-status";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 
 /**
  * Squelette du catalogue, affiché en arrivant sur la page.

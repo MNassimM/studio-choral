@@ -1,4 +1,4 @@
-import { handlers } from "@/lib/auth/config";
+import { handlers } from "@/features/auth/server/config";
 
 /**
  * Route handler Auth.js.

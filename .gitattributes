@@ -1,0 +1,13 @@
+# Fins de ligne Unix partout, quel que soit le réglage Git du poste.
+# Prettier les exige : sans cette règle, core.autocrlf=true sous Windows
+# réécrit les fichiers en CRLF et format:check échoue.
+* text=auto eol=lf
+
+# Binaires : jamais convertis.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.wav binary
+*.mp3 binary

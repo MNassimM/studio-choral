@@ -4,10 +4,10 @@ import { useEffect } from "react";
 import { RotateCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { Container } from "@/components/layout/container";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Container } from "@/shared/components/site/container";
+import { Button, buttonVariants } from "@/shared/components/ui/button";
 import { Link } from "@/i18n/navigation";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/utils/cn";
 
 /**
  * Filet de sécurité des pages d'une locale.

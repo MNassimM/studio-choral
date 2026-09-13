@@ -69,20 +69,20 @@ model Work {
   /// Courant musical. NULL si l'œuvre est en cours de catalogage.
   period           MusicalPeriod?
   /// Formation vocale (SATB, SATB div., SSAA...), saisie à la main -
-  /// jamais déduite des AudioFile. Voir src/lib/works/voicing.ts.
+  /// jamais déduite des AudioFile. Voir src/features/work/domain/voicing.ts.
   voicing          String?
   /// Vrai si chaque mouvement de l'oeuvre attend une piste d'accompagnement.
   hasAccompaniment Boolean        @default(false) @map("has_accompaniment")
   /// Langue du texte CHANTÉ (code ISO 639-1 : "fr", "la", "de", "en", "it"...),
   /// sans AUCUN rapport avec la langue d'interface du site. Voir
-  /// src/lib/works/languages.ts pour les libellés français.
+  /// src/features/work/domain/work-language.ts pour les libellés français.
   language         String?
   isPublished      Boolean        @default(false) @map("is_published")
   /// Date de PREMIÈRE mise en vente, posée par publishWork et conservée par
   /// unpublishWork. Distincte de createdAt, qui date la saisie du brouillon :
   /// une oeuvre préparée en mars et publiée en juin est une nouveauté en
   /// juin. Le comportement en cas de republication se règle dans
-  /// src/lib/works/publication.ts.
+  /// src/features/work/domain/publication.ts.
   publishedAt      DateTime?      @map("published_at")
   createdAt        DateTime       @default(now()) @map("created_at")
   updatedAt        DateTime       @updatedAt @map("updated_at")
@@ -104,7 +104,7 @@ model WorkTranslation {
   id               String  @id @default(cuid())
   workId           String  @map("work_id")
   /// Code de langue d'interface (ex. "en") - sans rapport avec Work.language
-  /// (la langue du texte CHANTÉ). Voir src/lib/works/resolve-translation.ts.
+  /// (la langue du texte CHANTÉ). Voir src/features/work/domain/resolve-translation.ts.
   locale           String
   /// Slug localisé (ex. "mass-in-g-major"). Résolution : chercher d'abord ici
   /// pour la locale demandée, retomber sur Work.slug si absent.
@@ -178,7 +178,7 @@ model AudioFile {
   @@map("audio_files")
 }
 
-// Une offre achetable - jamais un fichier audio. Voir src/lib/products/invariants.ts
+// Une offre achetable - jamais un fichier audio. Voir src/domain/product/invariants.ts
 // pour les règles de cohérence scope/coverage <-> movementId/voiceId que Postgres
 // ne peut pas exprimer nativement.
 model Product {
@@ -193,7 +193,7 @@ model Product {
   priceCents    Int           @map("price_cents")
   currency      String        @default("EUR")
   /// Vrai quand l'offre est couverte par ses pistes audio, donc vendable.
-  /// Calculé, jamais posé à la main. Voir src/lib/admin/sellability/product-activation.ts.
+  /// Calculé, jamais posé à la main. Voir src/features/admin/works/server/sellability/product-activation.ts.
   isActive      Boolean       @default(true) @map("is_active")
   /// Vrai quand l'offre n'est plus engendrée par le catalogue, parce que son
   /// pupitre ou son mouvement a été retiré. Elle n'est jamais supprimée, un
@@ -304,14 +304,14 @@ model VerificationToken {
 /// offre (Product) achetée, offerte ou obtenue par code promo. Sa structure
 /// reprend volontairement celle de Product (mêmes scope/coverage,
 /// mêmes règles de cohérence avec movementId/voiceId - voir
-/// src/lib/library-items/invariants.ts, calqué sur
-/// src/lib/products/invariants.ts).
+/// src/domain/library/invariants.ts, calqué sur
+/// src/domain/product/invariants.ts).
 ///
 /// DÉDUPLICATION SÉMANTIQUE NON TRAITÉE ICI : posséder « Alto - œuvre
 /// entière » (scope WORK) rend redondant « Alto - Kyrie » (scope MOVEMENT),
 /// mais aucune contrainte SQL ne peut exprimer cette relation d'inclusion.
 /// Cette déduplication relève du code de lecture des droits (prochaine
-/// étape, src/lib/access), pas de ce modèle ni de sa migration.
+/// étape, src/domain/access), pas de ce modèle ni de sa migration.
 model LibraryItem {
   id         String        @id @default(cuid())
   userId     String        @map("user_id")

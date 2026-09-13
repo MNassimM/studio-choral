@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { locale as rootLocale } from "next/root-params";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/utils/cn";
 
-import { CartPageContent } from "@/components/cart/cart-page-content";
-import { Container } from "@/components/layout/container";
+import { CartPageContent } from "@/features/cart/components/cart-page-content";
+import { Container } from "@/shared/components/site/container";
 import { getPathname, Link } from "@/i18n/navigation";
 import { routing, type AppLocale } from "@/i18n/routing";
 import { Playfair_Display } from "next/font/google";

@@ -43,7 +43,7 @@ next-env.d.ts
 
 /src/generated/prisma
 
-# fichiers audio de démonstration (générés, voir scripts/generate-demo-audio.ts)
+# fichiers audio de démonstration (générés, voir scripts/demo/generate-audio-fixtures.ts)
 /public/demo-audio
 
 prompt.md

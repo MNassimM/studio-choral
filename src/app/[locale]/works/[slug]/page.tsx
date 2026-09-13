@@ -9,33 +9,33 @@ import { Music2 } from "lucide-react";
 import Image from "next/image";
 import { after } from "next/server";
 
-import { Container } from "@/components/layout/container";
-import { Badge } from "@/components/ui/badge";
-import { AccessSidebar } from "@/components/work/access-sidebar";
-import { CollapsibleAccessPanel } from "@/components/work/collapsible-access-panel";
-import { StudioPlaceholder } from "@/components/work/studio-placeholder";
-import { DownloadFileGrid } from "@/components/work/download-file-grid";
-import { MovementPanelSwitcher } from "@/components/work/movement-panel-switcher";
-import { OfferSelector } from "@/components/work/offer-selector";
-import { SyncDynamicRouteAlternates } from "@/components/layout/dynamic-route-alternates";
+import { Container } from "@/shared/components/site/container";
+import { Badge } from "@/shared/components/ui/badge";
+import { AccessSidebar } from "@/features/work/components/access-sidebar";
+import { CollapsibleAccessPanel } from "@/features/work/components/collapsible-access-panel";
+import { StudioPlaceholder } from "@/features/work/components/studio-placeholder";
+import { DownloadFileGrid } from "@/features/work/components/download-file-grid";
+import { MovementPanelSwitcher } from "@/features/work/components/movement-panel-switcher";
+import { OfferSelector } from "@/features/work/components/offer-selector";
+import { SyncDynamicRouteAlternates } from "@/shared/i18n/route-alternates-context";
 import { Link, getPathname } from "@/i18n/navigation";
 import { routing, type AppLocale } from "@/i18n/routing";
-import { cn } from "@/lib/utils";
-import { prisma } from "@/lib/db/prisma";
-import { resolveWorkTranslation } from "@/lib/works/resolve-translation";
-import { isKnownWorkLanguageCode } from "@/lib/works/work-language";
-import { coverUrl } from "@/lib/storage/cover-url";
-import { recordWorkView } from "@/lib/works/work-views";
-import { isKnownVoiceCode } from "@/lib/works/voice-label";
-import { buildWorkPageViewModel } from "@/lib/works/work-page-view-model";
-import { getCurrentUser } from "@/lib/auth/current-user";
-import { getUserGrants } from "@/lib/catalog/access-grants";
-import { buildWorkAccessInput } from "@/lib/catalog/work-access-input";
-import { productToGrant } from "@/lib/catalog/product-grant";
-import { absorbs } from "@/lib/access/grants";
-import { resolveWorkAccess } from "@/lib/access/rules";
-import { composeProductDisplayName } from "@/lib/products/product-display-name";
-import type { Grant, WorkAccess } from "@/types/domain";
+import { cn } from "@/shared/utils/cn";
+import { prisma } from "@/server/db/prisma";
+import { resolveWorkTranslation } from "@/features/work/domain/resolve-translation";
+import { isKnownWorkLanguageCode } from "@/features/work/domain/work-language";
+import { coverUrl } from "@/server/storage/cover-url";
+import { recordWorkView } from "@/features/work/server/work-popularity";
+import { isKnownVoiceCode } from "@/features/work/domain/voice-label";
+import { buildWorkPageViewModel } from "@/features/work/server/work-details-view-model";
+import { getCurrentUser } from "@/features/auth/server/current-user";
+import { getUserGrants } from "@/features/catalog/server/access-grants";
+import { buildWorkAccessInput } from "@/features/catalog/server/work-access-input";
+import { productToGrant } from "@/features/catalog/server/product-grant";
+import { absorbs } from "@/domain/access/grant-dedupe";
+import { resolveWorkAccess } from "@/domain/access/work-access";
+import { composeProductDisplayName } from "@/domain/product/product-display-name";
+import type { Grant, WorkAccess } from "@/domain/types";
 
 // Page centrale du produit : son contenu dépend de l'utilisateur courant
 // (droits résolus à chaque requête). Jamais de rendu statique ni d'ISR ici.
@@ -244,7 +244,7 @@ export default async function WorkPage(
   const tNav = await getTranslations("navigation");
   const format = await getFormatter();
 
-  // Construit WorkAccessInput du domaine (src/types/domain.ts) à partir de la Work
+  // Construit WorkAccessInput du domaine (src/domain/types.ts) à partir de la Work
   const workAccessInput = buildWorkAccessInput(
     work.id,
     work.movements,

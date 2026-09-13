@@ -1,8 +1,8 @@
 import { getTranslations } from "next-intl/server";
 
-import { Container } from "@/components/layout/container";
-import { Badge } from "@/components/ui/badge";
-import { getCurrentUser } from "@/lib/auth/current-user";
+import { Container } from "@/shared/components/site/container";
+import { Badge } from "@/shared/components/ui/badge";
+import { getCurrentUser } from "@/features/auth/server/current-user";
 
 /**
  * Espace personnel de l'utilisateur.

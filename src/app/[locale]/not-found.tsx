@@ -1,9 +1,9 @@
 import { getTranslations } from "next-intl/server";
 
-import { Container } from "@/components/layout/container";
+import { Container } from "@/shared/components/site/container";
 import { Link } from "@/i18n/navigation";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/shared/components/ui/button";
+import { cn } from "@/shared/utils/cn";
 
 // Sans ce fichier DANS le segment [locale], une 404 en anglais afficherait le
 // texte français du not-found.tsx par défaut de la racine de l'app.

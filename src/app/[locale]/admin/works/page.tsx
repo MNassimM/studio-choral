@@ -9,14 +9,14 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 
-import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Badge } from "@/shared/components/ui/badge";
+import { buttonVariants } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
 import { Link } from "@/i18n/navigation";
-import { computeTrackCoverage } from "@/lib/admin/sellability/track-coverage";
-import { prisma } from "@/lib/db/prisma";
-import { coverUrl } from "@/lib/storage/cover-url";
-import { cn } from "@/lib/utils";
+import { computeTrackCoverage } from "@/features/admin/works/domain/track-coverage";
+import { prisma } from "@/server/db/prisma";
+import { coverUrl } from "@/server/storage/cover-url";
+import { cn } from "@/shared/utils/cn";
 
 // Dépend du rôle et montre des brouillons, donc jamais de cache.
 export const dynamic = "force-dynamic";

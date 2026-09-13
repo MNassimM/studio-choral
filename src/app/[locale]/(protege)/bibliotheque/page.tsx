@@ -4,16 +4,16 @@ import { locale as rootLocale } from "next/root-params";
 import { Playfair_Display } from "next/font/google";
 import { BookOpen, Download, Music2 } from "lucide-react";
 
-import { Container } from "@/components/layout/container";
-import { LibraryList } from "@/components/library/library-list";
-import { LibraryWorkCard } from "@/components/library/library-work-card";
-import { buttonVariants } from "@/components/ui/button";
+import { Container } from "@/shared/components/site/container";
+import { LibraryList } from "@/features/library/components/library-list";
+import { LibraryWorkCard } from "@/features/library/components/library-work-card";
+import { buttonVariants } from "@/shared/components/ui/button";
 import { Link, getPathname } from "@/i18n/navigation";
 import { routing, type AppLocale } from "@/i18n/routing";
-import { requireSession } from "@/lib/auth/require-session";
-import { findLibraryWorks } from "@/lib/library/library-works";
-import { isKnownVoiceCode } from "@/lib/works/voice-label";
-import { cn } from "@/lib/utils";
+import { requireSession } from "@/features/auth/server/require-session";
+import { findLibraryWorks } from "@/features/library/server/library-works";
+import { isKnownVoiceCode } from "@/features/work/domain/voice-label";
+import { cn } from "@/shared/utils/cn";
 
 const playfairDisplay = Playfair_Display({
   subsets: ["latin"],

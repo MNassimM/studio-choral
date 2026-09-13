@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { locale as rootLocale } from "next/root-params";
 
-import { Container } from "@/components/layout/container";
-import { SignInForm } from "@/components/auth/sign-in-form";
-import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
-import { getCurrentUser } from "@/lib/auth/current-user";
-import { isGoogleSignInEnabled } from "@/lib/auth/env";
-import { safeRedirectTarget } from "@/lib/auth/redirect-target";
+import { Container } from "@/shared/components/site/container";
+import { SignInForm } from "@/features/auth/components/sign-in-form";
+import { GoogleSignInButton } from "@/features/auth/components/google-sign-in-button";
+import { getCurrentUser } from "@/features/auth/server/current-user";
+import { isGoogleSignInEnabled } from "@/features/auth/server/env";
+import { safeRedirectTarget } from "@/features/auth/server/redirect-target";
 import { redirect as redirectToPath } from "next/navigation";
 
 import { getPathname } from "@/i18n/navigation";

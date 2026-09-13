@@ -1,4 +1,4 @@
-import { requireSession } from "@/lib/auth/require-session";
+import { requireSession } from "@/features/auth/server/require-session";
 
 /**
  * Toutes les pages de ce groupe dépendent de la session, aucune ne peut donc

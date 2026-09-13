@@ -3,9 +3,9 @@
 import { useEffect } from "react";
 import { RotateCcw } from "lucide-react";
 
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/shared/components/ui/button";
 import { Link } from "@/i18n/navigation";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/utils/cn";
 
 /**
  * Filet de sécurité des pages d'administration.

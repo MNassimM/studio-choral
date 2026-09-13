@@ -7,9 +7,9 @@ import {
   DEMO_LIBRARY_ITEMS,
   DEMO_USERS,
   DEMO_VOICES,
-} from "../src/lib/demo/dataset";
-import { assertValidLibraryItem } from "../src/lib/library-items/invariants";
-import { assertValidProduct } from "../src/lib/products/invariants";
+} from "../src/dev/demo-data";
+import { assertValidLibraryItem } from "../src/domain/library/invariants";
+import { assertValidProduct } from "../src/domain/product/invariants";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });

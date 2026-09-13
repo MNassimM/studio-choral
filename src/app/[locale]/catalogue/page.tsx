@@ -6,37 +6,37 @@ import { Playfair_Display } from "next/font/google";
 import { BookOpen, Headphones, Info, Music2, Users2 } from "lucide-react";
 
 // Import de composants partagés
-import { Container } from "@/components/layout/container";
-import { WorkCard } from "@/components/catalog/work-card";
-import { WorkTableRow } from "@/components/catalog/work-table-row";
-import { CatalogSearchForm } from "@/components/catalog/catalog-search-form";
+import { Container } from "@/shared/components/site/container";
+import { WorkCard } from "@/features/catalog/components/work-card";
+import { WorkTableRow } from "@/features/catalog/components/work-table-row";
+import { CatalogSearchForm } from "@/features/catalog/components/catalog-search-form";
 import {
   CatalogActiveFilters,
   type ActiveFilterPill,
-} from "@/components/catalog/catalog-active-filters";
+} from "@/features/catalog/components/active-filters";
 import {
   CatalogFiltersButton,
   CatalogFiltersPanel,
   type FilterCategory,
-} from "@/components/catalog/catalog-filters";
-import { SortSelect } from "@/components/catalog/catalog-controls";
-import { CatalogPagination } from "@/components/catalog/catalog-pagination";
+} from "@/features/catalog/components/catalog-filter-panel";
+import { SortSelect } from "@/features/catalog/components/catalog-controls";
+import { CatalogPagination } from "@/features/catalog/components/catalog-pagination";
 import {
   CatalogPendingProvider,
   CatalogResults,
-} from "@/components/catalog/catalog-pending";
+} from "@/features/catalog/components/catalog-pending-results";
 import {
   CATALOG_VIEW_COOKIE,
   DEFAULT_CATALOG_VIEW,
   parseCatalogView,
   type CatalogView,
-} from "@/lib/catalog/view-preference";
-import { PERIOD_OPTIONS } from "@/components/catalog/catalog-options";
-import { CatalogViewToggle } from "@/components/catalog/catalog-view-toggle";
-import { buttonVariants } from "@/components/ui/button";
+} from "@/features/catalog/domain/view-preference";
+import { PERIOD_OPTIONS } from "@/features/catalog/domain/catalog-options";
+import { CatalogViewToggle } from "@/features/catalog/components/catalog-view-toggle";
+import { buttonVariants } from "@/shared/components/ui/button";
 
 // Import de fonctions utilitaires
-import { prisma } from "@/lib/db/prisma";
+import { prisma } from "@/server/db/prisma";
 import {
   PAGE_PARAM,
   catalogHref,
@@ -44,14 +44,17 @@ import {
   parseCatalogParams,
   parsePage,
   type RawSearchParams,
-} from "@/lib/catalog/catalog-params";
-import { findCatalogPage } from "@/lib/catalog/catalog-query";
-import { MOST_POPULAR_COUNT, resolveWorkBadge } from "@/lib/catalog/work-badge";
-import { findMostPopularWorks } from "@/lib/works/work-views";
+} from "@/features/catalog/domain/catalog-params";
+import { findCatalogPage } from "@/features/catalog/server/catalog-query";
+import {
+  MOST_POPULAR_COUNT,
+  resolveWorkBadge,
+} from "@/features/catalog/domain/work-badge";
+import { findMostPopularWorks } from "@/features/work/server/work-popularity";
 import { Link, getPathname, redirect } from "@/i18n/navigation";
 import { routing, type AppLocale } from "@/i18n/routing";
-import { isKnownWorkLanguageCode } from "@/lib/works/work-language";
-import { cn } from "@/lib/utils";
+import { isKnownWorkLanguageCode } from "@/features/work/domain/work-language";
+import { cn } from "@/shared/utils/cn";
 
 // Rendue à chaque requête : ses résultats viennent des paramètres d'URL, et sa
 // vue du cookie de préférence, une API liée à la requête qui interdit tout

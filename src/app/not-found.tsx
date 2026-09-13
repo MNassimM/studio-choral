@@ -1,6 +1,6 @@
-import { Container } from "@/components/layout/container";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { Container } from "@/shared/components/site/container";
+import { buttonVariants } from "@/shared/components/ui/button";
+import { cn } from "@/shared/utils/cn";
 import "./globals.css";
 import { Link } from "@/i18n/navigation";
 

@@ -24,11 +24,11 @@ import {
 } from "lucide-react";
 
 import library from "@/assets/library.png";
-import { Container } from "@/components/layout/container";
-import { buttonVariants } from "@/components/ui/button";
+import { Container } from "@/shared/components/site/container";
+import { buttonVariants } from "@/shared/components/ui/button";
 import { Link, getPathname } from "@/i18n/navigation";
 import { routing, type AppLocale } from "@/i18n/routing";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/utils/cn";
 
 // Police serif propre à cette page, pour ses grands titres éditoriaux. Le
 // reste du site garde Geist.

@@ -28,7 +28,7 @@ const handleI18nRouting = createMiddleware(routing);
  * placer la gestion de session, et la stratégie de session du projet étant en
  * base, une vérification ici imposerait une requête SQL sur chaque page, y
  * compris publiques. La garde vit donc dans le rendu, voir
- * src/lib/auth/require-session.ts.
+ * src/features/auth/server/require-session.ts.
  *
  * Le seul ajout au comportement de next-intl est l'en tête de chemin. Il est
  * posé sur la réponse que next-intl a construite plutôt que sur une réponse

@@ -3,12 +3,12 @@ import { getTranslations } from "next-intl/server";
 import { locale as rootLocale } from "next/root-params";
 import { MailCheck } from "lucide-react";
 
-import { Container } from "@/components/layout/container";
-import { buttonVariants } from "@/components/ui/button";
+import { Container } from "@/shared/components/site/container";
+import { buttonVariants } from "@/shared/components/ui/button";
 import { Link, getPathname } from "@/i18n/navigation";
 import { routing, type AppLocale } from "@/i18n/routing";
-import { MAGIC_LINK_MAX_AGE_SECONDS } from "@/lib/auth/env";
-import { cn } from "@/lib/utils";
+import { MAGIC_LINK_MAX_AGE_SECONDS } from "@/features/auth/server/env";
+import { cn } from "@/shared/utils/cn";
 
 /**
  * Construit les métadonnées de la page de confirmation d'envoi.

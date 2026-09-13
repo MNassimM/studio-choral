@@ -6,7 +6,7 @@ import type { DefaultSession } from "next-auth";
  * @remarks
  * Auth.js n'inclut pas l'identifiant de l'utilisateur dans Session.user par défaut.
  *
- * Le callback session() défini dans src/lib/auth/config.ts ajoute cet identifiant à partir de la base de données.
+ * Le callback session() défini dans src/features/auth/server/config.ts ajoute cet identifiant à partir de la base de données.
  * Cette déclaration permet à TypeScript de connaître cette propriété supplémentaire dans l'ensemble de l'application.
  */
 declare module "next-auth" {

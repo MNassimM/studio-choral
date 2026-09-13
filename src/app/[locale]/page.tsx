@@ -4,21 +4,24 @@ import { locale as rootLocale } from "next/root-params";
 import { Playfair_Display } from "next/font/google";
 import { ChevronRight, Compass, Music2, Repeat, Search } from "lucide-react";
 
-import { Container } from "@/components/layout/container";
-import { WorkCard } from "@/components/catalog/work-card";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import { buttonVariants } from "@/components/ui/button";
-import { MOST_POPULAR_COUNT, resolveWorkBadge } from "@/lib/catalog/work-badge";
-import { findMostPopularWorks } from "@/lib/works/work-views";
+import { Container } from "@/shared/components/site/container";
+import { WorkCard } from "@/features/catalog/components/work-card";
+import { Input } from "@/shared/components/ui/input";
+import { Separator } from "@/shared/components/ui/separator";
+import { buttonVariants } from "@/shared/components/ui/button";
+import {
+  MOST_POPULAR_COUNT,
+  resolveWorkBadge,
+} from "@/features/catalog/domain/work-badge";
+import { findMostPopularWorks } from "@/features/work/server/work-popularity";
 import { Link, getPathname } from "@/i18n/navigation";
 import { routing, type AppLocale } from "@/i18n/routing";
-import { cn } from "@/lib/utils";
-import { prisma } from "@/lib/db/prisma";
+import { cn } from "@/shared/utils/cn";
+import { prisma } from "@/server/db/prisma";
 import {
   buildWorkCardInclude,
   deriveWorkCardData,
-} from "@/lib/catalog/work-card-data";
+} from "@/features/catalog/server/work-card-view-model";
 
 // Police serif locale à cette page, pour les grands titres éditoriaux - le
 // reste du site (Header, Footer, composants partagés) reste en Geist.
