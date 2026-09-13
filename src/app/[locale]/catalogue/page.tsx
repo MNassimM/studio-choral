@@ -22,6 +22,10 @@ import {
 import { SortSelect } from "@/components/catalog/catalog-controls";
 import { CatalogPagination } from "@/components/catalog/catalog-pagination";
 import {
+  CatalogPendingProvider,
+  CatalogResults,
+} from "@/components/catalog/catalog-pending";
+import {
   CATALOG_VIEW_COOKIE,
   DEFAULT_CATALOG_VIEW,
   parseCatalogView,
@@ -318,157 +322,169 @@ export default async function CataloguePage(
   return (
     <>
       <section className="max-w-7xl mx-auto bg-background">
-        <Container className="flex flex-col gap-8 pb-12 sm:pb-16 pt-2 sm:pt-6">
-          <nav
-            aria-label={tCommon("breadcrumbAriaLabel")}
-            className="text-sm text-muted-foreground"
-          >
-            <Link href="/" className="hover:text-primary !underline">
-              {tCommon("breadcrumbHome")}
-            </Link>
-            <span className="mx-2">-{">"}</span>
-            <span aria-current="page" className="text-foreground">
-              {t("title")}
-            </span>
-          </nav>
-
-          <div className="flex flex-col gap-3">
-            <h1
-              className={cn(
-                "text-3xl tracking-tight sm:text-4xl",
-                playfairDisplay.className,
-              )}
+        <CatalogPendingProvider>
+          <Container className="flex flex-col gap-8 pb-12 sm:pb-16 pt-2 sm:pt-6">
+            <nav
+              aria-label={tCommon("breadcrumbAriaLabel")}
+              className="text-sm text-muted-foreground"
             >
-              {t("title")}
-            </h1>
-            <p className="max-w-2xl text-muted-foreground">{t("intro")}</p>
-          </div>
+              <Link href="/" className="hover:text-primary !underline">
+                {tCommon("breadcrumbHome")}
+              </Link>
+              <span className="mx-2">-{">"}</span>
+              <span aria-current="page" className="text-foreground">
+                {t("title")}
+              </span>
+            </nav>
 
-          {/* Statistiques globales du catalogue, avant filtrage */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <StatBox
-              icon={BookOpen}
-              value={String(worksCount)}
-              label={t("statWorksAvailable")}
-            />
-            <StatBox
-              icon={Users2}
-              value={String(composers.length)}
-              label={t("statComposers")}
-            />
-            <StatBox
-              icon={Music2}
-              value={String(audioFilesCount)}
-              label={t("statAudioFiles")}
-            />
-            {/*
+            <div className="flex flex-col gap-3">
+              <h1
+                className={cn(
+                  "text-3xl tracking-tight sm:text-4xl",
+                  playfairDisplay.className,
+                )}
+              >
+                {t("title")}
+              </h1>
+              <p className="max-w-2xl text-muted-foreground">{t("intro")}</p>
+            </div>
+
+            {/* Statistiques globales du catalogue, avant filtrage */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <StatBox
+                icon={BookOpen}
+                value={String(worksCount)}
+                label={t("statWorksAvailable")}
+              />
+              <StatBox
+                icon={Users2}
+                value={String(composers.length)}
+                label={t("statComposers")}
+              />
+              <StatBox
+                icon={Music2}
+                value={String(audioFilesCount)}
+                label={t("statAudioFiles")}
+              />
+              {/*
             <StatBox
               icon={Music2}
               value={t("statVoicingValue")}
               label={t("statVoicingLabel")}
             />*/}
-            <StatBox
-              icon={Headphones}
-              value={t("statAudioValue")}
-              label={t("statAudioLabel")}
-            />
-          </div>
-
-          {/* Recherche, filtres (panneau) et bascule grille/tableau */}
-          <div className="flex flex-col gap-4">
-            <CatalogFiltersPanel
-              key={[...periods, ...voicings, ...languages].join("|")}
-              categories={filterCategories}
-              activePeriods={periods}
-              activeVoicings={voicings}
-              activeLanguages={languages}
-            >
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <CatalogSearchForm
-                  q={q}
-                  sort={sort}
-                  periods={periods}
-                  voicings={voicings}
-                  languages={languages}
-                  locale={locale}
-                />
-                <div className="flex flex-wrap items-center gap-2">
-                  <SortSelect value={sort} />
-                  {filterCategories.length > 0 ? (
-                    <CatalogFiltersButton />
-                  ) : null}
-                  <CatalogViewToggle view={view} />
-                </div>
-              </div>
-            </CatalogFiltersPanel>
-
-            <CatalogActiveFilters
-              pills={activeFilterPills}
-              currentParams={rawSearchParams}
-            />
-          </div>
-
-          {works.length === 0 ? (
-            <p className="py-16 text-center text-muted-foreground">
-              {t("emptyState")}
-            </p>
-          ) : view === "grid" ? (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {works.map((work) => (
-                <WorkCard key={work.slug} work={work} badge={badgeFor(work)} />
-              ))}
+              <StatBox
+                icon={Headphones}
+                value={t("statAudioValue")}
+                label={t("statAudioLabel")}
+              />
             </div>
-          ) : (
-            <div className="overflow-x-auto rounded-xl border border-border">
-              <table className="w-full text-left text-sm">
-                <thead className="border-b border-border bg-secondary/40 text-xs tracking-wide text-muted-foreground uppercase">
-                  <tr>
-                    <th className="py-3 pr-4 pl-4 font-medium">
-                      {t("tableVisual")}
-                    </th>
-                    <th className="py-3 pr-4 font-medium">{t("tableTitle")}</th>
-                    <th className="py-3 pr-4 font-medium">
-                      {t("tableComposer")}
-                    </th>
-                    <th className="py-3 pr-4 font-medium">
-                      {t("tableVoicing")}
-                    </th>
-                    <th className="py-3 pr-4 font-medium">
-                      {t("tableMovements")}
-                    </th>
-                    <th className="py-3 pr-4 font-medium">{t("tablePrice")}</th>
-                  </tr>
-                </thead>
-                <tbody>
+
+            {/* Recherche, filtres (panneau) et bascule grille/tableau */}
+            <div className="flex flex-col gap-4">
+              <CatalogFiltersPanel
+                key={[...periods, ...voicings, ...languages].join("|")}
+                categories={filterCategories}
+                activePeriods={periods}
+                activeVoicings={voicings}
+                activeLanguages={languages}
+              >
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <CatalogSearchForm
+                    q={q}
+                    sort={sort}
+                    periods={periods}
+                    voicings={voicings}
+                    languages={languages}
+                    locale={locale}
+                  />
+                  <div className="flex flex-wrap items-center gap-2">
+                    <SortSelect value={sort} />
+                    {filterCategories.length > 0 ? (
+                      <CatalogFiltersButton />
+                    ) : null}
+                    <CatalogViewToggle view={view} />
+                  </div>
+                </div>
+              </CatalogFiltersPanel>
+
+              <CatalogActiveFilters
+                pills={activeFilterPills}
+                currentParams={rawSearchParams}
+              />
+            </div>
+
+            <CatalogResults>
+              {works.length === 0 ? (
+                <p className="py-16 text-center text-muted-foreground">
+                  {t("emptyState")}
+                </p>
+              ) : view === "grid" ? (
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {works.map((work) => (
-                    <WorkTableRow
+                    <WorkCard
                       key={work.slug}
                       work={work}
                       badge={badgeFor(work)}
                     />
                   ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                </div>
+              ) : (
+                <div className="overflow-x-auto rounded-xl border border-border">
+                  <table className="w-full text-left text-sm">
+                    <thead className="border-b border-border bg-secondary/40 text-xs tracking-wide text-muted-foreground uppercase">
+                      <tr>
+                        <th className="py-3 pr-4 pl-4 font-medium">
+                          {t("tableVisual")}
+                        </th>
+                        <th className="py-3 pr-4 font-medium">
+                          {t("tableTitle")}
+                        </th>
+                        <th className="py-3 pr-4 font-medium">
+                          {t("tableComposer")}
+                        </th>
+                        <th className="py-3 pr-4 font-medium">
+                          {t("tableVoicing")}
+                        </th>
+                        <th className="py-3 pr-4 font-medium">
+                          {t("tableMovements")}
+                        </th>
+                        <th className="py-3 pr-4 font-medium">
+                          {t("tablePrice")}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {works.map((work) => (
+                        <WorkTableRow
+                          key={work.slug}
+                          work={work}
+                          badge={badgeFor(work)}
+                        />
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
 
-          <div className="flex flex-col items-center gap-3">
-            <p className="text-sm text-muted-foreground">
-              {catalogue.pageCount > 1
-                ? t("resultsRange", {
-                    from: firstRank,
-                    to: firstRank + works.length - 1,
-                    total: catalogue.total,
-                  })
-                : t("resultsCount", { count: catalogue.total })}
-            </p>
-            <CatalogPagination
-              page={catalogue.page}
-              pageCount={catalogue.pageCount}
-              currentParams={rawSearchParams}
-            />
-          </div>
-        </Container>
+              <div className="flex flex-col items-center gap-3">
+                <p className="text-sm text-muted-foreground">
+                  {catalogue.pageCount > 1
+                    ? t("resultsRange", {
+                        from: firstRank,
+                        to: firstRank + works.length - 1,
+                        total: catalogue.total,
+                      })
+                    : t("resultsCount", { count: catalogue.total })}
+                </p>
+                <CatalogPagination
+                  page={catalogue.page}
+                  pageCount={catalogue.pageCount}
+                  currentParams={rawSearchParams}
+                />
+              </div>
+            </CatalogResults>
+          </Container>
+        </CatalogPendingProvider>
       </section>
 
       <section className="border-t border-border bg-secondary/30">

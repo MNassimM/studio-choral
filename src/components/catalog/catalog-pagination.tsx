@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+import { LinkPendingReporter } from "@/components/catalog/catalog-pending";
 import { buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import {
@@ -65,6 +66,7 @@ async function CatalogPagination({
           className={pastille}
         >
           <ChevronLeft className="size-4" aria-hidden="true" />
+          <LinkPendingReporter />
         </Link>
       ) : (
         <span aria-hidden="true" className={fleche}>
@@ -100,6 +102,7 @@ async function CatalogPagination({
             className={pastille}
           >
             {item}
+            <LinkPendingReporter />
           </Link>
         ),
       )}
@@ -112,6 +115,7 @@ async function CatalogPagination({
           className={pastille}
         >
           <ChevronRight className="size-4" aria-hidden="true" />
+          <LinkPendingReporter />
         </Link>
       ) : (
         <span aria-hidden="true" className={fleche}>

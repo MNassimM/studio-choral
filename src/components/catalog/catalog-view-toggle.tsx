@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { LayoutGrid, List } from "lucide-react";
 
+import { FormPendingReporter } from "@/components/catalog/catalog-pending";
 import { buttonVariants } from "@/components/ui/button";
 import { rememberCatalogView } from "@/lib/catalog/view-preference-actions";
 import { type CatalogView } from "@/lib/catalog/view-preference";
@@ -26,6 +27,7 @@ async function CatalogViewToggle({ view }: CatalogViewToggleProps) {
       aria-label={t("groupAriaLabel")}
       className="inline-flex items-center gap-1 rounded-full border border-border p-1"
     >
+      <FormPendingReporter />
       <button
         type="submit"
         name="view"

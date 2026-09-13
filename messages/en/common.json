@@ -4,5 +4,6 @@
   "learnMore": "Learn more",
   "searchAriaLabel": "Search",
   "breadcrumbAriaLabel": "Breadcrumb",
-  "breadcrumbHome": "Home"
+  "breadcrumbHome": "Home",
+  "loading": "Loading…"
 }

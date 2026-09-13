@@ -48,6 +48,7 @@ export const AudioMatrixCell = memo(function AudioMatrixCell({
   track,
   meta,
   upload,
+  removing,
   uncertain,
   onFile,
   onRemove,
@@ -60,6 +61,8 @@ export const AudioMatrixCell = memo(function AudioMatrixCell({
   track: Track | undefined;
   meta: StoredTrackMeta;
   upload: UploadState | undefined;
+  /** Vrai pendant la suppression côté serveur. */
+  removing: boolean;
   uncertain: boolean;
   onFile: (
     file: File,
@@ -147,9 +150,15 @@ export const AudioMatrixCell = memo(function AudioMatrixCell({
           variant="ghost"
           size="sm"
           onClick={() => onRemove(track)}
+          disabled={removing}
+          aria-busy={removing}
           className="size-6 shrink-0 cursor-pointer rounded-full p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
         >
-          <Trash2 className="size-3" aria-hidden="true" />
+          {removing ? (
+            <Loader2 className="size-3 animate-spin" aria-hidden="true" />
+          ) : (
+            <Trash2 className="size-3" aria-hidden="true" />
+          )}
           <span className="sr-only">Retirer {name}</span>
         </Button>
       </div>

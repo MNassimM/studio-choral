@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { X } from "lucide-react";
 
+import { LinkPendingReporter } from "@/components/catalog/catalog-pending";
 import { Link } from "@/i18n/navigation";
 import { PAGE_PARAM, catalogHref } from "@/lib/catalog/catalog-params";
 
@@ -123,6 +124,7 @@ async function CatalogActiveFilters({
             className="flex size-5 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
           >
             <X className="size-3.5" aria-hidden="true" />
+            <LinkPendingReporter />
           </Link>
         </span>
       ))}
@@ -131,6 +133,7 @@ async function CatalogActiveFilters({
         className="font-medium text-primary hover:underline"
       >
         {t("resetAll")}
+        <LinkPendingReporter />
       </Link>
     </div>
   );

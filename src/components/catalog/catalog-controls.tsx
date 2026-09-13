@@ -14,6 +14,7 @@ import {
   SORT_OPTIONS,
   type SortValue,
 } from "@/components/catalog/catalog-options";
+import { useCatalogTransition } from "@/components/catalog/catalog-pending";
 import { PAGE_PARAM } from "@/lib/catalog/catalog-params";
 
 /**
@@ -25,6 +26,7 @@ function useUpdateSearchParam() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const startTransition = useCatalogTransition();
 
   return (key: string, value: string, defaultValue: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -35,7 +37,9 @@ function useUpdateSearchParam() {
     }
     params.delete(PAGE_PARAM);
     const query = params.toString();
-    router.push(query ? `${pathname}?${query}` : pathname);
+    startTransition(() => {
+      router.push(query ? `${pathname}?${query}` : pathname);
+    });
   };
 }
 

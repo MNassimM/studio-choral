@@ -145,15 +145,33 @@ export function WorkAudioSection({
     [upload, placeTrack],
   );
 
+  // Cases dont la suppression est en cours côté serveur.
+  const [removingKeys, setRemovingKeys] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
+
   /** Retire une piste, en supprimant l'objet si elle est déjà en base. */
   const remove = useCallback(
     async (track: Track) => {
       if (track.state.kind === "stored") {
+        const cellKey = trackCellKey(
+          track.movementKey,
+          track.voiceCode,
+          track.type,
+        );
         const confirme = window.confirm(
           "Cette piste est déjà enregistrée. La retirer supprimera définitivement le fichier audio. Continuer ?",
         );
         if (!confirme) return;
-        const retrait = await removeAudioTrack(track.state.audioFileId);
+        setRemovingKeys((current) => new Set(current).add(cellKey));
+        const retrait = await removeAudioTrack(track.state.audioFileId).finally(
+          () =>
+            setRemovingKeys((current) => {
+              const next = new Set(current);
+              next.delete(cellKey);
+              return next;
+            }),
+        );
         if (!retrait.ok) {
           setGlobalError(retrait.error);
           return;
@@ -316,6 +334,7 @@ export function WorkAudioSection({
             commonTypes={commonTypes}
             storedMeta={storedMeta}
             uploads={uploads}
+            removingKeys={removingKeys}
             uncertainCells={uncertainCells}
             typeLabel={typeLabel}
             trackAt={trackAt}

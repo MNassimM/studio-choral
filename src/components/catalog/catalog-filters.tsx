@@ -15,6 +15,7 @@ import { ChevronDown, RotateCcw, SlidersHorizontal } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useCatalogTransition } from "@/components/catalog/catalog-pending";
 import { useRouter } from "@/i18n/navigation";
 import { PAGE_PARAM } from "@/lib/catalog/catalog-params";
 import { cn } from "@/lib/utils";
@@ -94,6 +95,7 @@ function CatalogFiltersPanel({
 }: CatalogFiltersPanelProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const startTransition = useCatalogTransition();
   const t = useTranslations("catalogue.filters");
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<DraftState>(() => ({
@@ -160,7 +162,9 @@ function CatalogFiltersPanel({
         query[category.key] = values.join(",");
       }
     }
-    router.push({ pathname: "/catalogue", query });
+    startTransition(() => {
+      router.push({ pathname: "/catalogue", query });
+    });
     setOpen(false);
   }
 

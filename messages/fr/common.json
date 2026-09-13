@@ -4,5 +4,6 @@
   "learnMore": "En savoir plus",
   "searchAriaLabel": "Rechercher",
   "breadcrumbAriaLabel": "Fil d'Ariane",
-  "breadcrumbHome": "Accueil"
+  "breadcrumbHome": "Accueil",
+  "loading": "Chargement…"
 }

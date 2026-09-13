@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { Download, LockKeyhole, FileHeadphone } from "lucide-react";
+import { Download, FileHeadphone, Loader2, LockKeyhole } from "lucide-react";
 
 import { useRouter } from "@/i18n/navigation";
 import { requestTrackDownload } from "@/lib/downloads/download-actions";
@@ -88,7 +88,12 @@ export function DownloadButton({
           </span>
         </span>
 
-        {row.owned ? (
+        {enCours ? (
+          <Loader2
+            className="size-4 shrink-0 animate-spin text-primary"
+            aria-hidden="true"
+          />
+        ) : row.owned ? (
           <Download
             className="size-4 shrink-0 text-primary"
             aria-hidden="true"

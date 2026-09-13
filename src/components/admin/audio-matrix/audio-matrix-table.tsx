@@ -155,6 +155,7 @@ export function AudioMatrixTable({
   commonTypes,
   storedMeta,
   uploads,
+  removingKeys,
   uncertainCells,
   typeLabel,
   trackAt,
@@ -167,6 +168,7 @@ export function AudioMatrixTable({
   commonTypes: AudioType[];
   storedMeta: StoredTrackMeta;
   uploads: Record<string, UploadState>;
+  removingKeys: ReadonlySet<string>;
   uncertainCells: string[];
   typeLabel: (type: AudioType) => string;
   trackAt: (
@@ -205,6 +207,7 @@ export function AudioMatrixTable({
         track={trackAt(movement.key, voiceCode, type)}
         meta={storedMeta}
         upload={uploads[cellKey]}
+        removing={removingKeys.has(cellKey)}
         uncertain={uncertainCells.includes(cellKey)}
         onFile={onFile}
         onRemove={onRemove}
