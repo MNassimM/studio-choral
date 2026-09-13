@@ -77,7 +77,7 @@ const milleRegretz = {
 };
 
 /** Renvoie les chemins d'erreur d'une entrée refusée. */
-function chemins(input: unknown): string[] {
+function issuePaths(input: unknown): string[] {
   const result = workFormSchema.safeParse(input);
   assert.equal(result.success, false, "cette entrée aurait dû être refusée");
   return result.error!.issues.map((issue) => issue.path.join("."));
@@ -94,15 +94,15 @@ test("une oeuvre à mouvement unique passe sans prix de mouvement", () => {
 });
 
 test("le titre est obligatoire", () => {
-  assert.deepEqual(chemins({ ...messe, title: "" }), ["title"]);
+  assert.deepEqual(issuePaths({ ...messe, title: "" }), ["title"]);
 });
 
 test("un slug mal formé est refusé", () => {
-  assert.deepEqual(chemins({ ...messe, slug: "Messe En Sol" }), ["slug"]);
+  assert.deepEqual(issuePaths({ ...messe, slug: "Messe En Sol" }), ["slug"]);
 });
 
 test("un prix négatif est refusé", () => {
-  const erreurs = chemins({
+  const erreurs = issuePaths({
     ...messe,
     prices: { ...messe.prices, workSingleVoice: -1 },
   });
@@ -113,7 +113,7 @@ test("un pack qui ne vaut pas exactement ses pupitres réunis est refusé", () =
   // 4 pupitres à 8,90 font 35,60. Ni moins, ni plus : l'offre toutes voix
   // ouvre les mêmes droits que ses pupitres, elle vaut donc leur somme.
   for (const workAllVoices of [1, 30, 35.5, 40]) {
-    const erreurs = chemins({
+    const erreurs = issuePaths({
       ...messe,
       prices: { ...messe.prices, workAllVoices },
     });
@@ -126,7 +126,7 @@ test("un pack qui ne vaut pas exactement ses pupitres réunis est refusé", () =
 
 test("un pack de mouvement qui ne vaut pas ses pupitres réunis est refusé", () => {
   // 4 pupitres à 1,90 font 7,60.
-  const erreurs = chemins({
+  const erreurs = issuePaths({
     ...messe,
     prices: { ...messe.prices, movementAllVoices: 5 },
   });
@@ -137,7 +137,7 @@ test("un pack d'oeuvre plus cher que ses mouvements est refusé", () => {
   // 6 mouvements à 7,60 font 45,60, le pack complet doit rester en dessous.
   // Les prix choisis respectent l'égalité par voix (12 x 4 = 48), pour que
   // seule la règle de l'axe des mouvements puisse déclencher.
-  const erreurs = chemins({
+  const erreurs = issuePaths({
     ...messe,
     prices: { ...messe.prices, workSingleVoice: 12, workAllVoices: 48 },
   });
@@ -145,7 +145,7 @@ test("un pack d'oeuvre plus cher que ses mouvements est refusé", () => {
 });
 
 test("une voix sur l'oeuvre moins chère que sur un mouvement est refusée", () => {
-  const erreurs = chemins({
+  const erreurs = issuePaths({
     ...messe,
     prices: { ...messe.prices, workSingleVoice: 1.5, workAllVoices: 6 },
   });
@@ -162,7 +162,7 @@ test("un brouillon accepte de n'avoir aucun prix de mouvement", () => {
 });
 
 test("un mouvement unique refuse les prix de mouvement", () => {
-  const erreurs = chemins({
+  const erreurs = issuePaths({
     ...milleRegretz,
     prices: { ...milleRegretz.prices, movementAllVoices: 3 },
   });
@@ -221,11 +221,11 @@ test("un brouillon presque vide passe, seul le titre est exigé", () => {
 });
 
 test("le titre reste exigé, le slug en dérive et il est unique en base", () => {
-  assert.deepEqual(chemins({ ...messe, title: "" }), ["title"]);
+  assert.deepEqual(issuePaths({ ...messe, title: "" }), ["title"]);
 });
 
 test("un pupitre en double est refusé", () => {
-  const erreurs = chemins({
+  const erreurs = issuePaths({
     ...messe,
     voiceCodes: ["SOPRANO", "ALTO", "SOPRANO"],
   });
@@ -233,7 +233,7 @@ test("un pupitre en double est refusé", () => {
 });
 
 test("deux mouvements de même titre sont refusés", () => {
-  const erreurs = chemins({
+  const erreurs = issuePaths({
     ...messe,
     movements: [...messe.movements.slice(0, 5), { key: "k6", title: "Kyrie" }],
   });
@@ -251,11 +251,11 @@ test("une traduction anglaise au titre nul est acceptée", () => {
 });
 
 test("une période hors de l'enum Prisma est refusée", () => {
-  assert.deepEqual(chemins({ ...messe, period: "BAROQUEUX" }), ["period"]);
+  assert.deepEqual(issuePaths({ ...messe, period: "BAROQUEUX" }), ["period"]);
 });
 
 test("une langue chantée sans libellé est refusée", () => {
-  assert.deepEqual(chemins({ ...messe, language: "zz" }), ["language"]);
+  assert.deepEqual(issuePaths({ ...messe, language: "zz" }), ["language"]);
 });
 
 test("un texte facultatif laissé vide devient nul", () => {
@@ -271,7 +271,7 @@ test("un texte facultatif laissé vide devient nul", () => {
 });
 
 test("un prix à trois décimales est refusé", () => {
-  const erreurs = chemins({
+  const erreurs = issuePaths({
     ...messe,
     prices: { ...messe.prices, workSingleVoice: 8.905 },
   });
@@ -288,7 +288,7 @@ test("la conversion en centimes ne dérape pas sur les flottants", () => {
 });
 
 /** Une piste déjà envoyée, posée sur la case demandée. */
-function piste(voiceCode: string | null, type: string) {
+function track(voiceCode: string | null, type: string) {
   return {
     movementKey: "k1",
     voiceCode,
@@ -305,13 +305,13 @@ function piste(voiceCode: string | null, type: string) {
 }
 
 test("une piste par pupitre sans pupitre est refusée", () => {
-  assert.deepEqual(chemins({ ...messe, tracks: [piste(null, "SOLO")] }), [
+  assert.deepEqual(issuePaths({ ...messe, tracks: [track(null, "SOLO")] }), [
     "tracks.0",
   ]);
 });
 
 test("une piste commune portant un pupitre est refusée", () => {
-  assert.deepEqual(chemins({ ...messe, tracks: [piste("ALTO", "TUTTI")] }), [
+  assert.deepEqual(issuePaths({ ...messe, tracks: [track("ALTO", "TUTTI")] }), [
     "tracks.0",
   ]);
 });
@@ -319,7 +319,7 @@ test("une piste commune portant un pupitre est refusée", () => {
 test("une piste visant un mouvement supprimé passe, updateWork la purge", () => {
   const result = workFormSchema.safeParse({
     ...messe,
-    tracks: [{ ...piste("ALTO", "SOLO"), movementKey: "disparu" }],
+    tracks: [{ ...track("ALTO", "SOLO"), movementKey: "disparu" }],
   });
   assert.equal(result.success, true);
 });
@@ -329,7 +329,7 @@ test("une piste visant un pupitre retiré passe, updateWork la purge", () => {
   // retient pas, sans toucher au nombre de pupitres dont les prix dépendent.
   const result = workFormSchema.safeParse({
     ...messe,
-    tracks: [piste("MEZZO", "SOLO")],
+    tracks: [track("MEZZO", "SOLO")],
   });
   assert.equal(result.success, true);
 });

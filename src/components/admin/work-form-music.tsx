@@ -3,7 +3,7 @@
 import { useWatch } from "react-hook-form";
 
 import {
-  Champ,
+  Field,
   Section,
   useWorkForm,
 } from "@/components/admin/work-form-fields";
@@ -66,7 +66,7 @@ export function WorkMusicSection() {
   return (
     <Section title="Informations musicales">
       <div className="grid gap-4 md:grid-cols-2">
-        <Champ label="Compositeur" name="composer" required>
+        <Field label="Compositeur" name="composer" required>
           {(aria) => (
             <Input
               {...aria}
@@ -74,9 +74,9 @@ export function WorkMusicSection() {
               {...form.register("composer")}
             />
           )}
-        </Champ>
+        </Field>
 
-        <Champ label="Période" name="period">
+        <Field label="Période" name="period">
           {(aria) => (
             <Select
               value={periode}
@@ -104,11 +104,11 @@ export function WorkMusicSection() {
               </SelectContent>
             </Select>
           )}
-        </Champ>
+        </Field>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Champ
+        <Field
           label="Effectif"
           name="voicing"
 
@@ -125,9 +125,9 @@ export function WorkMusicSection() {
               })}
             />
           )}
-        </Champ>
+        </Field>
 
-        <Champ label="Langue du texte" name="language">
+        <Field label="Langue du texte" name="language">
           {(aria) => (
             <Select
               value={langue}
@@ -155,9 +155,9 @@ export function WorkMusicSection() {
               </SelectContent>
             </Select>
           )}
-        </Champ>
+        </Field>
 
-        <Champ label="Référence" name="catalogueRef">
+        <Field label="Référence" name="catalogueRef">
           {(aria) => (
             <Input
               {...aria}
@@ -168,11 +168,11 @@ export function WorkMusicSection() {
               })}
             />
           )}
-        </Champ>
+        </Field>
       </div>
 
       <div className="grid items-end gap-4 md:grid-cols-2">
-        <Champ label="Année de composition" name="composedYear">
+        <Field label="Année de composition" name="composedYear">
           {(aria) => (
             <Input
               {...aria}
@@ -185,7 +185,7 @@ export function WorkMusicSection() {
               })}
             />
           )}
-        </Champ>
+        </Field>
 
         <label className="flex items-center gap-2.5 pb-1.5 text-sm">
           <Checkbox

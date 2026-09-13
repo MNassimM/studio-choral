@@ -296,7 +296,7 @@ function CartProvider({
   useEffect(() => {
     let annule = false;
 
-    async function basculer() {
+    async function switchOwner() {
       if (userId === null) {
         // Déconnexion : on repasse sur le panier du visiteur, qui est vide
         // depuis qu'il a été versé au compte. Le panier du compte reste en
@@ -320,7 +320,7 @@ function CartProvider({
       publish(resultat.items, resultat.removedOwned);
     }
 
-    void basculer();
+    void switchOwner();
     return () => {
       annule = true;
     };

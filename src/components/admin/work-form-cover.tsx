@@ -61,7 +61,7 @@ export function WorkCoverSection({
    *
    * @param file - Fichier choisi ou déposé.
    */
-  async function deposer(file: File) {
+  async function uploadCover(file: File) {
     setErreur(null);
     setProgression(0);
 
@@ -101,7 +101,7 @@ export function WorkCoverSection({
   }
 
   /** Retire l'image du brouillon. L'objet ne partira qu'à l'enregistrement. */
-  function retirer() {
+  function removeCover() {
     if (apercuLocal) URL.revokeObjectURL(apercuLocal);
     setApercuLocal(null);
     setErreur(null);
@@ -153,7 +153,7 @@ export function WorkCoverSection({
             className="sr-only"
             onChange={(event) => {
               const file = event.target.files?.[0];
-              if (file) void deposer(file);
+              if (file) void uploadCover(file);
             }}
           />
         </div>
@@ -180,7 +180,7 @@ export function WorkCoverSection({
             variant="ghost"
             size="sm"
             disabled={envoiEnCours}
-            onClick={retirer}
+            onClick={removeCover}
             className="text-destructive"
           >
             <Trash2 className="size-4" aria-hidden="true" />

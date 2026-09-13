@@ -42,7 +42,7 @@ async function CatalogPagination({
 
   const t = await getTranslations("catalogue");
 
-  const lien = (cible: number) =>
+  const pageHref = (cible: number) =>
     catalogHref(catalogQueryForPage(currentParams, cible));
   const pastille = cn(
     buttonVariants({ variant: "outline", size: "icon" }),
@@ -59,7 +59,7 @@ async function CatalogPagination({
     >
       {page > 1 ? (
         <Link
-          href={lien(page - 1)}
+          href={pageHref(page - 1)}
           rel="prev"
           aria-label={t("paginationPreviousAriaLabel")}
           className={pastille}
@@ -95,7 +95,7 @@ async function CatalogPagination({
         ) : (
           <Link
             key={item}
-            href={lien(item)}
+            href={pageHref(item)}
             aria-label={t("paginationPageAriaLabel", { page: item })}
             className={pastille}
           >
@@ -106,7 +106,7 @@ async function CatalogPagination({
 
       {page < pageCount ? (
         <Link
-          href={lien(page + 1)}
+          href={pageHref(page + 1)}
           rel="next"
           aria-label={t("paginationNextAriaLabel")}
           className={pastille}

@@ -29,7 +29,10 @@ function CartAddedList({
   return (
     <div className="flex flex-col gap-2.5 pt-3">
       {groups.map((work) => (
-        <div key={work.workId} className="flex flex-col gap-1 border-b border-border pb-2 last:border-b-0">
+        <div
+          key={work.workId}
+          className="flex flex-col gap-1 border-b border-border pb-2 last:border-b-0"
+        >
           <p className="px-1.5 text-[0.65rem] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
             {work.workTitle ?? t("unknownItem")}
           </p>

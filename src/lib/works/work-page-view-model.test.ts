@@ -26,7 +26,7 @@ const VOICES = [
 ];
 
 /** Les pistes d'un mouvement, complètes pour les deux pupitres. */
-function pistes(): ViewModelMovement["audioFiles"] {
+function tracks(): ViewModelMovement["audioFiles"] {
   const parVoix = VOICES.flatMap((voice) =>
     (["SOLO", "PREDOMINANT", "PREVIEW"] as const).map((type) => ({
       id: `audio-${voice.id}-${type}`,
@@ -56,7 +56,7 @@ function pistes(): ViewModelMovement["audioFiles"] {
 }
 
 /** Une offre du catalogue, réduite à ce que le view model regarde. */
-function offre(
+function offer(
   sku: string,
   scope: "MOVEMENT" | "WORK",
   coverage: "SINGLE_VOICE" | "ALL_VOICES",
@@ -78,7 +78,7 @@ function offre(
 }
 
 /** Une oeuvre de test : deux mouvements, deux pupitres, offres complètes. */
-function oeuvre(movementCount: 1 | 2) {
+function makeWork(movementCount: 1 | 2) {
   const ids = movementCount === 1 ? ["m1"] : ["m1", "m2"];
   const titres: Record<string, string> = { m1: "Kyrie", m2: "Gloria" };
 
@@ -93,13 +93,13 @@ function oeuvre(movementCount: 1 | 2) {
   const movements: ViewModelMovement[] = ids.map((id) => ({
     id,
     title: titres[id],
-    audioFiles: pistes(),
+    audioFiles: tracks(),
   }));
 
   const products: ViewModelProduct[] = [
     ...ids.flatMap((id) => [
       ...VOICES.map((voice) =>
-        offre(
+        offer(
           `${id}-${voice.code}`,
           "MOVEMENT",
           "SINGLE_VOICE",
@@ -109,10 +109,10 @@ function oeuvre(movementCount: 1 | 2) {
           titres[id],
         ),
       ),
-      offre(`${id}-all`, "MOVEMENT", "ALL_VOICES", id, null, 400, titres[id]),
+      offer(`${id}-all`, "MOVEMENT", "ALL_VOICES", id, null, 400, titres[id]),
     ]),
     ...VOICES.map((voice) =>
-      offre(
+      offer(
         `work-${voice.code}`,
         "WORK",
         "SINGLE_VOICE",
@@ -122,15 +122,15 @@ function oeuvre(movementCount: 1 | 2) {
         null,
       ),
     ),
-    offre("work-all", "WORK", "ALL_VOICES", null, null, 800, null),
+    offer("work-all", "WORK", "ALL_VOICES", null, null, 800, null),
   ];
 
   return { layout, movements, products };
 }
 
 /** Monte le view model pour des droits donnés. */
-function vues(grants: Grant[], movementCount: 1 | 2 = 2) {
-  const { layout, movements, products } = oeuvre(movementCount);
+function viewsFor(grants: Grant[], movementCount: 1 | 2 = 2) {
+  const { layout, movements, products } = makeWork(movementCount);
   const access = resolveWorkAccess(layout, grants);
 
   return {
@@ -158,7 +158,7 @@ function vues(grants: Grant[], movementCount: 1 | 2 = 2) {
 }
 
 /** Le droit d'un pupitre sur l'oeuvre entière. */
-function droitPupitre(voiceCode: string): Grant {
+function voiceGrant(voiceCode: string): Grant {
   return {
     workId: WORK_ID,
     movementId: null,
@@ -169,7 +169,7 @@ function droitPupitre(voiceCode: string): Grant {
 }
 
 test("un visiteur sans droit ne possède rien, aucun téléchargement", () => {
-  const { access, model } = vues([]);
+  const { access, model } = viewsFor([]);
 
   assert.equal(access.ownsAnything, false);
   assert.deepEqual(model.ownedVoiceViews, []);
@@ -184,7 +184,7 @@ test("un visiteur sans droit ne possède rien, aucun téléchargement", () => {
 });
 
 test("la grille range les pupitres dans l'ordre de la table, puis tutti et accompagnement", () => {
-  const { layout, movements, products } = oeuvre(1);
+  const { layout, movements, products } = makeWork(1);
   // Pistes rendues dans le désordre, comme la base peut le faire sans ORDER
   // BY : l'alto arrive avant le soprano, l'accompagnement avant le tutti.
   const desordre = movements.map((movement) => ({
@@ -215,7 +215,7 @@ test("la grille range les pupitres dans l'ordre de la table, puis tutti et accom
 });
 
 test("la grille de téléchargement écarte les extraits et les voix seules", () => {
-  const { model } = vues([droitPupitre("ALTO")]);
+  const { model } = viewsFor([voiceGrant("ALTO")]);
   const types = model.downloadGroups[0].entries.map(
     (entree) => entree.audioType,
   );
@@ -233,7 +233,7 @@ test("la grille de téléchargement écarte les extraits et les voix seules", ()
 test("posséder un pupitre sur l'oeuvre entière ne rend PAS ownsFullWork vrai", () => {
   // Le piège documenté : l'alto est débloqué partout, mais il reste un seul
   // pupitre sur deux, l'oeuvre n'est pas possédée.
-  const { access, model } = vues([droitPupitre("ALTO")]);
+  const { access, model } = viewsFor([voiceGrant("ALTO")]);
 
   assert.equal(access.ownsAnything, true);
   assert.equal(access.ownsFullWork, false);
@@ -248,9 +248,9 @@ test("posséder un pupitre sur l'oeuvre entière ne rend PAS ownsFullWork vrai",
 });
 
 test("posséder toutes les voix rend ownsFullWork vrai et les mouvements complets", () => {
-  const { access, model } = vues([
-    droitPupitre("SOPRANO"),
-    droitPupitre("ALTO"),
+  const { access, model } = viewsFor([
+    voiceGrant("SOPRANO"),
+    voiceGrant("ALTO"),
   ]);
 
   assert.equal(access.ownsFullWork, true);
@@ -268,11 +268,11 @@ test("cumuler tous les pupitres ouvre le téléchargement du tutti", () => {
   // Les deux chemins vers l'oeuvre entière coûtent le même prix, ils doivent
   // donc ouvrir les mêmes droits. L'offre toutes voix n'est qu'un achat
   // unique, pas un achat privilégié.
-  const cumul = vues([droitPupitre("SOPRANO"), droitPupitre("ALTO")]);
+  const cumul = viewsFor([voiceGrant("SOPRANO"), voiceGrant("ALTO")]);
   assert.equal(cumul.access.ownsFullWork, true);
   assert.equal(cumul.model.hasTuttiDownload, true);
 
-  const packComplet = vues([
+  const packComplet = viewsFor([
     {
       workId: WORK_ID,
       movementId: null,
@@ -288,7 +288,7 @@ test("cumuler tous les pupitres ouvre le téléchargement du tutti", () => {
 test("les pupitres possédés sortent dans l'ordre de la table, pas des droits", () => {
   // Les droits arrivent alto puis soprano, l'affichage doit rendre l'ordre
   // canonique de la table Voice.
-  const { model } = vues([droitPupitre("ALTO"), droitPupitre("SOPRANO")]);
+  const { model } = viewsFor([voiceGrant("ALTO"), voiceGrant("SOPRANO")]);
 
   assert.deepEqual(
     model.ownedVoiceViews.map((vue) => vue.code),
@@ -297,7 +297,7 @@ test("les pupitres possédés sortent dans l'ordre de la table, pas des droits",
 });
 
 test("une offre déjà possédée est marquée alreadyOwned", () => {
-  const { model } = vues([droitPupitre("ALTO")]);
+  const { model } = viewsFor([voiceGrant("ALTO")]);
 
   const parSku = new Map(
     model.movementOfferGroups
@@ -318,7 +318,7 @@ test("une offre déjà possédée est marquée alreadyOwned", () => {
 test("le pack toutes voix est remisé au prorata de ce qui est déjà possédé", () => {
   // Deux mouvements fois deux pupitres, soit quatre cellules. L'alto en couvre
   // deux, donc la moitié : 800 centimes tombent à 400.
-  const { model } = vues([droitPupitre("ALTO")]);
+  const { model } = viewsFor([voiceGrant("ALTO")]);
 
   assert.equal(model.workAllVoicesCard?.discount?.percentOff, 50);
   assert.equal(
@@ -332,13 +332,13 @@ test("le pack toutes voix est remisé au prorata de ce qui est déjà possédé"
 });
 
 test("sans aucun droit, le pack toutes voix n'affiche aucune remise", () => {
-  const { model } = vues([]);
+  const { model } = viewsFor([]);
 
   assert.equal(model.workAllVoicesCard?.discount, null);
 });
 
 test("le pack toutes voix annonce le nombre de pupitres qu'il couvre", () => {
-  const { model } = vues([]);
+  const { model } = viewsFor([]);
 
   // Et rien d'autre : il coûte ses pupitres réunis et ouvre leurs droits,
   // il n'a aucun avantage propre à mettre en avant.
@@ -346,7 +346,7 @@ test("le pack toutes voix annonce le nombre de pupitres qu'il couvre", () => {
 });
 
 test("les noms d'offre passent par la fonction de composition injectée", () => {
-  const { model } = vues([]);
+  const { model } = viewsFor([]);
 
   assert.equal(model.workAllVoicesCard?.name, "toutes / Messe");
   assert.equal(
@@ -356,7 +356,7 @@ test("les noms d'offre passent par la fonction de composition injectée", () => 
 });
 
 test("l'onglet ouvert par défaut évite un mouvement déjà entièrement possédé", () => {
-  const { model } = vues([droitPupitre("SOPRANO"), droitPupitre("ALTO")]);
+  const { model } = viewsFor([voiceGrant("SOPRANO"), voiceGrant("ALTO")]);
 
   // Tous les mouvements sont possédés : on retombe sur le premier.
   assert.equal(model.defaultOfferMovementId, "m1");
@@ -365,7 +365,7 @@ test("l'onglet ouvert par défaut évite un mouvement déjà entièrement possé
 });
 
 test("une oeuvre à mouvement unique est signalée comme telle", () => {
-  const { model } = vues([droitPupitre("ALTO")], 1);
+  const { model } = viewsFor([voiceGrant("ALTO")], 1);
 
   assert.equal(model.hasSingleMovement, true);
   assert.equal(model.movementOfferGroups.length, 1);
@@ -375,7 +375,7 @@ test("une oeuvre à mouvement unique est signalée comme telle", () => {
 });
 
 test("une oeuvre sans offre toutes voix ne rend aucune carte de pack", () => {
-  const { layout, movements, products } = oeuvre(2);
+  const { layout, movements, products } = makeWork(2);
   const access = resolveWorkAccess(layout, []);
 
   const model = buildWorkPageViewModel({

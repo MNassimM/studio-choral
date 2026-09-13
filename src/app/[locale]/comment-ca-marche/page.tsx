@@ -428,7 +428,7 @@ async function CtaSection() {
  *
  * @returns La page rendue.
  */
-export default async function CommentCaMarchePage() {
+export default async function HowItWorksPage() {
   const t = await getTranslations("howItWorks");
   const tCommon = await getTranslations("common");
 

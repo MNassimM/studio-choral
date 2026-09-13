@@ -87,7 +87,7 @@ const TOUTES_VOIX: Grant = {
   coverage: "ALL_VOICES",
 };
 
-function groupes(grants: Grant[]) {
+function groupsFor(grants: Grant[]) {
   return buildDownloadGroups({
     access: resolveWorkAccess(LAYOUT, grants),
     movements: MOUVEMENTS,
@@ -98,7 +98,7 @@ function groupes(grants: Grant[]) {
 }
 
 test("les pupitres passent avant le tutti, puis l'accompagnement", () => {
-  const [groupe] = groupes([TOUTES_VOIX]);
+  const [groupe] = groupsFor([TOUTES_VOIX]);
 
   assert.deepEqual(
     groupe.entries.map((entree) => entree.audioFileId),
@@ -107,7 +107,7 @@ test("les pupitres passent avant le tutti, puis l'accompagnement", () => {
 });
 
 test("l'extrait et la voix seule ne sont jamais proposés", () => {
-  const [groupe] = groupes([TOUTES_VOIX]);
+  const [groupe] = groupsFor([TOUTES_VOIX]);
   const types = groupe.entries.map((entree) => entree.audioType);
 
   assert.equal(types.includes("PREVIEW" as never), false);
@@ -115,7 +115,7 @@ test("l'extrait et la voix seule ne sont jamais proposés", () => {
 });
 
 test("sans droit, toutes les pistes sont présentes mais verrouillées", () => {
-  const [groupe] = groupes([]);
+  const [groupe] = groupsFor([]);
 
   assert.equal(groupe.entries.length, 4);
   assert.equal(
@@ -126,7 +126,7 @@ test("sans droit, toutes les pistes sont présentes mais verrouillées", () => {
 });
 
 test("une ligne affiche le pupitre, le type, le format et la taille", () => {
-  const [groupe] = groupes([TOUTES_VOIX]);
+  const [groupe] = groupsFor([TOUTES_VOIX]);
   const labels = {
     audioTypeLabel: (type: string) => `type:${type}`,
     formatSize: (bytes: number) => `${bytes} o`,
@@ -142,7 +142,7 @@ test("une ligne affiche le pupitre, le type, le format et la taille", () => {
 });
 
 test("le mouvement se préfixe au nom quand l'affichage ne le nomme pas", () => {
-  const [groupe] = groupes([TOUTES_VOIX]);
+  const [groupe] = groupsFor([TOUTES_VOIX]);
   const ligne = toDownloadRow(
     groupe.entries[1],
     {
@@ -158,7 +158,7 @@ test("le mouvement se préfixe au nom quand l'affichage ne le nomme pas", () => 
 });
 
 test("une piste sans pupitre n'affiche que son type", () => {
-  const [groupe] = groupes([TOUTES_VOIX]);
+  const [groupe] = groupsFor([TOUTES_VOIX]);
   const ligne = toDownloadRow(groupe.entries[2], {
     audioTypeLabel: () => "Tutti",
     formatSize: () => "4 Ko",
@@ -169,7 +169,7 @@ test("une piste sans pupitre n'affiche que son type", () => {
 });
 
 test("une taille inconnue ne laisse que le format", () => {
-  const [groupe] = groupes([TOUTES_VOIX]);
+  const [groupe] = groupsFor([TOUTES_VOIX]);
   const ligne = toDownloadRow(groupe.entries[0], {
     audioTypeLabel: () => "Voix prédominante",
     formatSize: () => "jamais appelé",

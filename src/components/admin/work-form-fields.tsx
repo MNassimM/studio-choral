@@ -29,7 +29,7 @@ export function useWorkForm(): Form {
 /**
  * Enveloppe un champ avec son libellé et son message d'erreur.
  */
-function Champ({
+function Field({
   label,
   name,
   required,
@@ -131,7 +131,7 @@ function Section({
 /**
  * Emplacement d'une section à venir, pour tenir la mise en page.
  */
-function SectionAVenir({
+function UpcomingSection({
   title,
   note,
   error,
@@ -154,4 +154,4 @@ function SectionAVenir({
   );
 }
 
-export { Champ, Section, SectionAVenir };
+export { Field, Section, UpcomingSection };

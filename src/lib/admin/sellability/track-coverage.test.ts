@@ -113,7 +113,7 @@ const CONTEXTE = {
 };
 
 /** Toutes les cases d'un pupitre sur un mouvement. */
-function pupitre(movementId: string, voiceId: string) {
+function voice(movementId: string, voiceId: string) {
   return PER_VOICE_TYPES.map((type) => ({ movementId, voiceId, type }));
 }
 
@@ -125,19 +125,19 @@ function tutti(movementId: string) {
 test("un produit mouvement une voix exige les trois types de ce pupitre", () => {
   const produit = { movementId: M1, voiceId: SOP };
   assert.equal(requiredCellsFor(produit, CONTEXTE).length, 3);
-  assert.equal(isProductCovered(produit, CONTEXTE, pupitre(M1, SOP)), true);
+  assert.equal(isProductCovered(produit, CONTEXTE, voice(M1, SOP)), true);
 });
 
 test("il manque un seul type et le produit n'est plus couvert", () => {
   const produit = { movementId: M1, voiceId: SOP };
-  const partiel = pupitre(M1, SOP).slice(0, 2);
+  const partiel = voice(M1, SOP).slice(0, 2);
   assert.equal(isProductCovered(produit, CONTEXTE, partiel), false);
   assert.equal(productCoverageGap(produit, CONTEXTE, partiel).missing, 1);
 });
 
 test("l'aperçu compte dans la couverture", () => {
   const produit = { movementId: M1, voiceId: SOP };
-  const sansApercu = pupitre(M1, SOP).filter((cell) => cell.type !== "PREVIEW");
+  const sansApercu = voice(M1, SOP).filter((cell) => cell.type !== "PREVIEW");
   assert.equal(isProductCovered(produit, CONTEXTE, sansApercu), false);
 });
 
@@ -153,10 +153,10 @@ test("un produit mouvement toutes voix exige les deux pupitres plus le tutti", (
   const requises = requiredCellsFor(produit, CONTEXTE);
   assert.equal(requises.length, 7);
 
-  const completes = [...pupitre(M1, SOP), ...pupitre(M1, ALT), ...tutti(M1)];
+  const completes = [...voice(M1, SOP), ...voice(M1, ALT), ...tutti(M1)];
   assert.equal(isProductCovered(produit, CONTEXTE, completes), true);
   assert.equal(
-    isProductCovered(produit, CONTEXTE, [...pupitre(M1, SOP), ...tutti(M1)]),
+    isProductCovered(produit, CONTEXTE, [...voice(M1, SOP), ...tutti(M1)]),
     false,
   );
 });
@@ -166,7 +166,7 @@ test("l'accompagnement n'est exigé que si l'oeuvre le déclare", () => {
   const avec = { ...CONTEXTE, hasAccompaniment: true };
   assert.equal(requiredCellsFor(produit, avec).length, 8);
 
-  const sansAccomp = [...pupitre(M1, SOP), ...pupitre(M1, ALT), ...tutti(M1)];
+  const sansAccomp = [...voice(M1, SOP), ...voice(M1, ALT), ...tutti(M1)];
   assert.equal(isProductCovered(produit, avec, sansAccomp), false);
   assert.equal(
     isProductCovered(produit, avec, [
@@ -180,12 +180,9 @@ test("l'accompagnement n'est exigé que si l'oeuvre le déclare", () => {
 test("un produit oeuvre une voix exige tous les mouvements", () => {
   const produit = { movementId: null, voiceId: SOP };
   assert.equal(requiredCellsFor(produit, CONTEXTE).length, 6);
-  assert.equal(isProductCovered(produit, CONTEXTE, pupitre(M1, SOP)), false);
+  assert.equal(isProductCovered(produit, CONTEXTE, voice(M1, SOP)), false);
   assert.equal(
-    isProductCovered(produit, CONTEXTE, [
-      ...pupitre(M1, SOP),
-      ...pupitre(M2, SOP),
-    ]),
+    isProductCovered(produit, CONTEXTE, [...voice(M1, SOP), ...voice(M2, SOP)]),
     true,
   );
 });
@@ -195,11 +192,11 @@ test("un produit oeuvre toutes voix exige tout, partout", () => {
   assert.equal(requiredCellsFor(produit, CONTEXTE).length, 14);
 
   const tout = [
-    ...pupitre(M1, SOP),
-    ...pupitre(M1, ALT),
+    ...voice(M1, SOP),
+    ...voice(M1, ALT),
     ...tutti(M1),
-    ...pupitre(M2, SOP),
-    ...pupitre(M2, ALT),
+    ...voice(M2, SOP),
+    ...voice(M2, ALT),
     ...tutti(M2),
   ];
   assert.equal(isProductCovered(produit, CONTEXTE, tout), true);
@@ -209,18 +206,18 @@ test("une oeuvre à mouvement unique se couvre sur ce seul mouvement", () => {
   const mono = { movementIds: [M1], voiceIds: [SOP], hasAccompaniment: false };
   const produit = { movementId: null, voiceId: SOP };
   assert.equal(requiredCellsFor(produit, mono).length, 3);
-  assert.equal(isProductCovered(produit, mono, pupitre(M1, SOP)), true);
+  assert.equal(isProductCovered(produit, mono, voice(M1, SOP)), true);
 });
 
 test("un pupitre ajouté sans piste rend ses offres non couvertes", () => {
   const TEN = "voix-ten";
   const elargi = { ...CONTEXTE, voiceIds: [SOP, ALT, TEN] };
   const existantes = [
-    ...pupitre(M1, SOP),
-    ...pupitre(M1, ALT),
+    ...voice(M1, SOP),
+    ...voice(M1, ALT),
     ...tutti(M1),
-    ...pupitre(M2, SOP),
-    ...pupitre(M2, ALT),
+    ...voice(M2, SOP),
+    ...voice(M2, ALT),
     ...tutti(M2),
   ];
 
@@ -243,7 +240,7 @@ test("un pupitre ajouté sans piste rend ses offres non couvertes", () => {
 
 test("une piste ajoutée réactive un produit jusque là non couvert", () => {
   const produit = { movementId: M1, voiceId: SOP };
-  const partiel = pupitre(M1, SOP).slice(0, 2);
+  const partiel = voice(M1, SOP).slice(0, 2);
   assert.equal(isProductCovered(produit, CONTEXTE, partiel), false);
 
   const complet = [

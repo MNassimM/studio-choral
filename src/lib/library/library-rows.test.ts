@@ -18,7 +18,7 @@ const VOICES = [
 ];
 
 /** Un mouvement complet : 2 pupitres, un tutti, un accompagnement. */
-function mouvement(id: string, titre: string) {
+function movement(id: string, titre: string) {
   return {
     id,
     title: titre,
@@ -43,7 +43,7 @@ const MESSE: LibraryWorkInput = {
   period: "CLASSICAL",
   voicing: "SATB",
   language: "la",
-  movements: [mouvement("m1", "Kyrie"), mouvement("m2", "Gloria")],
+  movements: [movement("m1", "Kyrie"), movement("m2", "Gloria")],
 };
 
 const MOTET: LibraryWorkInput = {
@@ -52,10 +52,10 @@ const MOTET: LibraryWorkInput = {
   slug: "motet",
   title: "Motet",
   catalogueRef: null,
-  movements: [mouvement("m3", "Motet")],
+  movements: [movement("m3", "Motet")],
 };
 
-function droit(over: Partial<Grant> & { workId: string }): Grant {
+function grant(over: Partial<Grant> & { workId: string }): Grant {
   return {
     movementId: null,
     voiceCode: null,
@@ -71,7 +71,7 @@ const LE_26 = new Date("2026-08-26T10:00:00Z");
 test("une œuvre possédée entièrement compte tous ses fichiers", () => {
   const [row] = buildLibraryRows({
     works: [MESSE],
-    grants: [droit({ workId: "w1" })],
+    grants: [grant({ workId: "w1" })],
     items: [{ workId: "w1", grantedAt: LE_11, source: "PURCHASE" }],
     voices: VOICES,
     getVoiceLabel: (code) => `label:${code}`,
@@ -90,7 +90,7 @@ test("un seul pupitre ne débloque ni le tutti ni l'accompagnement des autres", 
   const [row] = buildLibraryRows({
     works: [MESSE],
     grants: [
-      droit({ workId: "w1", coverage: "SINGLE_VOICE", voiceCode: "ALTO" }),
+      grant({ workId: "w1", coverage: "SINGLE_VOICE", voiceCode: "ALTO" }),
     ],
     items: [{ workId: "w1", grantedAt: LE_11, source: "MANUAL_GRANT" }],
     voices: VOICES,
@@ -111,8 +111,8 @@ test("plusieurs droits sur une œuvre ne donnent qu'une ligne", () => {
   const rows = buildLibraryRows({
     works: [MESSE],
     grants: [
-      droit({ workId: "w1" }),
-      droit({
+      grant({ workId: "w1" }),
+      grant({
         workId: "w1",
         scope: "MOVEMENT",
         movementId: "m1",
@@ -136,7 +136,7 @@ test("plusieurs droits sur une œuvre ne donnent qu'une ligne", () => {
 test("les œuvres vont du droit le plus récent au plus ancien", () => {
   const rows = buildLibraryRows({
     works: [MESSE, MOTET],
-    grants: [droit({ workId: "w1" }), droit({ workId: "w2" })],
+    grants: [grant({ workId: "w1" }), grant({ workId: "w2" })],
     items: [
       { workId: "w1", grantedAt: LE_26, source: "PURCHASE" },
       { workId: "w2", grantedAt: LE_11, source: "PURCHASE" },
@@ -156,7 +156,7 @@ test("une œuvre sans aucun accès résolu n'apparaît pas", () => {
   // vide qui laisserait croire à un accès.
   const rows = buildLibraryRows({
     works: [MESSE],
-    grants: [droit({ workId: "autre" })],
+    grants: [grant({ workId: "autre" })],
     items: [{ workId: "w1", grantedAt: LE_11, source: "MANUAL_GRANT" }],
     voices: VOICES,
     getVoiceLabel: (code) => code,
@@ -168,7 +168,7 @@ test("une œuvre sans aucun accès résolu n'apparaît pas", () => {
 test("le résumé additionne œuvres, mouvements débloqués et fichiers", () => {
   const rows = buildLibraryRows({
     works: [MESSE, MOTET],
-    grants: [droit({ workId: "w1" }), droit({ workId: "w2" })],
+    grants: [grant({ workId: "w1" }), grant({ workId: "w2" })],
     items: [
       { workId: "w1", grantedAt: LE_26, source: "PURCHASE" },
       { workId: "w2", grantedAt: LE_11, source: "PURCHASE" },

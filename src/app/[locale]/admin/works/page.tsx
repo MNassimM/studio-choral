@@ -190,17 +190,17 @@ export default async function AdminWorksPage({
     draft: rows.filter((row) => !row.isPublished).length,
   };
 
-  const normalise = (value: string) =>
+  const foldText = (value: string) =>
     value.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
-  const besoin = normalise(query);
+  const besoin = foldText(query);
 
   const visible = rows.filter((row) => {
     if (status === "published" && !row.isPublished) return false;
     if (status === "draft" && row.isPublished) return false;
     if (besoin.length === 0) return true;
     return (
-      normalise(row.title).includes(besoin) ||
-      normalise(row.composer).includes(besoin)
+      foldText(row.title).includes(besoin) ||
+      foldText(row.composer).includes(besoin)
     );
   });
 

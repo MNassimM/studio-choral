@@ -14,7 +14,7 @@ import type { WorkActionResult } from "@/lib/admin/form/work-form-draft";
 /**
  * Confirmation de suppression, build seulement quand elle est ouverte.
  */
-function ConfirmationSuppression({
+function DeletionConfirmation({
   title,
   onCancel,
   onConfirm,
@@ -143,7 +143,7 @@ export function WorkAdminActions({
       </div>
 
       {confirmation ? (
-        <ConfirmationSuppression
+        <DeletionConfirmation
           title={title}
           enCours={enCours}
           onCancel={() => setConfirmation(false)}

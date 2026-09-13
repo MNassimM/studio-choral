@@ -17,7 +17,7 @@ console.log(
  */
 
 /** Les trois types qu'une offre par pupitre exige, pour un pupitre donné. */
-function pistesDuPupitre(voiceId: string): ActivationAudioFile[] {
+function voiceTracks(voiceId: string): ActivationAudioFile[] {
   return [
     { voiceId, type: "SOLO" },
     { voiceId, type: "PREDOMINANT" },
@@ -31,7 +31,7 @@ const TUTTI: ActivationAudioFile = { voiceId: null, type: "TUTTI" };
 test("une offre entièrement couverte reste active", () => {
   const work: WorkActivationState = {
     hasAccompaniment: false,
-    movements: [{ id: "m1", audioFiles: pistesDuPupitre("v1") }],
+    movements: [{ id: "m1", audioFiles: voiceTracks("v1") }],
     products: [{ id: "p1", movementId: "m1", voiceId: "v1", isActive: true }],
   };
 
@@ -78,7 +78,7 @@ test("une offre sans aucune piste est désactivée", () => {
 test("une piste ajoutée réactive une offre jusque là inactive", () => {
   const work: WorkActivationState = {
     hasAccompaniment: false,
-    movements: [{ id: "m1", audioFiles: pistesDuPupitre("v1") }],
+    movements: [{ id: "m1", audioFiles: voiceTracks("v1") }],
     products: [{ id: "p1", movementId: "m1", voiceId: "v1", isActive: false }],
   };
 
@@ -96,7 +96,7 @@ test("un pupitre retiré ne fait pas exiger ses pistes à l'offre toutes voix", 
   // pupitres du contexte viennent des OFFRES NON RETIREES, pas des pistes.
   const work: WorkActivationState = {
     hasAccompaniment: false,
-    movements: [{ id: "m1", audioFiles: [...pistesDuPupitre("v1"), TUTTI] }],
+    movements: [{ id: "m1", audioFiles: [...voiceTracks("v1"), TUTTI] }],
     products: [
       // L'offre de l'alto a été retirée, elle n'entre pas dans l'état.
       { id: "p1", movementId: "m1", voiceId: "v1", isActive: true },
@@ -113,7 +113,7 @@ test("un pupitre retiré ne fait pas exiger ses pistes à l'offre toutes voix", 
 test("une offre toutes voix exige le tutti en plus des pupitres", () => {
   const sansTutti: WorkActivationState = {
     hasAccompaniment: false,
-    movements: [{ id: "m1", audioFiles: pistesDuPupitre("v1") }],
+    movements: [{ id: "m1", audioFiles: voiceTracks("v1") }],
     products: [{ id: "all", movementId: "m1", voiceId: null, isActive: true }],
   };
 
@@ -121,7 +121,7 @@ test("une offre toutes voix exige le tutti en plus des pupitres", () => {
 });
 
 test("un accompagnement déclaré est exigé de l'offre toutes voix", () => {
-  const base = [...pistesDuPupitre("v1"), TUTTI];
+  const base = [...voiceTracks("v1"), TUTTI];
   const products = [
     { id: "all", movementId: "m1", voiceId: null, isActive: true },
   ];
@@ -154,7 +154,7 @@ test("une offre d'oeuvre entière exige tous les mouvements", () => {
   const work: WorkActivationState = {
     hasAccompaniment: false,
     movements: [
-      { id: "m1", audioFiles: pistesDuPupitre("v1") },
+      { id: "m1", audioFiles: voiceTracks("v1") },
       // Le second mouvement n'a rien.
       { id: "m2", audioFiles: [] },
     ],
@@ -168,7 +168,7 @@ test("une offre d'oeuvre entière exige tous les mouvements", () => {
 test("une oeuvre à mouvement unique se comporte comme les autres", () => {
   const work: WorkActivationState = {
     hasAccompaniment: false,
-    movements: [{ id: "m1", audioFiles: [...pistesDuPupitre("v1"), TUTTI] }],
+    movements: [{ id: "m1", audioFiles: [...voiceTracks("v1"), TUTTI] }],
     products: [
       { id: "p1", movementId: null, voiceId: "v1", isActive: false },
       { id: "all", movementId: null, voiceId: null, isActive: false },
@@ -225,7 +225,7 @@ test("le décompte des manques suit l'offre la plus incomplète", () => {
 test("une oeuvre complète ne manque de rien", () => {
   const work: WorkActivationState = {
     hasAccompaniment: false,
-    movements: [{ id: "m1", audioFiles: [...pistesDuPupitre("v1"), TUTTI] }],
+    movements: [{ id: "m1", audioFiles: [...voiceTracks("v1"), TUTTI] }],
     products: [
       { id: "p1", movementId: "m1", voiceId: "v1", isActive: true },
       { id: "all", movementId: "m1", voiceId: null, isActive: true },

@@ -12,7 +12,7 @@ import { useState } from "react";
 import { useFieldArray, useWatch } from "react-hook-form";
 
 import {
-  Champ,
+  Field,
   Section,
   useWorkForm,
 } from "@/components/admin/work-form-fields";
@@ -27,7 +27,7 @@ import { newMovementKey } from "@/lib/admin/form/work-form-draft";
 /**
  * Confirmation avant de retirer un mouvement déjà enregistréen base.
  */
-function ConfirmationRetrait({
+function RemovalConfirmation({
   title,
   onCancel,
   onConfirm,
@@ -118,12 +118,12 @@ export function WorkMovementsSection({
   const erreur = erreurTableau?.root?.message ?? erreurTableau?.message;
 
   /** Le titre affiché pour une ligne, en retombant sur un libellé de secours. */
-  function titreDe(index: number): string {
+  function titleAt(index: number): string {
     return titres?.[index]?.title || `Mouvement ${index + 1}`;
   }
 
   /** Découpe l'oeuvre en ajoutant un second mouvement. */
-  function decouper() {
+  function splitIntoMovements() {
     append({ key: newMovementKey(), title: "" });
     setAnnonce(
       "Découpage activé. Deux mouvements, chacun avec son titre et son ordre.",
@@ -131,23 +131,23 @@ export function WorkMovementsSection({
   }
 
   /** Ajoute un mouvement vide à la fin. */
-  function ajouter() {
+  function addMovement() {
     append({ key: newMovementKey(), title: "" });
     setAnnonce(`Mouvement ajouté en position ${fields.length + 1}.`);
   }
 
   /** Déplace un mouvement d'un cran et annonce le résultat. */
-  function deplacer(index: number, sens: -1 | 1) {
+  function moveMovement(index: number, sens: -1 | 1) {
     const cible = index + sens;
     if (cible < 0 || cible >= fields.length) return;
-    const nom = titreDe(index);
+    const nom = titleAt(index);
     move(index, cible);
     setAnnonce(`${nom} déplacé en position ${cible + 1} sur ${fields.length}.`);
   }
 
   /** Retire une ligne, et relance le suivi du titre s'il n'en reste qu'une. */
-  function retirer(index: number) {
-    const nom = titreDe(index);
+  function removeMovement(index: number) {
+    const nom = titleAt(index);
     remove(index);
     if (fields.length - 1 <= 1) {
       reprendreLeTitre();
@@ -160,12 +160,12 @@ export function WorkMovementsSection({
   }
 
   /** Demande confirmation quand la ligne existe déjà en base. */
-  function demanderRetrait(index: number) {
+  function requestRemoval(index: number) {
     if (titres?.[index]?.id) {
       setARetirer(index);
       return;
     }
-    retirer(index);
+    removeMovement(index);
   }
 
   return (
@@ -177,7 +177,7 @@ export function WorkMovementsSection({
             type="button"
             variant="outline"
             size="sm"
-            onClick={ajouter}
+            onClick={addMovement}
             className="cursor-pointer rounded-full"
           >
             Ajouter un mouvement
@@ -201,7 +201,7 @@ export function WorkMovementsSection({
               </span>
 
               <div className="min-w-0 flex-1">
-                <Champ
+                <Field
                   label={`Titre du mouvement ${index + 1}`}
                   name={`movements.${index}.title`}
                   required
@@ -213,7 +213,7 @@ export function WorkMovementsSection({
                       {...form.register(`movements.${index}.title`)}
                     />
                   )}
-                </Champ>
+                </Field>
               </div>
 
               <div className="mt-6 flex shrink-0 items-center gap-1">
@@ -222,32 +222,32 @@ export function WorkMovementsSection({
                   variant="ghost"
                   size="sm"
                   disabled={index === 0}
-                  onClick={() => deplacer(index, -1)}
+                  onClick={() => moveMovement(index, -1)}
                   className="cursor-pointer rounded-full"
                 >
                   <ArrowUp className="size-4" aria-hidden="true" />
-                  <span className="sr-only">Monter {titreDe(index)}</span>
+                  <span className="sr-only">Monter {titleAt(index)}</span>
                 </Button>
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
                   disabled={index === fields.length - 1}
-                  onClick={() => deplacer(index, 1)}
+                  onClick={() => moveMovement(index, 1)}
                   className="cursor-pointer rounded-full"
                 >
                   <ArrowDown className="size-4" aria-hidden="true" />
-                  <span className="sr-only">Descendre {titreDe(index)}</span>
+                  <span className="sr-only">Descendre {titleAt(index)}</span>
                 </Button>
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => demanderRetrait(index)}
+                  onClick={() => requestRemoval(index)}
                   className="cursor-pointer rounded-full text-destructive hover:bg-destructive/10 hover:text-destructive"
                 >
                   <Trash2 className="size-4" aria-hidden="true" />
-                  <span className="sr-only">Retirer {titreDe(index)}</span>
+                  <span className="sr-only">Retirer {titleAt(index)}</span>
                 </Button>
               </div>
             </li>
@@ -292,7 +292,7 @@ export function WorkMovementsSection({
             <Button
               type="button"
               variant="outline"
-              onClick={decouper}
+              onClick={splitIntoMovements}
               className="cursor-pointer rounded-full"
             >
               <Scissors className="size-4" aria-hidden="true" />
@@ -309,13 +309,13 @@ export function WorkMovementsSection({
       ) : null}
 
       {aRetirer !== null ? (
-        <ConfirmationRetrait
-          title={titreDe(aRetirer)}
+        <RemovalConfirmation
+          title={titleAt(aRetirer)}
           onCancel={() => setARetirer(null)}
           onConfirm={() => {
             const index = aRetirer;
             setARetirer(null);
-            retirer(index);
+            removeMovement(index);
           }}
         />
       ) : null}

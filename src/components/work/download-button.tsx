@@ -31,7 +31,7 @@ export function DownloadButton({
   const [enCours, startTransition] = useTransition();
   const [erreur, setErreur] = useState<string | null>(null);
 
-  function demander() {
+  function requestDownload() {
     setErreur(null);
     startTransition(async () => {
       let ticket: Awaited<ReturnType<typeof requestTrackDownload>>;
@@ -66,7 +66,7 @@ export function DownloadButton({
         type="button"
         disabled={!row.owned || enCours}
         aria-busy={enCours}
-        onClick={demander}
+        onClick={requestDownload}
         className={cn(
           "flex w-full items-center gap-3 rounded-sm border px-3 py-2 text-left transition-colors",
           row.owned

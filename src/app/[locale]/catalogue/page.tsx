@@ -286,7 +286,7 @@ export default async function CataloguePage(
     ),
   );
   const maintenant = new Date();
-  const badgeDe = (work: (typeof works)[number]) =>
+  const badgeFor = (work: (typeof works)[number]) =>
     resolveWorkBadge({
       mostPopular: populaires.has(work.workId),
       publishedAt: work.publishedAt,
@@ -415,7 +415,7 @@ export default async function CataloguePage(
           ) : view === "grid" ? (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {works.map((work) => (
-                <WorkCard key={work.slug} work={work} badge={badgeDe(work)} />
+                <WorkCard key={work.slug} work={work} badge={badgeFor(work)} />
               ))}
             </div>
           ) : (
@@ -444,7 +444,7 @@ export default async function CataloguePage(
                     <WorkTableRow
                       key={work.slug}
                       work={work}
-                      badge={badgeDe(work)}
+                      badge={badgeFor(work)}
                     />
                   ))}
                 </tbody>

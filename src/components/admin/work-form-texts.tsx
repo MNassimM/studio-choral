@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useWatch } from "react-hook-form";
 
 import {
-  Champ,
+  Field,
   Section,
   useWorkForm,
 } from "@/components/admin/work-form-fields";
@@ -83,7 +83,7 @@ export function WorkTextsSection({
         {/* keepMounted : la saisie de l'onglet caché survit au changement. */}
         <Tabs.Panel value="fr" keepMounted className="flex flex-col gap-4">
           <div className="grid gap-4 md:grid-cols-2">
-            <Champ label="Titre" name="title" required>
+            <Field label="Titre" name="title" required>
               {(aria) => (
                 <Input
                   {...aria}
@@ -94,9 +94,9 @@ export function WorkTextsSection({
                   })}
                 />
               )}
-            </Champ>
+            </Field>
 
-            <Champ
+            <Field
               label="Slug"
               name="slug"
 
@@ -117,11 +117,11 @@ export function WorkTextsSection({
                   })}
                 />
               )}
-            </Champ>
+            </Field>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <Champ
+            <Field
               label="Accroche"
               name="shortDescription"
 
@@ -134,9 +134,9 @@ export function WorkTextsSection({
                   {...form.register("shortDescription")}
                 />
               )}
-            </Champ>
+            </Field>
 
-            <Champ
+            <Field
               label="Description"
               name="description"
 
@@ -149,7 +149,7 @@ export function WorkTextsSection({
                   {...form.register("description")}
                 />
               )}
-            </Champ>
+            </Field>
           </div>
         </Tabs.Panel>
 
@@ -160,7 +160,7 @@ export function WorkTextsSection({
           </p>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <Champ
+            <Field
               label="Title"
               name="translations.en.title"
 
@@ -179,9 +179,9 @@ export function WorkTextsSection({
                   })}
                 />
               )}
-            </Champ>
+            </Field>
 
-            <Champ
+            <Field
               label="Slug"
               name="translations.en.slug"
 
@@ -202,11 +202,11 @@ export function WorkTextsSection({
                   })}
                 />
               )}
-            </Champ>
+            </Field>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <Champ
+            <Field
               label="Short description"
               name="translations.en.shortDescription"
             >
@@ -218,9 +218,9 @@ export function WorkTextsSection({
                   })}
                 />
               )}
-            </Champ>
+            </Field>
 
-            <Champ label="Description" name="translations.en.description">
+            <Field label="Description" name="translations.en.description">
               {(aria) => (
                 <Textarea
                   {...aria}
@@ -229,7 +229,7 @@ export function WorkTextsSection({
                   })}
                 />
               )}
-            </Champ>
+            </Field>
           </div>
         </Tabs.Panel>
       </Section>

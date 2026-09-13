@@ -133,7 +133,7 @@ export function workToDraft(work: WorkRow): WorkFormDraft {
   const vendus = work.products.filter((product) => !product.isRetired);
   const actifs = vendus.filter((product) => product.isActive);
 
-  const prix = (scope: string, coverage: string) =>
+  const priceOf = (scope: string, coverage: string) =>
     toEuros(
       actifs.find(
         (product) => product.scope === scope && product.coverage === coverage,
@@ -188,10 +188,10 @@ export function workToDraft(work: WorkRow): WorkFormDraft {
       })),
     ),
     prices: {
-      movementSingleVoice: prix("MOVEMENT", "SINGLE_VOICE"),
-      movementAllVoices: prix("MOVEMENT", "ALL_VOICES"),
-      workSingleVoice: prix("WORK", "SINGLE_VOICE") ?? 0,
-      workAllVoices: prix("WORK", "ALL_VOICES") ?? 0,
+      movementSingleVoice: priceOf("MOVEMENT", "SINGLE_VOICE"),
+      movementAllVoices: priceOf("MOVEMENT", "ALL_VOICES"),
+      workSingleVoice: priceOf("WORK", "SINGLE_VOICE") ?? 0,
+      workAllVoices: priceOf("WORK", "ALL_VOICES") ?? 0,
     },
   };
 }

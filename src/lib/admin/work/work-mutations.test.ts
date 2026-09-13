@@ -105,7 +105,7 @@ test("un mouvement ajouté seul ne gare rien", () => {
 // ─── Offres ──────────────────────────────────────────────────────────────────
 
 /** Fabrique une offre engendrée, réduite à ce que le plan regarde. */
-function offre(
+function offer(
   sku: string,
   movementId: string | null,
   voiceId: string | null,
@@ -131,7 +131,7 @@ test("une offre qui n'est plus engendrée est retirée, jamais supprimée", () =
   ];
 
   const plan = planProducts(existing, [
-    offre("a", null, "v1", "SINGLE_VOICE", 0),
+    offer("a", null, "v1", "SINGLE_VOICE", 0),
   ]);
 
   assert.deepEqual(plan.retiredIds, ["p2"]);
@@ -143,7 +143,7 @@ test("une offre déjà présente est mise à jour, pas recréée", () => {
   ];
 
   const plan = planProducts(existing, [
-    offre("a", null, "v1", "SINGLE_VOICE", 3),
+    offer("a", null, "v1", "SINGLE_VOICE", 3),
   ]);
 
   assert.deepEqual(plan.updates, [
@@ -154,7 +154,7 @@ test("une offre déjà présente est mise à jour, pas recréée", () => {
 });
 
 test("une offre inconnue est créée", () => {
-  const plan = planProducts([], [offre("a", "m1", "v1", "SINGLE_VOICE", 0)]);
+  const plan = planProducts([], [offer("a", "m1", "v1", "SINGLE_VOICE", 0)]);
 
   assert.equal(plan.creations.length, 1);
   assert.equal(plan.creations[0].sku, "a");
@@ -169,7 +169,7 @@ test("deux offres de mêmes coordonnées mais de couverture différente ne se co
   // Même mouvement, même absence de pupitre, mais couverture SINGLE_VOICE :
   // c'est une autre offre, celle en base doit être retirée.
   const plan = planProducts(existing, [
-    offre("a", "m1", null, "SINGLE_VOICE", 0),
+    offer("a", "m1", null, "SINGLE_VOICE", 0),
   ]);
 
   assert.deepEqual(plan.retiredIds, ["p1"]);

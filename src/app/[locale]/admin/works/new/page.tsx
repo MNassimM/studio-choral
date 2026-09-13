@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic";
 /**
  * Crée l'oeuvre puis emmène vers sa page de modification.
  */
-async function creer(values: WorkFormValues): Promise<WorkActionResult> {
+async function createAction(values: WorkFormValues): Promise<WorkActionResult> {
   "use server";
 
   const result = await createWork(values);
@@ -41,7 +41,7 @@ export default async function NewWorkPage() {
       mode="create"
       initialValues={emptyWorkFormDraft()}
       voices={voices}
-      submitAction={creer}
+      submitAction={createAction}
     />
   );
 }

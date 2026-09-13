@@ -38,7 +38,7 @@ export function LibraryWorkDetails({
   const [erreur, setErreur] = useState<string | null>(null);
   const [enCours, startTransition] = useTransition();
 
-  function basculer() {
+  function toggleDetails() {
     if (ouvert) {
       setOuvert(false);
       return;
@@ -69,7 +69,7 @@ export function LibraryWorkDetails({
     <div className="flex flex-col gap-4 border-t border-border p-5">
       <button
         type="button"
-        onClick={basculer}
+        onClick={toggleDetails}
         aria-expanded={ouvert}
         aria-controls={panelId}
         className="inline-flex w-fit cursor-pointer items-center gap-1.5 text-sm font-medium text-primary hover:underline"

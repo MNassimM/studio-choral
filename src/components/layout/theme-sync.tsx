@@ -26,20 +26,20 @@ export function ThemeSync({ theme }: { theme: ThemePreference }) {
   useLayoutEffect(() => {
     const media = window.matchMedia("(prefers-color-scheme: dark)");
 
-    function appliquer() {
+    function applyTheme() {
       const sombre = theme === "system" ? media.matches : theme === "dark";
       const racine = document.documentElement;
       racine.classList.toggle("dark", sombre);
       racine.style.colorScheme = sombre ? "dark" : "light";
     }
 
-    appliquer();
+    applyTheme();
 
     // Seul le mode système dépend du réglage de l'appareil, qui peut changer
     // pendant la visite.
     if (theme !== "system") return;
-    media.addEventListener("change", appliquer);
-    return () => media.removeEventListener("change", appliquer);
+    media.addEventListener("change", applyTheme);
+    return () => media.removeEventListener("change", applyTheme);
   });
 
   return null;

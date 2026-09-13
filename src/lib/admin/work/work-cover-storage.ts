@@ -34,7 +34,7 @@ const RIEN: CoverOutcome = { updated: false, failed: null, leftBehind: false };
  * @param key - Clé de l'image à effacer.
  * @returns Vrai quand l'objet est resté en place malgré la demande.
  */
-async function effacer(key: string): Promise<boolean> {
+async function removeObject(key: string): Promise<boolean> {
   const efface = await coverStorage.deleteObject(key);
   if (!efface.ok) {
     console.error("work-cover-storage deleteObject", efface.error);
@@ -81,7 +81,7 @@ export async function storePendingCover(
     return {
       updated: true,
       failed: null,
-      leftBehind: await effacer(precedente),
+      leftBehind: await removeObject(precedente),
     };
   }
 
@@ -111,7 +111,7 @@ export async function storePendingCover(
 
   const leftBehind =
     precedente !== null && precedente !== cible
-      ? await effacer(precedente)
+      ? await removeObject(precedente)
       : false;
 
   return { updated: true, failed: null, leftBehind };
@@ -125,5 +125,5 @@ export async function storePendingCover(
  */
 export async function deleteCoverObject(key: string | null): Promise<boolean> {
   if (key === null) return false;
-  return effacer(key);
+  return removeObject(key);
 }

@@ -10,7 +10,7 @@ import {
 console.log("▶ src/lib/catalog/work-badge.ts — choix du badge d'une oeuvre");
 
 const MAINTENANT = new Date("2026-09-12T12:00:00.000Z");
-const jours = (n: number) =>
+const daysAgo = (n: number) =>
   new Date(MAINTENANT.getTime() - n * 24 * 60 * 60 * 1000);
 
 test("une oeuvre ajoutée aujourd'hui est une nouveauté", () => {
@@ -18,12 +18,12 @@ test("une oeuvre ajoutée aujourd'hui est une nouveauté", () => {
 });
 
 test("une oeuvre plus vieille que la fenêtre ne l'est plus", () => {
-  assert.equal(isNewWork(jours(NEW_WORK_DAYS), MAINTENANT), false);
-  assert.equal(isNewWork(jours(NEW_WORK_DAYS - 1), MAINTENANT), true);
+  assert.equal(isNewWork(daysAgo(NEW_WORK_DAYS), MAINTENANT), false);
+  assert.equal(isNewWork(daysAgo(NEW_WORK_DAYS - 1), MAINTENANT), true);
 });
 
 test("une date future n'est pas une nouveauté", () => {
-  assert.equal(isNewWork(jours(-1), MAINTENANT), false);
+  assert.equal(isNewWork(daysAgo(-1), MAINTENANT), false);
 });
 
 test("la popularité passe devant la nouveauté", () => {
@@ -38,7 +38,7 @@ test("la popularité passe devant la nouveauté", () => {
 test("une oeuvre récente et peu vue est une nouveauté", () => {
   const badge = resolveWorkBadge({
     mostPopular: false,
-    publishedAt: jours(2),
+    publishedAt: daysAgo(2),
     now: MAINTENANT,
   });
   assert.equal(badge, "NEW");
@@ -47,7 +47,7 @@ test("une oeuvre récente et peu vue est une nouveauté", () => {
 test("une oeuvre ancienne et peu vue n'a aucun badge", () => {
   const badge = resolveWorkBadge({
     mostPopular: false,
-    publishedAt: jours(200),
+    publishedAt: daysAgo(200),
     now: MAINTENANT,
   });
   assert.equal(badge, null);

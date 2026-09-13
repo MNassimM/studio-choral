@@ -131,17 +131,17 @@ function buildVoiceLookup(voices: DeductionVoice[]): Map<string, string> {
   const compte = new Map<string, Set<string>>();
 
   /** Enregistre une forme comme désignant ce pupitre. */
-  function offrir(forme: string, code: string) {
+  function registerForm(forme: string, code: string) {
     const clef = normalize(forme);
     if (clef.length === 0) return;
     compte.set(clef, (compte.get(clef) ?? new Set()).add(code));
   }
 
   for (const voice of voices) {
-    offrir(voice.code, voice.code);
-    offrir(voice.label, voice.code);
+    registerForm(voice.code, voice.code);
+    registerForm(voice.label, voice.code);
     for (const alias of VOICE_ALIASES[voice.code] ?? []) {
-      offrir(alias, voice.code);
+      registerForm(alias, voice.code);
     }
   }
 

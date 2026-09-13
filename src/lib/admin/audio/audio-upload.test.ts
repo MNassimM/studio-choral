@@ -24,7 +24,7 @@ const VALIDE: UploadCandidate = {
 };
 
 /** Renvoie le message de refus, en échouant si le dépôt passe. */
-function refus(candidate: UploadCandidate): string {
+function rejectionOf(candidate: UploadCandidate): string {
   const verdict = validateUpload(candidate);
   assert.equal(verdict.ok, false, "ce dépôt aurait dû être refusé");
   return verdict.ok ? "" : verdict.error;
@@ -49,25 +49,28 @@ test("les trois formats audio prévus sont acceptés", () => {
 
 test("une extension hors liste est refusée", () => {
   assert.match(
-    refus({ ...VALIDE, filename: "virus.exe", contentType: "audio/wav" }),
+    rejectionOf({ ...VALIDE, filename: "virus.exe", contentType: "audio/wav" }),
     /Format non accepté/,
   );
 });
 
 test("un fichier sans extension est refusé", () => {
-  assert.match(refus({ ...VALIDE, filename: "kyrie" }), /Format non accepté/);
+  assert.match(
+    rejectionOf({ ...VALIDE, filename: "kyrie" }),
+    /Format non accepté/,
+  );
 });
 
 test("un type non audio est refusé même sous une bonne extension", () => {
   assert.match(
-    refus({ ...VALIDE, contentType: "application/octet-stream" }),
+    rejectionOf({ ...VALIDE, contentType: "application/octet-stream" }),
     /ne correspond pas à un fichier wav/,
   );
 });
 
 test("un type audio qui ne colle pas à l'extension est refusé", () => {
   assert.match(
-    refus({ ...VALIDE, filename: "piste.mp3", contentType: "audio/wav" }),
+    rejectionOf({ ...VALIDE, filename: "piste.mp3", contentType: "audio/wav" }),
     /ne correspond pas à un fichier mp3/,
   );
 });
@@ -79,7 +82,7 @@ test("le type est comparé sans tenir compte de la casse", () => {
 
 test("une taille au delà de la limite est refusée", () => {
   assert.match(
-    refus({ ...VALIDE, sizeBytes: MAX_UPLOAD_BYTES + 1 }),
+    rejectionOf({ ...VALIDE, sizeBytes: MAX_UPLOAD_BYTES + 1 }),
     /trop volumineux, la limite est 200 Mo/,
   );
 });
@@ -90,18 +93,24 @@ test("la taille limite exacte passe encore", () => {
 });
 
 test("une taille nulle ou négative est refusée", () => {
-  assert.match(refus({ ...VALIDE, sizeBytes: 0 }), /taille du fichier/);
-  assert.match(refus({ ...VALIDE, sizeBytes: -1 }), /taille du fichier/);
+  assert.match(rejectionOf({ ...VALIDE, sizeBytes: 0 }), /taille du fichier/);
+  assert.match(rejectionOf({ ...VALIDE, sizeBytes: -1 }), /taille du fichier/);
 });
 
 test("une durée absente ou non entière est refusée", () => {
-  assert.match(refus({ ...VALIDE, durationSeconds: 0 }), /durée de la piste/);
-  assert.match(refus({ ...VALIDE, durationSeconds: 1.5 }), /durée de la piste/);
+  assert.match(
+    rejectionOf({ ...VALIDE, durationSeconds: 0 }),
+    /durée de la piste/,
+  );
+  assert.match(
+    rejectionOf({ ...VALIDE, durationSeconds: 1.5 }),
+    /durée de la piste/,
+  );
 });
 
 test("une durée au delà du plafond est refusée", () => {
   assert.match(
-    refus({ ...VALIDE, durationSeconds: MAX_DURATION_SECONDS + 1 }),
+    rejectionOf({ ...VALIDE, durationSeconds: MAX_DURATION_SECONDS + 1 }),
     /durée maximale/,
   );
 });

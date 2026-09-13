@@ -40,7 +40,7 @@ const VIDE: CartSaveResult = { items: [], removedOwned: 0 };
  * @param raw - Panier sérialisé.
  * @returns Les articles reconnus, vide si l'entrée n'est pas exploitable.
  */
-function relire(raw: unknown): CartItem[] {
+function parseRawCart(raw: unknown): CartItem[] {
   return typeof raw === "string" ? parseCart(raw) : [];
 }
 
@@ -51,7 +51,7 @@ function relire(raw: unknown): CartItem[] {
  * @param items - Articles candidats.
  * @returns Le panier retenu et le nombre d'articles écartés.
  */
-async function enregistrer(
+async function persistCart(
   userId: string,
   items: CartItem[],
 ): Promise<CartSaveResult> {
@@ -94,7 +94,7 @@ export async function saveUserCartAction(
 ): Promise<CartSaveResult> {
   const user = await getCurrentUser();
   if (!user) return VIDE;
-  return enregistrer(user.id, relire(raw));
+  return persistCart(user.id, parseRawCart(raw));
 }
 
 /**
@@ -115,12 +115,12 @@ export async function mergeGuestCartAction(
   const user = await getCurrentUser();
   if (!user) return VIDE;
 
-  const invite = relire(raw);
+  const invite = parseRawCart(raw);
   const existant = await readUserCart(user.id);
   const fusion = invite.reduce(
     (items, item) => replaceInCart(items, item, item.addedAt),
     existant,
   );
 
-  return enregistrer(user.id, fusion);
+  return persistCart(user.id, fusion);
 }

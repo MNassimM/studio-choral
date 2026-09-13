@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useWatch } from "react-hook-form";
 
 import {
-  Champ,
+  Field,
   Section,
   useWorkForm,
 } from "@/components/admin/work-form-fields";
@@ -24,7 +24,7 @@ const CHAMPS = [
 ] as const;
 
 /** Une ligne de tarif, saisissable ou déduite. */
-function LignePrix({
+function PriceRow({
   name,
   label,
   readOnly,
@@ -36,7 +36,7 @@ function LignePrix({
   const form = useWorkForm();
 
   return (
-    <Champ
+    <Field
       label={label}
       name={name}
       hint={readOnly ? "déduit" : undefined}
@@ -63,7 +63,7 @@ function LignePrix({
           </span>
         </span>
       )}
-    </Champ>
+    </Field>
   );
 }
 
@@ -122,7 +122,7 @@ export function WorkPricesSection() {
       ) : null}
 
       {visibles.map(([name, label]) => (
-        <LignePrix
+        <PriceRow
           key={name}
           name={name}
           label={label}

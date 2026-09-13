@@ -351,23 +351,24 @@ export function derivePrices(
   if (voiceCount < 1 || movementCount < 1) return vide;
 
   const cents = toCents(source);
-  const enEuros = (valeur: number) => Math.round(valeur) / 100;
-  const toutesVoix = (unitaire: number) => Math.round(unitaire * voiceCount);
+  const centsToEuros = (valeur: number) => Math.round(valeur) / 100;
+  const allVoicesCents = (unitaire: number) =>
+    Math.round(unitaire * voiceCount);
 
   if (movementCount === 1) {
     return {
       movementSingleVoice: null,
       movementAllVoices: null,
-      workSingleVoice: enEuros(cents),
-      workAllVoices: enEuros(toutesVoix(cents)),
+      workSingleVoice: centsToEuros(cents),
+      workAllVoices: centsToEuros(allVoicesCents(cents)),
     };
   }
 
   const oeuvreUneVoix = Math.round(cents * movementCount);
   return {
-    movementSingleVoice: enEuros(cents),
-    movementAllVoices: enEuros(toutesVoix(cents)),
-    workSingleVoice: enEuros(oeuvreUneVoix),
-    workAllVoices: enEuros(toutesVoix(oeuvreUneVoix)),
+    movementSingleVoice: centsToEuros(cents),
+    movementAllVoices: centsToEuros(allVoicesCents(cents)),
+    workSingleVoice: centsToEuros(oeuvreUneVoix),
+    workAllVoices: centsToEuros(allVoicesCents(oeuvreUneVoix)),
   };
 }

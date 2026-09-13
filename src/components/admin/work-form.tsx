@@ -109,7 +109,7 @@ export function WorkForm({
   const slugAnglaisFige = useRef(mode === "edit");
 
   /** Réaligne le mouvement unique sur le titre de l'oeuvre. */
-  function reprendreLeTitre() {
+  function restoreWorkTitle() {
     setTitreSuiviLOeuvre(true);
     form.setValue("movements.0.title", form.getValues("title"), {
       shouldValidate: false,
@@ -118,7 +118,7 @@ export function WorkForm({
   }
 
   /** Recalcule les deux slugs tant qu'ils suivent encore leur titre. */
-  function suivreLesTitres(titreFr: string, titreEn: string | null) {
+  function syncSlugsWithTitles(titreFr: string, titreEn: string | null) {
     const slugFr = slugFige.current ? form.getValues("slug") : slugify(titreFr);
     if (!slugFige.current) {
       form.setValue("slug", slugFr, { shouldValidate: false });
@@ -281,7 +281,7 @@ export function WorkForm({
           <div className="flex min-w-0 flex-col gap-6">
             <WorkTextsSection
               mode={mode}
-              suivreLesTitres={suivreLesTitres}
+              suivreLesTitres={syncSlugsWithTitles}
               figerSlug={() => {
                 slugFige.current = true;
               }}
@@ -295,7 +295,7 @@ export function WorkForm({
             {/* Emplacement de l'éditeur de mouvements, prompt suivant. */}
             <WorkMovementsSection
               titreSuiviLOeuvre={titreSuiviLOeuvre}
-              reprendreLeTitre={reprendreLeTitre}
+              reprendreLeTitre={restoreWorkTitle}
             />
 
             <WorkAudioSection

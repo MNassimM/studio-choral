@@ -38,7 +38,7 @@ export function AudioDropZone({
   const [survole, setSurvole] = useState(false);
 
   /** Traite les fichiers d'un dépôt ou d'un choix. */
-  function accepte(files: FileList | null) {
+  function acceptFiles(files: FileList | null) {
     if (!files || files.length === 0) return;
     if (onFiles) onFiles(files);
     else if (onFile) onFile(files[0]);
@@ -54,7 +54,7 @@ export function AudioDropZone({
       onDrop={(event) => {
         event.preventDefault();
         setSurvole(false);
-        accepte(event.dataTransfer.files);
+        acceptFiles(event.dataTransfer.files);
       }}
       className={cn(
         "rounded-lg border border-dashed border-border text-center",
@@ -83,7 +83,7 @@ export function AudioDropZone({
         multiple={Boolean(onFiles)}
         className="sr-only"
         onChange={(event) => {
-          accepte(event.target.files);
+          acceptFiles(event.target.files);
           event.target.value = "";
         }}
       />

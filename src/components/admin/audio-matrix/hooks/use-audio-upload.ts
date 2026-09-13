@@ -102,7 +102,7 @@ export function useAudioUpload(): AudioUpload {
   const upload = useCallback(
     async (file: File, cellKey: string): Promise<UploadedFile | null> => {
       /** Marque la case en échec et annonce le refus. */
-      function refuser(message: string) {
+      function reject(message: string) {
         setUploads((etat) => ({
           ...etat,
           [cellKey]: { progress: 0, error: message },
@@ -118,7 +118,7 @@ export function useAudioUpload(): AudioUpload {
 
       const durationSeconds = await readDuration(file);
       if (durationSeconds === null) {
-        refuser("Durée illisible, ce fichier n'est pas un audio valide.");
+        reject("Durée illisible, ce fichier n'est pas un audio valide.");
         return null;
       }
 
@@ -130,7 +130,7 @@ export function useAudioUpload(): AudioUpload {
       });
 
       if (!ticket.ok) {
-        refuser(ticket.error);
+        reject(ticket.error);
         return null;
       }
 

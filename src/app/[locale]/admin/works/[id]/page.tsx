@@ -100,13 +100,13 @@ export default async function EditWorkPage({
   if (!work) notFound();
 
   /** Enregistre les modifications de cette oeuvre. */
-  async function enregistrer(values: WorkFormValues) {
+  async function saveAction(values: WorkFormValues) {
     "use server";
     return updateWork(id, values);
   }
 
   /** Supprime l'oeuvre puis revient à la liste. */
-  async function supprimer(workId: string): Promise<WorkActionResult> {
+  async function deleteAction(workId: string): Promise<WorkActionResult> {
     "use server";
     const result = await deleteWork(workId);
     if (result.ok) {
@@ -143,7 +143,7 @@ export default async function EditWorkPage({
         coverPreviewUrl={
           work.coverImageKey ? coverUrl(work.coverImageKey) : null
         }
-        submitAction={enregistrer}
+        submitAction={saveAction}
         submitLabel="Enregistrer les modifications"
         publication={{
           workId: work.id,
@@ -156,7 +156,7 @@ export default async function EditWorkPage({
         workId={work.id}
         title={work.title}
         isPublished={work.isPublished}
-        onDelete={supprimer}
+        onDelete={deleteAction}
       />
     </div>
   );
