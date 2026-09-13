@@ -17,10 +17,10 @@
     "totalPending": "Calcul en cours",
     "totalNotice": "Le total sera recalculé au moment du paiement.",
     "unavailableExcluded": "{count, plural, one {# article indisponible, non facturé.} other {# articles indisponibles, non facturés.}}",
-    "viewCart": "Voir le panier"
+    "viewCart": "Voir le panier",
+    "addedTitle": "{count, plural, =1 {Ajouté à votre panier} other {Ajoutés à votre panier}}"
   },
   "drawer": {
-    "addedNotice": "{item} a été ajouté à votre panier.",
     "continueShopping": "Continuer mes achats"
   },
   "page": {

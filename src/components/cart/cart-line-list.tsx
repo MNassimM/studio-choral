@@ -447,5 +447,11 @@ function CartLineGroups({
   );
 }
 
-export { CartLineGroups, CartLineItem, CartLineList, CartWorkCover };
+export {
+  CartLineGroups,
+  CartLineItem,
+  CartLineList,
+  CartLinePrice,
+  CartWorkCover,
+};
 export type { CartLineDensity };

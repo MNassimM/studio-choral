@@ -17,10 +17,10 @@
     "totalPending": "Calculating",
     "totalNotice": "The total will be recalculated at checkout.",
     "unavailableExcluded": "{count, plural, one {# unavailable item, not charged.} other {# unavailable items, not charged.}}",
-    "viewCart": "View cart"
+    "viewCart": "View cart",
+    "addedTitle": "{count, plural, =1 {Added to your cart} other {Added to your cart}}"
   },
   "drawer": {
-    "addedNotice": "{item} has been added to your cart.",
     "continueShopping": "Continue shopping"
   },
   "page": {

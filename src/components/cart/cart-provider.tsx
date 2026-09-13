@@ -236,8 +236,8 @@ export type CartContextValue = {
   lineOf: (sku: string) => ResolvedCartLine | null;
   /** Lignes résolues indexées par référence. */
   resolvedBySku: Map<string, ResolvedCartLine>;
-  /** Référence du dernier article ajouté, ou null. */
-  lastAddedSku: string | null;
+  /** Références du dernier lot ajouté, vide si aucun ajout depuis l'ouverture. */
+  lastAddedSkus: string[];
   /** Mode du panneau, ou null lorsqu'aucun n'est ouvert. */
   panelMode: CartPanelMode;
   /** Demande ou retire l'ouverture au survol, qui reprend la main sur l'ajout. */
@@ -326,7 +326,7 @@ function CartProvider({
     };
   }, [userId, initialCart]);
 
-  const [lastAddedSku, setLastAddedSku] = useState<string | null>(null);
+  const [lastAddedSkus, setLastAddedSkus] = useState<string[]>([]);
   const [isAddOpen, setAddOpen] = useState(false);
   const [isHoverRequested, setHoverRequested] = useState(false);
   const [pending, setPending] = useState<{
@@ -387,7 +387,7 @@ function CartProvider({
         current,
       ),
     );
-    setLastAddedSku(inputs[inputs.length - 1].sku);
+    setLastAddedSkus(inputs.map((input) => input.sku));
     setHoverRequested(false);
     setAddOpen(true);
   }, []);
@@ -500,7 +500,7 @@ function CartProvider({
       isResolving,
       lineOf: (sku: string) => resolvedBySku.get(sku) ?? null,
       resolvedBySku,
-      lastAddedSku,
+      lastAddedSkus,
       panelMode,
       requestHoverPanel,
       closeAddPanel,
@@ -519,7 +519,7 @@ function CartProvider({
       addMany,
       remove,
       clear,
-      lastAddedSku,
+      lastAddedSkus,
       panelMode,
       requestHoverPanel,
       closeAddPanel,

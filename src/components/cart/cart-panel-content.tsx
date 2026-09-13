@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { ArrowRight, CheckCircle2, X } from "lucide-react";
+import { ArrowRight, X } from "lucide-react";
 
 import { CartLineGroups } from "@/components/cart/cart-line-list";
 import { useCart } from "@/components/cart/cart-provider";
@@ -11,11 +11,10 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 /**
- * Contenu du panneau du panier, les memes au mode survol et au mode ajout.
+ * Contenu du panneau du panier au survol de l'icône.
  *
  * @param density - Densité d'affichage des lignes.
  * @param removable - Vrai pour proposer le retrait de chaque ligne.
- * @param showAddedNotice - Vrai pour annoncer le dernier article ajouté.
  * @param titleId - Identifiant du titre, pour l'étiquetage du dialogue.
  * @param descriptionId - Identifiant du résumé, pour la description du dialogue.
  * @param onClose - Ferme le panneau.
@@ -24,23 +23,18 @@ import { cn } from "@/lib/utils";
 function CartPanelContent({
   density = "comfortable",
   removable = false,
-  showAddedNotice = false,
   titleId,
   descriptionId,
   onClose,
 }: {
   density?: "comfortable" | "compact";
   removable?: boolean;
-  showAddedNotice?: boolean;
   titleId?: string;
   descriptionId?: string;
   onClose: () => void;
 }) {
   const t = useTranslations("cart");
-  const { items, count, lastAddedSku, labelOf } = useCart();
-
-  const lastAddedLabel =
-    showAddedNotice && lastAddedSku ? labelOf(lastAddedSku) : null;
+  const { items, count } = useCart();
 
   return (
     <>
@@ -63,18 +57,6 @@ function CartPanelContent({
         >
           <X className="size-4" />
         </Button>
-      </div>
-
-      <div aria-live="polite">
-        {lastAddedLabel ? (
-          <p className="mt-2 flex items-start gap-2 rounded-lg border border-primary/30 bg-secondary/50 p-2.5 text-xs">
-            <CheckCircle2
-              className="mt-0.5 size-4 shrink-0 text-primary"
-              aria-hidden="true"
-            />
-            <span>{t("drawer.addedNotice", { item: lastAddedLabel })}</span>
-          </p>
-        ) : null}
       </div>
 
       <div className="mt-2 max-h-80 overflow-auto pr-1 scrollbar-thumb-primary scrollbar-track-background">
